@@ -125,18 +125,24 @@ Maintainer: Miguel Luis and Gregory Cristian
 #endif
 
 /* --------Preprocessor compile swicth------------ */
-#define LoRa_Sensor_Node   /*LSN50 Device*/
-//#define AT_Data_Send         /*LoRa ST Module*/
+ // TODO: This is confusing. If you want to create different
+ // firmware variations based on different hardware, specify directly
+ // the hardware name. In this case:
+ // " Is the hardware a dragino LGT92 or LSN50?"
 
-   
-/* uncomment below line to never enter lowpower modes in main.c*/
-//#define LOW_POWER_DISABLE
-  
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
+#define LoRa_Sensor_Node /*LSN50 Device*/
+ // #define AT_Data_Send         /*LoRa ST Module*/
+
+ /* uncomment below line to never enter lowpower modes in main.c*/
+ // #define LOW_POWER_DISABLE
+
+ /* Exported types
+  * ------------------------------------------------------------*/
+ /* Exported constants
+  * --------------------------------------------------------*/
 
 #ifdef __cplusplus
-}
+ }
 #endif
 
 #endif /* __HW_CONF_H__ */

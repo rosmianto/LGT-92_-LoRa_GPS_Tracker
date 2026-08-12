@@ -1,50 +1,3 @@
-/******************************************************************************
-  * @file    main.c
-  * @author  MCD Application Team
-  * @version V1.1.4
-  * @date    08-January-2018
-  * @brief   this is the main!
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without 
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice, 
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other 
-  *    contributors to this software may be used to endorse or promote products 
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this 
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under 
-  *    this license is void and will automatically terminate your rights under 
-  *    this license. 
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS" 
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT 
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT 
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "hw.h"
 #include "flash_eraseprogram.h"
 #include "low_power_manager.h"
@@ -62,67 +15,50 @@
 #include "bsp_usart2.h"
 #include "IIC.h"
 #include "mpu9250.h"
+
 extern uint8_t ic_version;
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
+#define FIRMWARE_VERSION 0x04
 
-/*!
- * Defines the application data transmission duty cycle. 5s, value in [ms].
- */
-#define Firmware    0x04
-/*!
- * LoRaWAN Adaptive Data Rate
- * @note Please note that when ADR is enabled the end-device should be static
- */
-#define LORAWAN_ADR_STATE LORAWAN_ADR_ON
-/*!
- * LoRaWAN Default data Rate Data Rate
- * @note Please note that LORAWAN_DEFAULT_DATA_RATE is used only when ADR is disabled 
- */
-#define LORAWAN_DEFAULT_DATA_RATE DR_0
-/*!
- * LoRaWAN application port is 0 to 255
- * @note do not use 256. It is reserved for certification
- */
-#define LORAWAN_APP_PORT                            2
-/*!
- * Number of trials for the join request.
- */
-#define JOINREQ_NBTRIALS                            200
-/*!
- * LoRaWAN default endNode class port
- */
-#define LORAWAN_DEFAULT_CLASS                       CLASS_A
-/*!
- * LoRaWAN default confirm state
- */
-#define LORAWAN_DEFAULT_CONFIRM_MSG_STATE           LORAWAN_UNCONFIRMED_MSG
-/*!
- * User application data buffer size
- */
-#define LORAWAN_APP_DATA_BUFF_SIZE                           256
-/*!
- * User application data
- */
+// clang-format off
+// LoRaWAN stack configurations
+#define LORAWAN_ADR_STATE                 	LORAWAN_ADR_ON
+#define LORAWAN_DEFAULT_DATA_RATE         	DR_0
+#define LORAWAN_APP_PORT                  	2
+#define LORAWAN_DEFAULT_CLASS             	CLASS_A
+#define LORAWAN_DEFAULT_CONFIRM_MSG_STATE 	LORAWAN_UNCONFIRMED_MSG
+#define LORAWAN_APP_DATA_BUFF_SIZE        	256
+#define JOINREQ_NBTRIALS                  	200
+// clang-format on
+
 static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
-bool rxpr_flags=0;
-int exti_flag=0;
-uint32_t COUNT;
-uint8_t TDC_flag=0;
-uint8_t join_flag=0;
-uint8_t atz_flags=0;
-uint8_t payloadlens;
-bool is_time_to_IWDG_Refresh=0;
-bool JoinReq_NbTrails_over=0;
-bool unconfirmed_downlink_data_ans_status=0,confirmed_downlink_data_ans_status=0;
-bool rejoin_status=0;
-bool rejoin_keep_status=0;
-bool MAC_COMMAND_ANS_status=0;
-uint8_t response_level=0;
-uint16_t REJOIN_TX_DUTYCYCLE=20;//min
 
-void send_exti(void);
+// clang-format off
+bool     rxpr_flags                          	= 0;
+int      exti_flag                           	= 0;
+uint32_t COUNT                               	= 0;
+uint8_t  TDC_flag                            	= 0;
+uint8_t  join_flag                           	= 0;
+uint8_t  atz_flags                           	= 0;
+uint8_t  payloadlens							= 0;
+bool     is_time_to_IWDG_Refresh             	= 0;
+bool     JoinReq_NbTrails_over               	= 0;
+bool     unconfirmed_downlink_data_ans_status	= 0;
+bool     confirmed_downlink_data_ans_status  	= 0;
+bool     rejoin_status                       	= 0;
+bool     rejoin_keep_status                  	= 0;
+bool     MAC_COMMAND_ANS_status              	= 0;
+uint8_t  response_level                      	= 0;
+uint16_t REJOIN_TX_DUTYCYCLE                 	= 20;  // minutes
+
+uint32_t Altitude           					= 0;
+uint32_t APP_TX_DUTYCYCLE   					= 300000;
+uint32_t Server_TX_DUTYCYCLE					= 300000;
+uint32_t Alarm_TX_DUTYCYCLE 					= 60000;
+uint32_t Keep_TX_DUTYCYCLE  					= 21600000;
+uint32_t GPS_ALARM          					= 0;
+uint32_t GS                 					= 0;
+
 extern uint8_t mode;
 extern __IO uint16_t AD_code2;
 extern __IO uint16_t AD_code3;
@@ -132,25 +68,8 @@ extern bool rx2_flags;
 extern uint32_t LoRaMacState;
 extern uint8_t dwelltime;
 extern bool debug_flags;
-
-uint32_t Altitude =0 ;
-
-uint32_t APP_TX_DUTYCYCLE=300000;
-
-uint32_t Server_TX_DUTYCYCLE=300000;
-
-uint32_t Alarm_TX_DUTYCYCLE=60000;
-
-uint32_t Keep_TX_DUTYCYCLE=21600000;
-
-uint32_t GPS_ALARM=0;
-
-uint32_t GS=0;
-
 extern uint16_t dr_power;
-
 extern uint32_t set_sgm;
-
 extern uint32_t LON ;
 extern uint32_t MD ;
 extern uint32_t MLON ;
@@ -164,77 +83,41 @@ extern uint32_t se_mode;
 extern uint32_t fr_mode;
 
 uint32_t CHE = 0;
-
 int ALARM = 0;
-
 uint32_t FLAG=0;
-
 uint8_t send_fail=0;
-
 uint32_t a = 1;
-
 int basic_flag=0;
-
 static uint32_t ServerSetTDC;
-
 uint32_t start_time=0;
-	
 uint32_t AlarmSetTDC;
-
 uint8_t flag_1=1;
-
 extern uint8_t LP;
-
 uint8_t alarm_flags=0;
-
 uint8_t stop_flag=0;
-
 uint8_t payloadlens=0;
-
 uint8_t gps_setflags=0;
-
 uint8_t position_flags=0;
-
 float pdop_comp=7.0;
-
 float pdop_fixed=0.0;
-
 extern uint8_t Alarm_times;
-
 extern uint8_t Alarm_times1;
-
 extern uint32_t Positioning_time;
-
 extern uint8_t md_flags;
-
 extern float pdop_value;
-
 extern float pdop_gps;
-
 extern UART_HandleTypeDef uart1;
-
 extern bool rx2_flags;
-
 uint32_t Start_times=0,End_times=0,gps_time = 0;;
-
 FP32 gps_latitude ,gps_longitude;
-
 int32_t longitude;
-
 int32_t latitude;
-
 uint32_t SendData=0;
-
 uint16_t batteryLevel_mV;
-
 uint16_t TIMES = 10000;
-
 bool is_lora_joined=0;
-
 bool motion_flags=0;
-
 extern char DATABUFF[500];
-
 uint32_t led_red =0,led_blue=0,led_greed=0;
 bool red =0,blue=0,greed=0;
 float Roll_basic=0,Pitch_basic=0,Yaw_basic=0;
@@ -244,6 +127,9 @@ float Roll1=0,Pitch1=0,Yaw1=0;
 float Roll_new=0,Pitch_new=0,Yaw_new=0;
 float Roll_old=0,Pitch_old=0,Yaw_old=0;
 
+// clang-format on
+
+void send_exti(void);
 void lora_send_fsm(void);
 void send_data(void);
 void send_exti(void);
@@ -671,9 +557,9 @@ static void Send( void )
 		LP = 0;
 	}
 
-	  MPU_Write_Byte(MPU9250_ADDR,0x6B,0X00);//»½ÐÑ
+	  MPU_Write_Byte(MPU9250_ADDR,0x6B,0X00);//ï¿½ï¿½ï¿½ï¿½
 	  MPU_Init();
-//    MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT2_REG,0X00);  	//¼ÓËÙ¶ÈÓëÍÓÂÝÒÇ¶¼¹¤×÷
+//    MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT2_REG,0X00);  	//ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¶ï¿½ï¿½ï¿½ï¿½ï¿½
     yaw = 0;
 		for(int H=0; H<10; H++)
 		{
@@ -768,41 +654,36 @@ static void Send( void )
 //	}
   
 	printf_uplink();
-  FLAG = (int)(MD<<6 | LON<<5 | Firmware )& 0xFF;
-//	PRINTF("\n\rFLAG=%d  ",FLAG);
-	if(lora_getGPSState() == STATE_GPS_OFF)
-			{
-				AppData.Buff[i++] = 0x00;
-				AppData.Buff[i++] = 0x00;
-				AppData.Buff[i++] = 0x00;
-				AppData.Buff[i++] = 0x00;
-				AppData.Buff[i++] = 0x00;	
-				AppData.Buff[i++] = 0x00;
-				AppData.Buff[i++] = 0x00;	
-				AppData.Buff[i++] = 0x00;				
-			}
-		 else if(lora_getGPSState() == STATE_GPS_NO)
-		 {
-				AppData.Buff[i++] = 0xFF;
-				AppData.Buff[i++] = 0xFF;
-				AppData.Buff[i++] = 0xFF;
-				AppData.Buff[i++] = 0xFF;
-				AppData.Buff[i++] = 0xFF;	
-				AppData.Buff[i++] = 0xFF;	
-				AppData.Buff[i++] = 0xFF;	
-				AppData.Buff[i++] = 0xFF;				 
-		 }
-		else
-		{
-			  AppData.Buff[i++] =(int)latitude>>24& 0xFF;
-			  AppData.Buff[i++] =(int)latitude>>16& 0xFF;
-			  AppData.Buff[i++] =(int)latitude>>8& 0xFF;
-			  AppData.Buff[i++] =(int)latitude& 0xFF;
-				AppData.Buff[i++] =(int)longitude>>24& 0xFF;
-			  AppData.Buff[i++] =(int)longitude>>16& 0xFF;
-			  AppData.Buff[i++] =(int)longitude>>8& 0xFF;
-			  AppData.Buff[i++] =(int)longitude& 0xFF;		 
-		}
+        FLAG = (int)(MD << 6 | LON << 5 | FIRMWARE_VERSION) & 0xFF;
+        //	PRINTF("\n\rFLAG=%d  ",FLAG);
+        if (lora_getGPSState() == STATE_GPS_OFF) {
+          AppData.Buff[i++] = 0x00;
+          AppData.Buff[i++] = 0x00;
+          AppData.Buff[i++] = 0x00;
+          AppData.Buff[i++] = 0x00;
+          AppData.Buff[i++] = 0x00;
+          AppData.Buff[i++] = 0x00;
+          AppData.Buff[i++] = 0x00;
+          AppData.Buff[i++] = 0x00;
+        } else if (lora_getGPSState() == STATE_GPS_NO) {
+          AppData.Buff[i++] = 0xFF;
+          AppData.Buff[i++] = 0xFF;
+          AppData.Buff[i++] = 0xFF;
+          AppData.Buff[i++] = 0xFF;
+          AppData.Buff[i++] = 0xFF;
+          AppData.Buff[i++] = 0xFF;
+          AppData.Buff[i++] = 0xFF;
+          AppData.Buff[i++] = 0xFF;
+        } else {
+          AppData.Buff[i++] = (int)latitude >> 24 & 0xFF;
+          AppData.Buff[i++] = (int)latitude >> 16 & 0xFF;
+          AppData.Buff[i++] = (int)latitude >> 8 & 0xFF;
+          AppData.Buff[i++] = (int)latitude & 0xFF;
+          AppData.Buff[i++] = (int)longitude >> 24 & 0xFF;
+          AppData.Buff[i++] = (int)longitude >> 16 & 0xFF;
+          AppData.Buff[i++] = (int)longitude >> 8 & 0xFF;
+          AppData.Buff[i++] = (int)longitude & 0xFF;
+        }
    if(set_sgm == 1)
 		{
 			if(ALARM == 1)
