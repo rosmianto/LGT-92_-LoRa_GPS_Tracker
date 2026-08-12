@@ -603,21 +603,11 @@ static void Send(void) {
 	Pitch_sum = 0;
 	Yaw_sum = 0;
 	TimerTime_t ts = TimerGetCurrentTime();
-	//	PPRINTF("\n\r[%lu]", ts);
 	PPRINTF("Roll=%0.2f  ", ((int)(Roll1 * 100)) / 100.0);
 	PPRINTF("Pitch=%0.2f\r\n", ((int)(Pitch1 * 100)) / 100.0);
-	//	PPRINTF("Yaw=%0.2f\r\n",((int)(Yaw1*100))/100.0);
-	//	if(gps.altitude < 0)
-	//	{
-	//		Altitude = gps.altitude*100;
-	//		AT_PRINTF("Altitude:%d\r\n ",Altitude);
-	//		Altitude = (~Altitude)+1;
-	//		AT_PRINTF("Altitude:%.1f%c\r\n ",(float)Altitude/100);
-	//	}
 
 	printf_uplink();
 	FLAG = (int)(MD << 6 | LON << 5 | FIRMWARE_VERSION) & 0xFF;
-	//	PRINTF("\n\rFLAG=%d  ",FLAG);
 	if (lora_getGPSState() == STATE_GPS_OFF) {
 		AppData.Buff[i++] = 0x00;
 		AppData.Buff[i++] = 0x00;
@@ -648,7 +638,8 @@ static void Send(void) {
 	}
 	if (set_sgm == 1) {
 		if (ALARM == 1) {
-			AppData.Buff[i++] = (int)(sensor_data.bat_mv) >> 8 | 0x40; // battery
+			AppData.Buff[i++] =
+				(int)(sensor_data.bat_mv) >> 8 | 0x40; // battery
 			AppData.Buff[i++] = (int)sensor_data.bat_mv;
 
 		} else {
@@ -658,7 +649,8 @@ static void Send(void) {
 		AppData.Buff[i++] = (int)FLAG;
 	} else if (set_sgm == 0) {
 		if (ALARM == 1) {
-			AppData.Buff[i++] = (int)(sensor_data.bat_mv) >> 8 | 0x40; // battery
+			AppData.Buff[i++] =
+				(int)(sensor_data.bat_mv) >> 8 | 0x40; // battery
 			AppData.Buff[i++] = (int)sensor_data.bat_mv;
 		} else {
 			AppData.Buff[i++] = (int)(sensor_data.bat_mv) >> 8; // battery
@@ -1333,8 +1325,6 @@ void lora_send(void) {
 			} else {
 				MPU_INT_Init();
 			}
-			//			PPRINTF("Update Interval: %d ms\n\r",APP_TX_DUTYCYCLE);
-			//        PPRINTF("LP == 1\n\r");
 			lora_state_Led();
 			a = 1;
 			DISABLE_IRQ();
