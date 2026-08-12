@@ -138,7 +138,6 @@ extern uint32_t           Positioning_time;
 extern uint8_t            md_flags;
 extern float              pdop_value;
 extern float              pdop_gps;
-extern UART_HandleTypeDef uart1;
 extern bool               rx2_flags;
 
 static uint32_t ServerSetTDC;
