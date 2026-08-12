@@ -9,6 +9,8 @@
 # *.SRC # generate source file
 # *.src
 
+.vscode/
+
 # Prerequisites
 *.d
 *.dep

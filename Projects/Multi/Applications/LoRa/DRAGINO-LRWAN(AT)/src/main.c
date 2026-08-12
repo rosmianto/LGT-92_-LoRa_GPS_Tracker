@@ -23,16 +23,7 @@ extern uint8_t ic_version;
 
 #define FIRMWARE_VERSION 0x04
 
-// clang-format off
-// LoRaWAN stack configurations
-#define LORAWAN_ADR_STATE                 	LORAWAN_ADR_ON
-#define LORAWAN_DEFAULT_DATA_RATE         	DR_0
-#define LORAWAN_APP_PORT                  	2
-#define LORAWAN_DEFAULT_CLASS             	CLASS_A
-#define LORAWAN_DEFAULT_CONFIRM_MSG_STATE 	LORAWAN_UNCONFIRMED_MSG
-#define LORAWAN_APP_DATA_BUFF_SIZE        	256
-#define JOINREQ_NBTRIALS                  	200
-// clang-format on
+#include <LoRaWAN_Configurations.h>
 
 static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
 
@@ -183,7 +174,6 @@ static void timing( void );
 
 #endif
 extern void printf_joinmessage(void);
-
 
 bool sleep_status=0;//AT+SLEEP
 int user_key_exti_flag=0;
