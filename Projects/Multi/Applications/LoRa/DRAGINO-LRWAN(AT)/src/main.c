@@ -16,6 +16,40 @@
 #include "vcom.h"
 #include "version.h"
 
+// clang-format off
+// Downlink Command Definitions
+#define DOWNLINK_CMD_SET_TRANSMIT_INTERVAL       0x01
+#define DOWNLINK_CMD_EXIT_ALARM_MODE             0x02
+#define DOWNLINK_CMD_DEVICE_TRIGGER              0x04 // reset and factory reset
+#define DOWNLINK_CMD_CONFIRM_MODE                0x05 // two types of cfm
+#define DOWNLINK_CMD_NETWORK_JOINMODE            0x20
+#define DOWNLINK_CMD_PACKET_RESPONSE_LEVEL       0x21
+#define DOWNLINK_CMD_ADAPTIVE_DATARATE           0x22
+#define DOWNLINK_CMD_APP_PORT                    0x23
+#define DOWNLINK_CMD_EIGHT_CH_MODE               0x24
+#define DOWNLINK_CMD_DWELLTIME                   0x25
+#define DOWNLINK_CMD_FIRMWARE_VERSION            0x26
+#define DOWNLINK_CMD_NETWORK_REJOINING           0x26
+#define DOWNLINK_CMD_TIMESYNC                    0x28
+#define DOWNLINK_CMD_ONLINE_DETECT               0x32
+#define DOWNLINK_CMD_NBTRANS_MAX                 0x33
+#define DOWNLINK_CMD_ACK_MODE                    0x34
+#define DOWNLINK_CMD_MOVEMENT_DETECTION_MODE     0xA5
+#define DOWNLINK_CMD_UNKNOWN                     0xA8
+#define DOWNLINK_CMD_KEEPALIVE_TIME              0xA9
+#define DOWNLINK_CMD_GPS_FIXTIME                 0xAA
+#define DOWNLINK_CMD_NAVIGATION_MODE             0xAB
+#define DOWNLINK_CMD_GPS_SEARCH_MODE             0xAC
+#define DOWNLINK_CMD_GPS_PDOP                    0xAD
+#define DOWNLINK_CMD_LED_ON                      0xAE
+#define DOWNLINK_CMD_MOVEMENT_LED_ON             0xAF
+#define DOWNLINK_CMD_INCLUDE_MOTION_DATA         0xB0
+#define DOWNLINK_CMD_ALARM_TX_INTERVAL           0xB1
+#define DOWNLINK_CMD_DEVICE_TRIGGER_FACTORYRESET 0xFE
+#define DOWNLINK_CMD_DEVICE_TRIGGER_RESET        0xFF
+
+// clang-format on
+
 // TODO: printf not available via UART, enable or not?
 // So far it's routed through TraceSend().
 
@@ -689,7 +723,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 	set_at_receive(AppData->Port, AppData->Buff, AppData->BuffSize);
 
 	switch (AppData->Buff[0] & 0xff) {
-	case 0x01: {
+	case DOWNLINK_CMD_SET_TRANSMIT_INTERVAL: {
 		if (AppData->BuffSize == 4) //---->AT+TDC
 		{
 			ServerSetTDC = (AppData->Buff[1] << 16 | AppData->Buff[2] << 8 |
@@ -706,7 +740,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		break;
 	}
 
-	case 0x04: {
+	case DOWNLINK_CMD_DEVICE_TRIGGER: {
 		if (AppData->BuffSize == 2) {
 			if (AppData->Buff[1] == 0xFF) //---->ATZ
 			{
@@ -724,7 +758,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		break;
 	}
 
-	case 0x05: {
+	case DOWNLINK_CMD_CONFIRM_MODE: {
 		if (AppData->BuffSize == 2) {
 			if (AppData->Buff[1] == 0x01) //---->AT+CFM=1
 			{
@@ -741,7 +775,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		break;
 	}
 
-	case 2: {
+	case DOWNLINK_CMD_EXIT_ALARM_MODE: {
 		if (AppData->BuffSize == 2) {
 			if (AppData->Buff[1] == 0x01) {
 				start_time = HW_RTC_GetTimerValue();
@@ -760,7 +794,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		}
 		break;
 	}
-	case 0xa5: {
+	case DOWNLINK_CMD_MOVEMENT_DETECTION_MODE: {
 		if (AppData->BuffSize == 2) {
 			MD = AppData->Buff[1];
 			PRINTF("MD: %02x\n\r", MD);
@@ -782,7 +816,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		Store_Config();
 		break;
 	}
-	case 0xaa: {
+	case DOWNLINK_CMD_GPS_FIXTIME: {
 		if (AppData->BuffSize == 3) {
 			Positioning_time = (AppData->Buff[1] << 8 | AppData->Buff[2]);
 			if (Positioning_time == 1203) {
@@ -794,14 +828,14 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		Store_Config();
 		break;
 	}
-	case 0xab: {
+	case DOWNLINK_CMD_NAVIGATION_MODE: {
 		if (AppData->BuffSize == 2) {
 			fr_mode = AppData->Buff[1];
 		}
 		Store_Config();
 		break;
 	}
-	case 0xac: {
+	case DOWNLINK_CMD_GPS_SEARCH_MODE: {
 		if (AppData->BuffSize == 2) {
 			se_mode = AppData->Buff[1];
 		}
@@ -809,7 +843,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
 		break;
 	}
-	case 0xad: {
+	case DOWNLINK_CMD_GPS_PDOP: {
 		if (AppData->BuffSize == 3) {
 			pdop_value = (AppData->Buff[1] << 8 | AppData->Buff[2]) / 10.0;
 		}
@@ -817,7 +851,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
 		break;
 	}
-	case 0xae: {
+	case DOWNLINK_CMD_LED_ON: {
 		if (AppData->BuffSize == 2) {
 			LON = AppData->Buff[1];
 		}
@@ -825,7 +859,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
 		break;
 	}
-	case 0xaf: {
+	case DOWNLINK_CMD_MOVEMENT_LED_ON: {
 		if (AppData->BuffSize == 2) {
 			MLON = AppData->Buff[1];
 		}
@@ -833,7 +867,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
 		break;
 	}
-	case 0xa8: {
+	case DOWNLINK_CMD_UNKNOWN: {
 		if (AppData->BuffSize == 10) {
 			if (AppData->Buff[1] == 0x01) {
 				BSP_powerLED_Init();
@@ -882,7 +916,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
 		break;
 	}
-	case 0xb0: {
+	case DOWNLINK_CMD_INCLUDE_MOTION_DATA: {
 		if (AppData->BuffSize == 2) {
 			set_sgm = AppData->Buff[1];
 		}
@@ -890,7 +924,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
 		break;
 	}
-	case 0xb1: {
+	case DOWNLINK_CMD_ALARM_TX_INTERVAL: {
 		ServerSetTDC = (AppData->Buff[1] << 16 | AppData->Buff[2] << 8 |
 						AppData->Buff[3]); // S
 		if (ServerSetTDC < 6) {
@@ -905,7 +939,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
 		break;
 	}
-	case 0xa9: {
+	case DOWNLINK_CMD_KEEPALIVE_TIME: {
 		if (AppData->BuffSize == 4) {
 			ServerSetTDC = (AppData->Buff[1] << 16 | AppData->Buff[2] << 8 |
 							AppData->Buff[3]); // S
@@ -921,7 +955,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		}
 		break;
 	}
-	case 0x20: {
+	case DOWNLINK_CMD_NETWORK_JOINMODE: {
 		if (AppData->BuffSize == 2) {
 			if ((AppData->Buff[1] == 0x00) || (AppData->Buff[1] == 0x01)) {
 				if (AppData->Buff[1] == 0x01) //---->AT+NJM=1
@@ -939,7 +973,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		break;
 	}
 
-	case 0x21: {
+	case DOWNLINK_CMD_PACKET_RESPONSE_LEVEL: {
 		if ((AppData->BuffSize == 2) && (AppData->Buff[1] <= 4)) {
 			response_level =
 				(AppData->Buff[1]); // 0~4					//---->AT++RPL
@@ -949,7 +983,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		break;
 	}
 
-	case 0x22: {
+	case DOWNLINK_CMD_ADAPTIVE_DATARATE: {
 		MibRequestConfirm_t mib;
 		if ((AppData->BuffSize == 2) &&
 			(AppData->Buff[1] == 0x01)) //---->AT+ADR=1
@@ -983,7 +1017,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		break;
 	}
 
-	case 0x23: {
+	case DOWNLINK_CMD_APP_PORT: {
 		if (AppData->BuffSize == 2) {
 			lora_config_application_port_set(AppData->Buff[1]); //---->AT+PORT
 			Store_Config();
@@ -992,7 +1026,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		break;
 	}
 
-	case 0x24: {
+	case DOWNLINK_CMD_EIGHT_CH_MODE: {
 #if defined(REGION_US915) || defined(REGION_AU915) || defined(REGION_CN470)
 		if (AppData->BuffSize == 2) {
 			if (AppData->Buff[1] <= 0x0C) {
@@ -1005,7 +1039,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		break;
 	}
 
-	case 0x25: {
+	case DOWNLINK_CMD_DWELLTIME: {
 #if defined(REGION_AS923) || defined(REGION_AU915)
 		if (AppData->BuffSize == 2) {
 			if ((AppData->Buff[1] == 0x00) ||
