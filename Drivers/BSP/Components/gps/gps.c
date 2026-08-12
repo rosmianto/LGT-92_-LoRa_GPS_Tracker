@@ -1,14 +1,14 @@
-#include "GPS.h"  
-#include "at.h"  
-#include "vcom.h"
+#include "gps.h"
+#include "at.h"
 #include "delay.h"
+#include "vcom.h"
 #define SEMICOLON   ','    
 #define ASTERISK    '*'    
   
-//sscanf()  ´úÂëÁ¿1K)
-//strncpy() ´úÂëÁ¿300
-// atof()   ´úÂëÁ¿4300 
-// atoi()   ´úÂëÁ¿600  
+//sscanf()  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1K)
+//strncpy() ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½300
+// atof()   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½4300 
+// atoi()   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½600  
 
   GPSINFO  gps;  
   char lasttime[20]; 
@@ -43,7 +43,7 @@ _Bool GPS_Run(void)
 void GPS_Stop(void)   
 {   
 
-       // GPS_POWER_OFF();  //¹Ø±ÕGPSµçÔ´
+       // GPS_POWER_OFF();  //ï¿½Ø±ï¿½GPSï¿½ï¿½Ô´
        // GPS_BOOT_H();
         isrunning=0;   
      
@@ -53,11 +53,11 @@ void GPS_Stop(void)
 void GPS_FirmwareUpdate(void)   
 {   
         isFirmwareUpdate = 1;
-        //GPS_POWER_OFF();  //¹Ø±ÕGPSµçÔ´
+        //GPS_POWER_OFF();  //ï¿½Ø±ï¿½GPSï¿½ï¿½Ô´
         //Delay_ms(1000);
        // GPS_BOOT_H();
        // Delay_ms(1000);
-        //GPS_POWER_ON();  //¿ªÆôGPSµçÔ´
+        //GPS_POWER_ON();  //ï¿½ï¿½ï¿½ï¿½GPSï¿½ï¿½Ô´
          
        // USART1_Configuration(38400);
 	     // USART2_Configuration(38400);
@@ -172,18 +172,18 @@ FP32 CCrd::DMSToRadian(FP32 dms)
 int my_atoi(const char *str)
 {
     int result = 0;
-    int signal = 1; /* Ä¬ÈÏÎªÕýÊý */
+    int signal = 1; /* Ä¬ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ */
     if((*str>='0'&&*str<='9')||*str=='-'||*str=='+')
     {
         if(*str=='-'||*str=='+')
         {   if(*str=='-')
-	        signal = -1; /* ÊäÈë¸ºÊý */ 
+	        signal = -1; /* ï¿½ï¿½ï¿½ë¸ºï¿½ï¿½ */ 
 	        str++;
          }
     }
     else return 0; 
    
-   /* ¿ªÊ¼×ª»» */
+   /* ï¿½ï¿½Ê¼×ªï¿½ï¿½ */
    while(*str>='0'&&*str<='9')
         result = result*10+(*str++ -'0'); 
 
@@ -192,19 +192,19 @@ int my_atoi(const char *str)
 
 /*
 
-   Õâ¸öº¯ÊýÊÇ°Ñ¸¡µãÊý×Ö·û´®×ª»»Îª¸¡µãÊýµÄº¯Êý¡£
+   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°Ñ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½×ªï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äºï¿½ï¿½ï¿½ï¿½ï¿½
 
-   º¯Êý½«»áÌø¹ý×Ö·û´®ÖÐµÄ¿Õ¸ñ×Ö·ûºÍ²»ÊÇ'+'¡¢'-'¡¢'.'¡¢
+   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ÐµÄ¿Õ¸ï¿½ï¿½Ö·ï¿½ï¿½Í²ï¿½ï¿½ï¿½'+'ï¿½ï¿½'-'ï¿½ï¿½'.'ï¿½ï¿½
 
-   Êý×ÖµÄ×Ö·û¡£Èç¹û×Ö·û´®ÊÇ¿ÕµÄ»òÕß¶¼ÊÇÓÉ¿Õ¸ñ×é³É£¬½«²»»á
+   ï¿½ï¿½ï¿½Öµï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½Ç¿ÕµÄ»ï¿½ï¿½ß¶ï¿½ï¿½ï¿½ï¿½É¿Õ¸ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-   ×öÈÎºÎ×ª»»£¬½ö½öÊÇ°Ñ×Ö·û´®µÄ½áÊøµØÖ·¸³¸øendptr¡£Èç¹û×Ö
+   ï¿½ï¿½ï¿½Îºï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½endptrï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-   ·û´®ºÏ·¨£¬½«»á½øÐÐ×ª»»£¬²¢°Ñ×Ö·û´®×îºóµÄNULLµÄµØÖ·¸ø
+   ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½NULLï¿½Äµï¿½Ö·ï¿½ï¿½
 
-   endptr¡£Èç¹ûÄãÏëÊ¹ÓÃendptr²ÎÊý£¬ÄÇÃ´¸³Ò»¸öNULLÖµ¾Í
+   endptrï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½endptrï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã´ï¿½ï¿½Ò»ï¿½ï¿½NULLÖµï¿½ï¿½
 
-   ¿ÉÒÔÁË¡£
+   ï¿½ï¿½ï¿½ï¿½ï¿½Ë¡ï¿½
 
 */
 
@@ -224,7 +224,7 @@ FP32 my_strtod(const char* s, char** endptr)
 
    
 
-    while ( isspace(*p) )//Ìø¹ýÇ°ÃæµÄ¿Õ¸ñ
+    while ( isspace(*p) )//ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Ä¿Õ¸ï¿½
 
       p++;
 
@@ -232,19 +232,19 @@ FP32 my_strtod(const char* s, char** endptr)
 
     if(*p == '-' || *p == '+')
 
-      sign = *p++;//°Ñ·ûºÅ¸³¸ø×Ö·ûsign£¬Ö¸ÕëºóÒÆ¡£
+      sign = *p++;//ï¿½Ñ·ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½Ö·ï¿½signï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Æ¡ï¿½
 
    
 
-   //´¦ÀíÊý×Ö×Ö·û
+   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½
 
  
 
-    while ( (unsigned int)(*p - '0') < 10u )//×ª»»ÕûÊý²¿·Ö
+    while ( (unsigned int)(*p - '0') < 10u )//×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
       value = value*10 + (*p++ - '0');
 
-   //Èç¹ûÊÇÕý³£µÄ±íÊ¾·½Ê½£¨Èç£º1234.5678£©
+   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½Ê¾ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ç£º1234.5678ï¿½ï¿½
 
    if ( *p == '.' ) 
 
@@ -266,7 +266,7 @@ FP32 my_strtod(const char* s, char** endptr)
 
     }
 
-   //Èç¹ûÊÇIEEE754±ê×¼µÄ¸ñÊ½£¨Èç£º1.23456E+3£©
+   //ï¿½ï¿½ï¿½ï¿½ï¿½IEEE754ï¿½ï¿½×¼ï¿½Ä¸ï¿½Ê½ï¿½ï¿½ï¿½ç£º1.23456E+3ï¿½ï¿½
 
     if ( (*p | 32) == 'e' ) 
 
@@ -451,8 +451,8 @@ uint8_t GPS_parse(char *buf)
    int d,m,mm;
     uint8_t i;
    char *word,*left=buf+1;    
-   static uint8_t msgcount=0,msgid=0,satcount=0;   //½âÎöGSVÓÃµ½µÄ±äÁ¿
-           //¸÷Í¨µÀ²ÉÓÃµÄÎÀÐÇ±àºÅ    
+   static uint8_t msgcount=0,msgid=0,satcount=0;   //ï¿½ï¿½ï¿½ï¿½GSVï¿½Ãµï¿½ï¿½Ä±ï¿½ï¿½ï¿½
+           //ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½Ç±ï¿½ï¿½    
     uint8_t usedsatcount=0;
 
     if(buf[0] != '$')   
@@ -475,7 +475,7 @@ uint8_t GPS_parse(char *buf)
 		
     if(!strcmp(word,"GNRRMC"))   
     {   
-        //Ê±¼ä´Á  
+        //Ê±ï¿½ï¿½ï¿½  
 //        AT_PRINTF("GNRMC:%s\n\r",word);				
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GNRMC1:%s\n\r",word);				
@@ -489,7 +489,7 @@ uint8_t GPS_parse(char *buf)
             }   
         }   
    
-        //¶¨Î»×´Ì¬    
+        //ï¿½ï¿½Î»×´Ì¬    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GNRMC2:%s\n\r",word);				
         if(word != NULL)   
@@ -500,7 +500,7 @@ uint8_t GPS_parse(char *buf)
                 gps.isvalid=0;   
         }   
    
-        //Î³¶È    
+        //Î³ï¿½ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GNRMC3:%s\n\r",word);				
         if(word != NULL)   
@@ -508,10 +508,10 @@ uint8_t GPS_parse(char *buf)
              
             sscanf(word,"%2d%2d.%4d",&d,&m,&mm);   
             gps.latitude=(float)d+(float)m/60.0+(float)mm/600000.0;  
-            PRINTF("%s: %.6f¶È\n\r",gps.latitude);					
+            PRINTF("%s: %.6fï¿½ï¿½\n\r",gps.latitude);					
         }   
    
-        //ÄÏ±±°ëÇò±êÖ¾    
+        //ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GNRMC4:%s\n\r",word);				
         if(word != NULL)   
@@ -525,7 +525,7 @@ uint8_t GPS_parse(char *buf)
          }       
 
    
-        //¾­¶È    
+        //ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left);  
 //        AT_PRINTF("GNRMC5:%s\n\r",word);				 
         if(word != NULL)   
@@ -533,10 +533,10 @@ uint8_t GPS_parse(char *buf)
             int d,m,mm;   
             sscanf(word,"%3d%2d.%4d",&d,&m,&mm);   
             gps.longitude = (float)d+(float)m/60.0+(float)mm/600000.0;
-//            PRINTF("%s: %.6f¶È\n\r",gps.longitude);					
+//            PRINTF("%s: %.6fï¿½ï¿½\n\r",gps.longitude);					
         }   
    
-        //¶«Î÷°ëÇò±êÖ¾    
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GNRMC6:%s\n\r",word);				
         if(word != NULL)   
@@ -550,7 +550,7 @@ uint8_t GPS_parse(char *buf)
             }  
         }   
    
-        //¶ÔµØÔË¶¯ËÙ¶È    
+        //ï¿½Ôµï¿½ï¿½Ë¶ï¿½ï¿½Ù¶ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GNRMC7:%s\n\r",word);				
         if(word != NULL)   
@@ -558,7 +558,7 @@ uint8_t GPS_parse(char *buf)
             gps.speed=my_atof(word)*1.852;   
         }   
    
-        //¶ÔµØÔË¶¯·½Ïò    
+        //ï¿½Ôµï¿½ï¿½Ë¶ï¿½ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GNRMC8:%s\n\r",word);				
         if(word != NULL)   
@@ -566,7 +566,7 @@ uint8_t GPS_parse(char *buf)
             gps.direction=my_atof(word);   
         } 
         
-         //utc ÈÕÆÚ    
+         //utc ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GNRMC9:%s\n\r",word);				
         if(word != NULL)   
@@ -576,7 +576,7 @@ uint8_t GPS_parse(char *buf)
     }		
     else if(!strcmp(word,"GPRMC"))   
     {   
-        //Ê±¼ä´Á    
+        //Ê±ï¿½ï¿½ï¿½    
 //			  AT_PRINTF("GPRMC:%s\n\r",word);
         word=split(left,SEMICOLON,&left);  
 //        AT_PRINTF("GPRMC0:%s\n\r",word);			
@@ -589,7 +589,7 @@ uint8_t GPS_parse(char *buf)
             }   
         }   
    
-        //¶¨Î»×´Ì¬    
+        //ï¿½ï¿½Î»×´Ì¬    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPRMC1:%s\n\r",word);				
         if(word != NULL)   
@@ -600,7 +600,7 @@ uint8_t GPS_parse(char *buf)
                 gps.isvalid=0;   
         }   
    
-        //Î³¶È    
+        //Î³ï¿½ï¿½    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GPRMC2:%s\n\r",word);				
         if(word != NULL)   
@@ -610,7 +610,7 @@ uint8_t GPS_parse(char *buf)
             gps.latitude=(float)d+(float)m/60.0+(float)mm/600000.0;   
         }   
    
-        //ÄÏ±±°ëÇò±êÖ¾    
+        //ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GPRMC3:%s\n\r",word);				
         if(word != NULL)   
@@ -624,7 +624,7 @@ uint8_t GPS_parse(char *buf)
          }       
 
    
-        //¾­¶È    
+        //ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPRMC4:%s\n\r",word);				 
         if(word != NULL)   
@@ -634,7 +634,7 @@ uint8_t GPS_parse(char *buf)
             gps.longitude = (float)d+(float)m/60.0+(float)mm/600000.0;   
         }   
    
-        //¶«Î÷°ëÇò±êÖ¾    
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPRMC5:%s\n\r",word);				
         if(word != NULL)   
@@ -648,7 +648,7 @@ uint8_t GPS_parse(char *buf)
             }  
         }   
    
-        //¶ÔµØÔË¶¯ËÙ¶È    
+        //ï¿½Ôµï¿½ï¿½Ë¶ï¿½ï¿½Ù¶ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPRMC6:%s\n\r",word);				
         if(word != NULL)   
@@ -656,7 +656,7 @@ uint8_t GPS_parse(char *buf)
             gps.speed=my_atof(word)*1.852;   
         }   
    
-        //¶ÔµØÔË¶¯·½Ïò    
+        //ï¿½Ôµï¿½ï¿½Ë¶ï¿½ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPRMC7:%s\n\r",word);				
         if(word != NULL)   
@@ -664,7 +664,7 @@ uint8_t GPS_parse(char *buf)
             gps.direction=my_atof(word);   
         } 
         
-         //utc ÈÕÆÚ    
+         //utc ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPRMC8:%s\n\r",word);				
         if(word != NULL)   
@@ -674,7 +674,7 @@ uint8_t GPS_parse(char *buf)
     } 
     else if((!strcmp(word,"GPGGA")) || (!strcmp(word,"GNGGA")))
     {   
-        //Ê±¼ä´Á  
+        //Ê±ï¿½ï¿½ï¿½  
 //        AT_PRINTF("GPGGA:%s\n\r",word);			
         word=split(left,SEMICOLON,&left);   
         if(word != NULL)   
@@ -686,7 +686,7 @@ uint8_t GPS_parse(char *buf)
             }   
         }   
    
-        //Î³¶È    
+        //Î³ï¿½ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGGA1:%s\n\r",word);				
         if(word != NULL)   
@@ -696,7 +696,7 @@ uint8_t GPS_parse(char *buf)
             gps.latitude=(float)d+(float)m/60.0+(float)mm/600000.0;   
         }   
    
-        //ÄÏ±±°ëÇò±êÖ¾    
+        //ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GPGGA2:%s\n\r",word);				
         if(word != NULL)   
@@ -709,7 +709,7 @@ uint8_t GPS_parse(char *buf)
               } 
          }    
    
-        //¾­¶È    
+        //ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GPGGA3:%s\n\r",word);				 
         if(word != NULL)   
@@ -719,7 +719,7 @@ uint8_t GPS_parse(char *buf)
             gps.longitude=(float)d+(float)m/60.0+(float)mm/600000.0;   
         }   
    
-        //¶«Î÷°ëÇò±êÖ¾    
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGGA4:%s\n\r",word);					
         if(word != NULL)   
@@ -733,7 +733,7 @@ uint8_t GPS_parse(char *buf)
             }  
         }   
    
-        //¶¨Î»ÓÐÐ§ÐÔ¼°¸ñÊ½    
+        //ï¿½ï¿½Î»ï¿½ï¿½Ð§ï¿½Ô¼ï¿½ï¿½ï¿½Ê½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGGA5:%s\n\r",word);					
         if(word != NULL)   
@@ -741,7 +741,7 @@ uint8_t GPS_parse(char *buf)
             gps.FixMode=my_atoi(word);   
         }   
    
-        //²¶×½ÎÀÐÇÊýÁ¿    
+        //ï¿½ï¿½×½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GPGGA6:%s\n\r",word);					
         if(word != NULL)   
@@ -749,7 +749,7 @@ uint8_t GPS_parse(char *buf)
             gps.usedsatnum=my_atoi(word);   
         }   
    
-        //¹À¼ÆÎó²î    
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGGA7:%s\n\r",word);					
         if(word != NULL)   
@@ -759,7 +759,7 @@ uint8_t GPS_parse(char *buf)
             //sscanf(word,"%f",&gps.HDOP);  
         }   
    
-        //º£°Î¸ß¶È    
+        //ï¿½ï¿½ï¿½Î¸ß¶ï¿½    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGGA8:%s\n\r",word);					
         if(word != NULL)   
@@ -767,7 +767,7 @@ uint8_t GPS_parse(char *buf)
             gps.altitude=my_atof(word);   
         }   
    
-        //¸ß¶Èµ¥Î»    
+        //ï¿½ß¶Èµï¿½Î»    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGGA9:%s\n\r",word);					
         if(word != NULL)   
@@ -779,7 +779,7 @@ uint8_t GPS_parse(char *buf)
     {   
         
    
-        //ÏûÏ¢×ÜÊý   
+        //ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½   
 //        AT_PRINTF("GPGSV:%s\n\r",word);			
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGSV1:%s\n\r",word);			
@@ -788,7 +788,7 @@ uint8_t GPS_parse(char *buf)
             msgcount=my_atoi(word);   
         }   
    
-        //ÏûÏ¢±àºÅ    
+        //ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GPGSV2:%s\n\r",word);				
         if(word != NULL)   
@@ -802,7 +802,7 @@ uint8_t GPS_parse(char *buf)
             //memset(satinfo,0,sizeof(SatelliteInfo)*38);   
         }   
    
-        //ÎÀÐÇ×ÜÊý    
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GPGSV4:%s\n\r",word);				
         if(word != NULL)   
@@ -813,14 +813,14 @@ uint8_t GPS_parse(char *buf)
        // printf("%s\n",left);   
         for(i=0;i<4;i++)   
         {   
-            //ÎÀÐÇ±àºÅ    
+            //ï¿½ï¿½ï¿½Ç±ï¿½ï¿½    
             word=split(left,SEMICOLON,&left);   
             if(word != NULL)   
             {   
                 gps.satinfo[satcount].satid=my_atoi(word);   
             }   
    
-            //ÎÀÐÇÑö½Ç    
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½    
             word=split(left,SEMICOLON,&left); 
 //            AT_PRINTF("GPGSV5:%s\n\r",word);						
             if(word != NULL)   
@@ -828,7 +828,7 @@ uint8_t GPS_parse(char *buf)
                 gps.satinfo[satcount].elevation=my_atoi(word);   
             }   
    
-            //ÎÀÐÇ·½Î»½Ç    
+            //ï¿½ï¿½ï¿½Ç·ï¿½Î»ï¿½ï¿½    
             word=split(left,SEMICOLON,&left); 
 //            AT_PRINTF("GPGSV6:%s\n\r",word);						
             if(word != NULL)   
@@ -836,7 +836,7 @@ uint8_t GPS_parse(char *buf)
                 gps.satinfo[satcount].azimuth=my_atoi(word);   
             }   
    
-            //ÎÀÐÇÐÅºÅÐÅÔë±È    
+            //ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½    
             word=split(left,SEMICOLON,&left); 
 //            AT_PRINTF("GPGSV7:%s\n\r",word);						
             if(word != NULL)   
@@ -856,7 +856,7 @@ uint8_t GPS_parse(char *buf)
     else if((!strcmp(word,"GPGSA"))||(!strcmp(word,"GNGSA")))     
     {   
 //			  AT_PRINTF("GPGSA:%s\n\r",word);
-        //¶¨Î»Ä£Ê½1    
+        //ï¿½ï¿½Î»Ä£Ê½1    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGSA1:%s\n\r",word);			
         if(word != NULL)   
@@ -864,7 +864,7 @@ uint8_t GPS_parse(char *buf)
             gps.GSA_mode1=my_atoi(word);   
         }   
    
-        //¶¨Î»Ä£Ê½2    
+        //ï¿½ï¿½Î»Ä£Ê½2    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGSA2:%s\n\r",word);					
         if(word != NULL)   
@@ -884,7 +884,7 @@ uint8_t GPS_parse(char *buf)
             }   
         }   
    
-        //Î»ÖÃ¾«¶ÈÖµ    
+        //Î»ï¿½Ã¾ï¿½ï¿½ï¿½Öµ    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGSA3:%s\n\r",word);					
         if(word != NULL)   
@@ -893,7 +893,7 @@ uint8_t GPS_parse(char *buf)
             pdop_gps=	gps.PDOP;							
         }   
    
-        //Ë®Æ½¾«¶ÈÖµ    
+        //Ë®Æ½ï¿½ï¿½ï¿½ï¿½Öµ    
         word=split(left,SEMICOLON,&left); 
 //        AT_PRINTF("GPGSA4:%s\n\r",word);					
         if(word != NULL)   
@@ -901,7 +901,7 @@ uint8_t GPS_parse(char *buf)
             gps.HDOP=(float)my_atof(word);   
         }   
    
-        //¸ß¶È¾«¶ÈÖµ    
+        //ï¿½ß¶È¾ï¿½ï¿½ï¿½Öµ    
         word=split(left,SEMICOLON,&left);
 //        AT_PRINTF("GPGSA4:%s\n\r",word);					
         if(word != NULL)   
@@ -919,12 +919,12 @@ uint8_t GPS_parse(char *buf)
     return 1;   
 }
 
-#define  NEMA_NUM_MAX   6     //»º³åµÄNEMAÓï¾äÊýÁ¿
-#define  NEMA_CHAR_MAX  255   //»º³åµÄNEMAÓï¾ä×Ö·ûÊýÁ¿ 
+#define  NEMA_NUM_MAX   6     //ï¿½ï¿½ï¿½ï¿½ï¿½NEMAï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define  NEMA_CHAR_MAX  255   //ï¿½ï¿½ï¿½ï¿½ï¿½NEMAï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ 
 
 struct {
-       uint8_t   isupdated;  //NEMA »º³åÇø¸üÐÂ±êÖ¾
-      char buffer[NEMA_CHAR_MAX]; //NEMA »º³åÇø
+       uint8_t   isupdated;  //NEMA ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â±ï¿½Ö¾
+      char buffer[NEMA_CHAR_MAX]; //NEMA ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
       }GPS_NEMA[NEMA_NUM_MAX] ;    
 
 
@@ -935,17 +935,17 @@ struct {
     static  uint8_t NEMA_count = 0;
     static  uint8_t char_count = 0;
 //		 uint8_t Empty = 0;
-    if(isFirmwareUpdate == 1)     //¸üÐÂ¹Ì¼þ
+    if(isFirmwareUpdate == 1)     //ï¿½ï¿½ï¿½Â¹Ì¼ï¿½
       return;
     if(buffer == '$')
       { 			
-         GPS_NEMA[NEMA_count].isupdated = 1;  //½«ÉÏÃæÒ»ÌõÓï¾ä´òÉÏ¸üÐÂ±êÖ¾
+         GPS_NEMA[NEMA_count].isupdated = 1;  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½Â±ï¿½Ö¾
          NEMA_count++;
          if(NEMA_count > (NEMA_NUM_MAX-1))
          {
             NEMA_count = 0;
          }
-         GPS_NEMA[NEMA_count].isupdated = 0;  //½«±¾ÌõÓï¾ä´òÉÏÎ´¸üÐÂ±êÖ¾
+         GPS_NEMA[NEMA_count].isupdated = 0;  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½Â±ï¿½Ö¾
          GPS_NEMA[NEMA_count].buffer[0] = '$';
          char_count = 1;
 
@@ -982,18 +982,18 @@ uint8_t GPS_INFO_update(void)
 
 
 //======================================================================
-//º¯ Êý Ãû: GPS_init() 
-//¹¦    ÄÜ: ÅäÖÃLED¹Ü½Å
-//Èë¿Ú²ÎÊý: ÎÞ
-//³ö¿Ú²ÎÊý: ÎÞ
-//·µ »Ø Öµ: ÎÞ
+//ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½: GPS_init() 
+//ï¿½ï¿½    ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½LEDï¿½Ü½ï¿½
+//ï¿½ï¿½Ú²ï¿½ï¿½ï¿½: ï¿½ï¿½
+//ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½: ï¿½ï¿½
+//ï¿½ï¿½ ï¿½ï¿½ Öµ: ï¿½ï¿½
 //======================================================================
  void GPS_init(void)
 { 			
     GPIO_InitTypeDef GPIO_InitStructure;  
 											   
 
-	/* ÅäÖÃ PC.0 GPS_BOOT -PC.1 GPS_EN ÎªÊä³öÄ£Ê½*/
+	/* ï¿½ï¿½ï¿½ï¿½ PC.0 GPS_BOOT -PC.1 GPS_EN Îªï¿½ï¿½ï¿½Ä£Ê½*/
     
    __GPIOB_CLK_ENABLE();
 
@@ -1023,7 +1023,7 @@ uint8_t GPS_INFO_update(void)
     GPIO_InitTypeDef GPIO_InitStructure;  
 											   
 
-	/* ÅäÖÃ  ÎªÊäÈëÄ£Ê½*/
+	/* ï¿½ï¿½ï¿½ï¿½  Îªï¿½ï¿½ï¿½ï¿½Ä£Ê½*/
     
    __GPIOB_CLK_ENABLE();
 
@@ -1076,7 +1076,7 @@ void GPS_INPUT(void)
     switch(gps.FixMode)
     {
         case 0:
-//					AT_PRINTF("GPS×´Ì¬:Î´¶¨Î»   \n\r");
+//					AT_PRINTF("GPS×´Ì¬:Î´ï¿½ï¿½Î»   \n\r");
 				break;
         case 1: 
 //					AT_PRINTF("GPS×´Ì¬:%dD SPS  \n\r ",gps.GSA_mode2);
@@ -1085,7 +1085,7 @@ void GPS_INPUT(void)
 //					AT_PRINTF("GPS×´Ì¬:%dD DGPS  \n\r",gps.GSA_mode2);
 				break;
         case 6:
-//					AT_PRINTF("GPS×´Ì¬:¹ÀËãÖÐ    \n\r");
+//					AT_PRINTF("GPS×´Ì¬:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½    \n\r");
 				break;
         default :break;                                                 
     }

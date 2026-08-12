@@ -82,6 +82,10 @@
 #ifndef __LORAMAC_H__
 #define __LORAMAC_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <utilities.h>
+
 /*!
  * Check the Mac layer state every MAC_STATE_CHECK_TIMEOUT in ms
  */

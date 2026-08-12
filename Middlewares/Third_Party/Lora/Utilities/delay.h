@@ -15,6 +15,10 @@ Maintainer: Miguel Luis and Gregory Cristian
 #ifndef __DELAY_H__
 #define __DELAY_H__
 
+// TODO: No C++ guard?
+
+#include <stdint.h>
+
 /*! 
  * Blocking delay of "s" seconds
  */

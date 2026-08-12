@@ -62,6 +62,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 #ifndef __HW_CONF_H__
 #define __HW_CONF_H__
 
+#include <stdint.h>
+
 #ifdef __cplusplus
  extern "C" {
 #endif

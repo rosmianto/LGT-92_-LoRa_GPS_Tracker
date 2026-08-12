@@ -62,6 +62,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 #ifndef __IIC_H__
 #define __IIC_H__
 
+#include <stdint.h>
+
 #ifdef __cplusplus
  extern "C" {
 #endif

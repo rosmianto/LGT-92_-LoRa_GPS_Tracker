@@ -45,21 +45,20 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
-#include "timeServer.h"
-#include "LoRaMac.h"
 #include "lora.h"
-#include "lora-test.h"
-#include "tiny_sscanf.h"
-#include "flash_eraseprogram.h"
-#include "version.h"
+#include "LoRaMac.h"
 #include "bsp.h"
-#include "GPS.h"
-#include "low_power_manager.h"
-#include "version.h"
-#include "mpu9250.h"
 #include "delay.h"
+#include "flash_eraseprogram.h"
+#include "gps.h"
+#include "hw.h"
+#include "lora-test.h"
+#include "low_power_manager.h"
+#include "mpu9250.h"
 #include "stdlib.h"
+#include "timeServer.h"
+#include "tiny_sscanf.h"
+#include "version.h"
 
 #if defined( REGION_AS923 )
 #define Firm_FQ 0x0001

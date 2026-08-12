@@ -59,13 +59,13 @@ Maintainer: Miguel Luis and Gregory Cristian
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
 #include "stm32l0xx_it.h"
-#include "vcom.h"
 #include "gpio_exti.h"
-#include "GPS.h"  
-#include "lora.h"
+#include "gps.h"
+#include "hw.h"
 #include "iwdg.h"
+#include "lora.h"
+#include "vcom.h"
 
 bool button_exitflag=0;
 bool moinint_exitflag=0;

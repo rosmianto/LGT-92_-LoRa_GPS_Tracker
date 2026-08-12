@@ -1,20 +1,23 @@
-#include "hw.h"
-#include "flash_eraseprogram.h"
-#include "low_power_manager.h"
-#include "lora.h"
+#include "IIC.h"
+#include "at.h"
 #include "bsp.h"
+#include "bsp_usart2.h"
+#include "command.h"
+#include "delay.h"
+#include "flash_eraseprogram.h"
+#include "gpio_exti.h"
+#include "gps.h"
+#include "hw.h"
+#include "iwdg.h"
+#include "lora.h"
+#include "low_power_manager.h"
+#include "mpu9250.h"
 #include "timeServer.h"
 #include "vcom.h"
 #include "version.h"
-#include "command.h"
-#include "at.h"
-#include "gpio_exti.h"
-#include "iwdg.h"
-#include "delay.h"
-#include "GPS.h"  
-#include "bsp_usart2.h"
-#include "IIC.h"
-#include "mpu9250.h"
+
+// TODO: printf not available via UART, enable or not?
+// So far it's routed through TraceSend().
 
 extern uint8_t ic_version;
 
@@ -95,7 +98,6 @@ uint8_t flag_1=1;
 extern uint8_t LP;
 uint8_t alarm_flags=0;
 uint8_t stop_flag=0;
-uint8_t payloadlens=0;
 uint8_t gps_setflags=0;
 uint8_t position_flags=0;
 float pdop_comp=7.0;
