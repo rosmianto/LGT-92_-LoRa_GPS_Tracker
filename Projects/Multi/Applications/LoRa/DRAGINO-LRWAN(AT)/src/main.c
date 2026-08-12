@@ -67,7 +67,7 @@ int      exti_flag                           	= 0;
 uint32_t COUNT                               	= 0;
 uint8_t  TDC_flag                            	= 0;
 uint8_t  join_flag                           	= 0;
-uint8_t  atz_flags                           	= 0;
+uint8_t  device_reset_trigger                   = 0;
 uint8_t  payloadlens							= 0;
 bool     is_time_to_IWDG_Refresh             	= 0;
 bool     JoinReq_NbTrails_over               	= 0;
@@ -349,14 +349,14 @@ int main(void) {
 		/* Handle UART commands */
 		CMD_Process();
 
-		if (atz_flags == 1) {
+		if (device_reset_trigger == 1) {
 			DelayMs(500);
 			AppData.Buff[0] = 0x11;
 			AppData.BuffSize = 1;
 			AppData.Port = 2;
 			LORA_send(&AppData, LORAWAN_UNCONFIRMED_MSG);
-			atz_flags++;
-		} else if ((atz_flags == 2) &&
+			device_reset_trigger++;
+		} else if ((device_reset_trigger == 2) &&
 				   ((LoRaMacState & 0x00000001) != 0x00000001)) {
 			NVIC_SystemReset();
 		}
@@ -454,9 +454,6 @@ static void LORA_HasJoined(void) {
 static void printf_uplink(void) {
 	if (gps_latitude > 0 && gps_longitude > 0) {
 		gps_state_on();
-		//	 PRINTF("%s: %.6f\n\r",(gps.latNS ==
-		//'N')?"South":"North",gps_latitude); 	 PRINTF("%s: %.6f\n\r ",(gps.lgtEW
-		//== 'E')?"East":"West",gps_longitude);
 
 		if (gps.latNS != 'N') {
 			latitude = gps_latitude * 1000000;
@@ -744,14 +741,14 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 		if (AppData->BuffSize == 2) {
 			if (AppData->Buff[1] == 0xFF) //---->ATZ
 			{
-				atz_flags = 1;
+				device_reset_trigger = 1;
 				rxpr_flags = 1;
 			} else if (AppData->Buff[1] == 0xFE) //---->AT+FDR
 			{
 				FLASH_erase(0x8018F80); // page 799
 				FLASH_program_on_addr(0x8018F80, 0x12);
 				FLASH_erase(FLASH_USER_START_ADDR_CONFIG); // Page800
-				atz_flags = 1;
+				device_reset_trigger = 1;
 				rxpr_flags = 1;
 			}
 		}
@@ -966,7 +963,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 					lora_config_otaa_set(LORA_DISABLE);
 				}
 				Store_Config();
-				atz_flags = 1;
+				device_reset_trigger = 1;
 				rxpr_flags = 1;
 			}
 		}
@@ -1047,7 +1044,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 			{
 				dwelltime = AppData->Buff[1];
 				Store_Config();
-				atz_flags = 1;
+				device_reset_trigger = 1;
 				rxpr_flags = 1;
 			}
 		}
