@@ -53,6 +53,32 @@ uint32_t Keep_TX_DUTYCYCLE  					= 21600000;
 uint32_t GPS_ALARM          					= 0;
 uint32_t GS                 					= 0;
 
+// GPS-related variables (?)
+uint8_t  gps_setflags     = 0;
+uint8_t  position_flags   = 0;
+float    pdop_comp        = 7.0;
+float    pdop_fixed       = 0.0;
+uint32_t Start_times      = 0;
+uint32_t End_times        = 0;
+uint32_t gps_time         = 0;
+FP32     gps_latitude     = 0.0;
+FP32     gps_longitude    = 0.0;
+int32_t  longitude        = 0;
+int32_t  latitude         = 0;
+
+// IMU-related variables (?)
+float Roll_basic=0,Pitch_basic=0,Yaw_basic=0;
+float Roll_sum=0,Pitch_sum=0,Yaw_sum=0;
+float Roll=0,Pitch=0,Yaw=0;
+float Roll1=0,Pitch1=0,Yaw1=0;
+float Roll_new=0,Pitch_new=0,Yaw_new=0;
+float Roll_old=0,Pitch_old=0,Yaw_old=0;
+
+// LED-related variables (?)
+uint32_t led_red =0,led_blue=0,led_greed=0;
+bool red =0,blue=0,greed=0;
+
+// various extern variables
 extern uint8_t mode;
 extern __IO uint16_t AD_code2;
 extern __IO uint16_t AD_code3;
@@ -72,9 +98,17 @@ extern uint32_t Freq ;
 extern uint8_t mpuint_flags;
 extern bool button_exitflag;
 extern bool moinint_exitflag;
-
 extern uint32_t se_mode;
 extern uint32_t fr_mode;
+extern uint8_t LP;
+extern uint8_t Alarm_times;
+extern uint8_t Alarm_times1;
+extern uint32_t Positioning_time;
+extern uint8_t md_flags;
+extern float pdop_value;
+extern float pdop_gps;
+extern UART_HandleTypeDef uart1;
+extern bool rx2_flags;
 
 uint32_t CHE = 0;
 int ALARM = 0;
@@ -86,39 +120,15 @@ static uint32_t ServerSetTDC;
 uint32_t start_time=0;
 uint32_t AlarmSetTDC;
 uint8_t flag_1=1;
-extern uint8_t LP;
 uint8_t alarm_flags=0;
 uint8_t stop_flag=0;
-uint8_t gps_setflags=0;
-uint8_t position_flags=0;
-float pdop_comp=7.0;
-float pdop_fixed=0.0;
-extern uint8_t Alarm_times;
-extern uint8_t Alarm_times1;
-extern uint32_t Positioning_time;
-extern uint8_t md_flags;
-extern float pdop_value;
-extern float pdop_gps;
-extern UART_HandleTypeDef uart1;
-extern bool rx2_flags;
-uint32_t Start_times=0,End_times=0,gps_time = 0;;
-FP32 gps_latitude ,gps_longitude;
-int32_t longitude;
-int32_t latitude;
+
 uint32_t SendData=0;
 uint16_t batteryLevel_mV;
 uint16_t TIMES = 10000;
 bool is_lora_joined=0;
 bool motion_flags=0;
 extern char DATABUFF[500];
-uint32_t led_red =0,led_blue=0,led_greed=0;
-bool red =0,blue=0,greed=0;
-float Roll_basic=0,Pitch_basic=0,Yaw_basic=0;
-float Roll_sum=0,Pitch_sum=0,Yaw_sum=0;
-float Roll=0,Pitch=0,Yaw=0;
-float Roll1=0,Pitch1=0,Yaw1=0;
-float Roll_new=0,Pitch_new=0,Yaw_new=0;
-float Roll_old=0,Pitch_old=0,Yaw_old=0;
 
 // clang-format on
 
