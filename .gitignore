@@ -11,6 +11,10 @@
 
 .vscode/
 *.elf
+**/CMakeFiles/*
+CMakeCache.txt
+cmake_install.cmake
+Makefile
 
 # Prerequisites
 *.d
