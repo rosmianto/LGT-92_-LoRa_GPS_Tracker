@@ -25,6 +25,7 @@ extern uint8_t se_mode;
 extern uint8_t fr_mode;
 extern uint8_t ic_version;
 extern uint32_t loggps;
+
 _Bool GPS_Run(void)   
 {   
     if( isrunning)   
