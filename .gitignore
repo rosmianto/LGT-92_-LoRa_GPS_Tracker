@@ -10,6 +10,7 @@
 # *.src
 
 .vscode/
+*.elf
 
 # Prerequisites
 *.d

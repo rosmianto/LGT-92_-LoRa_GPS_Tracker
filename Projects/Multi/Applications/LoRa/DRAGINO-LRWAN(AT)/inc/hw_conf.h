@@ -133,7 +133,7 @@ Maintainer: Miguel Luis and Gregory Cristian
  // " Is the hardware a dragino LGT92 or LSN50?"
 
 #define LoRa_Sensor_Node /*LSN50 Device*/
- // #define AT_Data_Send         /*LoRa ST Module*/
+                         // #define AT_Data_Send         /*LoRa ST Module*/
 
  /* uncomment below line to never enter lowpower modes in main.c*/
  // #define LOW_POWER_DISABLE

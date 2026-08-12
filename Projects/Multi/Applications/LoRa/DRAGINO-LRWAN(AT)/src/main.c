@@ -74,60 +74,91 @@ float Roll1=0,Pitch1=0,Yaw1=0;
 float Roll_new=0,Pitch_new=0,Yaw_new=0;
 float Roll_old=0,Pitch_old=0,Yaw_old=0;
 
+#define Kp 40.0f        // proportional gain governs rate of convergence toaccelerometer/magnetometer
+#define Ki 0.02f        // integral gain governs rate of convergenceof gyroscope biases
+#define halfT 0.0048f   // half the sample period
+#define dt 0.0096f
+
+float pitch,roll,yaw;
+float pitch_sum,roll_sum,yaw_sum;
+short igx,igy,igz;
+short iax,iay,iaz;
+short imx,imy,imz;
+float gx,gy,gz;
+float ax,ay,az;
+float mx,my,mz;
+
+float gx_old,gy_old,gz_old;
+float ax_old,ay_old,az_old;
+float mx_old,my_old,mz_old;
+
+static float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
+static float exInt = 0, eyInt = 0, ezInt = 0; 
+static short turns=0;
+static float newdata=0.0f,olddata=0.0f;
+static float pitchoffset,rolloffset,yawoffset;
+
+static float k10=0.0f,k11=0.0f,k12=0.0f,k13=0.0f;
+static float k20=0.0f,k21=0.0f,k22=0.0f,k23=0.0f;
+static float k30=0.0f,k31=0.0f,k32=0.0f,k33=0.0f;
+static float k40=0.0f,k41=0.0f,k42=0.0f,k43=0.0f;
+
+
+
 // LED-related variables (?)
 uint32_t led_red =0,led_blue=0,led_greed=0;
 bool red =0,blue=0,greed=0;
 
 // various extern variables
-extern uint8_t mode;
 extern __IO uint16_t AD_code2;
 extern __IO uint16_t AD_code3;
-extern uint8_t inmode;
-extern uint16_t power_time;
-extern bool rx2_flags;
-extern uint32_t LoRaMacState;
-extern uint8_t dwelltime;
-extern bool debug_flags;
-extern uint16_t dr_power;
-extern uint32_t set_sgm;
-extern uint32_t LON ;
-extern uint32_t MD ;
-extern uint32_t MLON ;
-extern uint32_t Threshold ;
-extern uint32_t Freq ;
-extern uint8_t mpuint_flags;
-extern bool button_exitflag;
-extern bool moinint_exitflag;
-extern uint32_t se_mode;
-extern uint32_t fr_mode;
-extern uint8_t LP;
-extern uint8_t Alarm_times;
-extern uint8_t Alarm_times1;
-extern uint32_t Positioning_time;
-extern uint8_t md_flags;
-extern float pdop_value;
-extern float pdop_gps;
+extern uint8_t            mode;
+extern uint8_t            inmode;
+extern uint16_t           power_time;
+extern bool               rx2_flags;
+extern uint32_t           LoRaMacState;
+extern uint8_t            dwelltime;
+extern bool               debug_flags;
+extern uint16_t           dr_power;
+extern uint32_t           set_sgm;
+extern uint32_t           LON;
+extern uint32_t           MD;
+extern uint32_t           MLON;
+extern uint32_t           Threshold;
+extern uint32_t           Freq;
+extern uint8_t            mpuint_flags;
+extern bool               button_exitflag;
+extern bool               moinint_exitflag;
+extern uint32_t           se_mode;
+extern uint32_t           fr_mode;
+extern uint8_t            LP;
+extern uint8_t            Alarm_times;
+extern uint8_t            Alarm_times1;
+extern uint32_t           Positioning_time;
+extern uint8_t            md_flags;
+extern float              pdop_value;
+extern float              pdop_gps;
 extern UART_HandleTypeDef uart1;
-extern bool rx2_flags;
+extern bool               rx2_flags;
 
-uint32_t CHE = 0;
-int ALARM = 0;
-uint32_t FLAG=0;
-uint8_t send_fail=0;
-uint32_t a = 1;
-int basic_flag=0;
 static uint32_t ServerSetTDC;
-uint32_t start_time=0;
-uint32_t AlarmSetTDC;
-uint8_t flag_1=1;
-uint8_t alarm_flags=0;
-uint8_t stop_flag=0;
+uint32_t        CHE              = 0;
+int             ALARM            = 0;
+uint32_t        FLAG             = 0;
+uint8_t         send_fail        = 0;
+uint32_t        a                = 1;
+int             basic_flag       = 0;
+uint32_t        start_time       = 0;
+uint32_t        AlarmSetTDC      = 0;
+uint8_t         flag_1           = 1;
+uint8_t         alarm_flags      = 0;
+uint8_t         stop_flag        = 0;
+uint32_t        SendData         = 0;
+uint16_t        batteryLevel_mV  = 0;
+uint16_t        TIMES            = 10000;
+bool            is_lora_joined   = 0;
+bool            motion_flags     = 0;
 
-uint32_t SendData=0;
-uint16_t batteryLevel_mV;
-uint16_t TIMES = 10000;
-bool is_lora_joined=0;
-bool motion_flags=0;
 extern char DATABUFF[500];
 
 // clang-format on
@@ -138,12 +169,8 @@ void send_data(void);
 void send_exti(void);
 void send_moin(void);
 void gps_Identify();
-/*!
- * User application data structure
- */
-static lora_AppData_t AppData={ AppDataBuff,  0 ,0 };
-/* Private macro -------------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
+
+static lora_AppData_t AppData = {AppDataBuff, 0, 0};
 
 /* call back when LoRa endNode has received a frame*/
 static void LORA_RxData( lora_AppData_t *AppData);
@@ -183,6 +210,7 @@ static void OnReJoinTimerEvent( void );
 static void timing( void );
 
 #endif
+
 extern void printf_joinmessage(void);
 
 bool sleep_status=0;//AT+SLEEP
@@ -229,49 +257,14 @@ static  LoRaParam_t LoRaParamInit= {LORAWAN_ADR_STATE,
                                     LORAWAN_PUBLIC_NETWORK,
                                     JOINREQ_NBTRIALS};
 
-#define Kp 40.0f        // proportional gain governs rate of convergence toaccelerometer/magnetometer
-																		
-#define Ki 0.02f        // integral gain governs rate of convergenceof gyroscope biases
-	
-#define halfT 0.0048f   // half the sample period  
-	
-#define dt 0.0096f		
-/***************************************************/
-
-static float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
-static float exInt = 0, eyInt = 0, ezInt = 0; 
-static short turns=0;
-static float newdata=0.0f,olddata=0.0f;
-static float pitchoffset,rolloffset,yawoffset;
-
-static float k10=0.0f,k11=0.0f,k12=0.0f,k13=0.0f;
-static float k20=0.0f,k21=0.0f,k22=0.0f,k23=0.0f;
-static float k30=0.0f,k31=0.0f,k32=0.0f,k33=0.0f;
-static float k40=0.0f,k41=0.0f,k42=0.0f,k43=0.0f;
-
-
 float invSqrt(float number);
 void AHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz,float *roll,float *pitch,float *yaw);
 void CountTurns(float *newdata,float *olddata,short *turns);
 void CalYaw(float *yaw,short *turns);
 void CalibrateToZero(void);
- 
- 
- 	float pitch,roll,yaw;
-	float pitch_sum,roll_sum,yaw_sum;
-	short igx,igy,igz;
-	short iax,iay,iaz;
-	short imx,imy,imz;
-	float gx,gy,gz;
-	float ax,ay,az;
-	float mx,my,mz;
-	
-	float gx_old,gy_old,gz_old;
-	float ax_old,ay_old,az_old;
-	float mx_old,my_old,mz_old;
-	
-	uint8_t flag_2=1;																			
-																		
+
+uint8_t flag_2 = 1;
+
 /* Private functions ---------------------------------------------------------*/
 
 /**
