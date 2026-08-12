@@ -1036,36 +1036,38 @@ void store_data(uint8_t size,uint8_t *data1,uint32_t data2)
 
 void read_data(uint8_t size,uint8_t *data1,uint32_t data3,uint32_t data4,uint32_t data5,uint32_t data6)
 {
-	switch(size)
-		{
-		case 8:
-			     data1[0]=(data3>>24)&0xFF;
-		       data1[1]=(data3>>16)&0xFF;
-		       data1[2]=(data3>>8)&0xFF;
-		       data1[3]=(data3)&0xFF;
-		       data1[4]=(data4>>24)&0xFF;
-		       data1[5]=(data4>>16)&0xFF;
-		       data1[6]=(data4>>8)&0xFF;
-		       data1[7]=(data4)&0xFF;break;
-		case 16:
-			     data1[0]=(data3>>24)&0xFF;
-		       data1[1]=(data3>>16)&0xFF;
-		       data1[2]=(data3>>8)&0xFF;
-		       data1[3]=(data3)&0xFF;
-		       data1[4]=(data4>>24)&0xFF;
-		       data1[5]=(data4>>16)&0xFF;
-		       data1[6]=(data4>>8)&0xFF;
-		       data1[7]=(data4)&0xFF;
-		       data1[8]=(data5>>24)&0xFF;
-		       data1[9]=(data5>>16)&0xFF;
-		       data1[10]=(data5>>8)&0xFF;
-		       data1[11]=(data5)&0xFF;
-		       data1[12]=(data6>>24)&0xFF;
-		       data1[13]=(data6>>16)&0xFF;
-		       data1[14]=(data6>>8)&0xFF;
-		       data1[15]=(data6)&0xFF;break;
-		default:break;					
-		}
+	switch (size) {
+	case 8:
+		data1[0] = (data3 >> 24) & 0xFF;
+		data1[1] = (data3 >> 16) & 0xFF;
+		data1[2] = (data3 >> 8) & 0xFF;
+		data1[3] = (data3) & 0xFF;
+		data1[4] = (data4 >> 24) & 0xFF;
+		data1[5] = (data4 >> 16) & 0xFF;
+		data1[6] = (data4 >> 8) & 0xFF;
+		data1[7] = (data4) & 0xFF;
+		break;
+	case 16:
+		data1[0] = (data3 >> 24) & 0xFF;
+		data1[1] = (data3 >> 16) & 0xFF;
+		data1[2] = (data3 >> 8) & 0xFF;
+		data1[3] = (data3) & 0xFF;
+		data1[4] = (data4 >> 24) & 0xFF;
+		data1[5] = (data4 >> 16) & 0xFF;
+		data1[6] = (data4 >> 8) & 0xFF;
+		data1[7] = (data4) & 0xFF;
+		data1[8] = (data5 >> 24) & 0xFF;
+		data1[9] = (data5 >> 16) & 0xFF;
+		data1[10] = (data5 >> 8) & 0xFF;
+		data1[11] = (data5) & 0xFF;
+		data1[12] = (data6 >> 24) & 0xFF;
+		data1[13] = (data6 >> 16) & 0xFF;
+		data1[14] = (data6 >> 8) & 0xFF;
+		data1[15] = (data6) & 0xFF;
+		break;
+	default:
+		break;
+	}
 }
 void Store_key(void)
 {
