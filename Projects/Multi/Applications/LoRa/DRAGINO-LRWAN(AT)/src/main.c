@@ -21,6 +21,28 @@
 // TODO: printf not available via UART, enable or not?
 // So far it's routed through TraceSend().
 
+// TODO: Some ideas around device config.
+// * Skip flash, use EEPROM only. Better that way.
+// * Use versioning, because EEPROM can persist between different firmware
+// variants/versions
+// * Add basic CRC32 hashing at the end of device config to ensure data
+// integrity
+// * Use packed struct and create union to simplify the read and write process.
+
+// TODO: What subsystems we're handling anyway?
+// Hardware:
+// * GPS (UART)
+// * IMU (I2C)
+// * LoRa (SPI)
+// * EEPROM (built-in)
+// * LEDs (GPIO)
+// * Button (GPIO)
+// * RTC (built-in)
+// Software:
+// * NMEA parser
+// * AT command parser
+// *
+
 extern uint8_t ic_version;
 
 #define FIRMWARE_VERSION 0x04

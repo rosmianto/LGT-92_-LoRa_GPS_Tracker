@@ -3,7 +3,6 @@
 #include "vcom.h"
 #include <stdarg.h>
 
-
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define BUFSIZE 256
