@@ -36,6 +36,8 @@
 #ifndef __LORAMACTEST_H__
 #define __LORAMACTEST_H__
 
+#include <stdbool.h>
+
 /*!
  * \brief   Enabled or disables the reception windows
  *

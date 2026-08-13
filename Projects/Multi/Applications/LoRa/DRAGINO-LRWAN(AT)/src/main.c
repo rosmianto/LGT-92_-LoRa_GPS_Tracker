@@ -2,7 +2,6 @@
 #include "IIC.h"
 #include "at.h"
 #include "bsp.h"
-#include "bsp_usart2.h"
 #include "command.h"
 #include "delay.h"
 #include "flash_eraseprogram.h"
@@ -14,9 +13,6 @@
 #include "low_power_manager.h"
 #include "mpu9250.h"
 #include "timeServer.h"
-#include "vcom.h"
-#include "version.h"
-
 #include <Downlink_Commands.h>
 
 // TODO: printf not available via UART, enable or not?
