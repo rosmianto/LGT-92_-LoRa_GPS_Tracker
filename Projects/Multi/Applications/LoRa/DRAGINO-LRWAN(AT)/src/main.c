@@ -1,7 +1,7 @@
 
-#include "IIC.h"
-#include "at.h"
-#include "bsp.h"
+#include "IIC.h" // What's this? They want to bitbang I2C via GPIO?
+#include "at.h" // AT command processor (via UART). Heavy dependency to other subsystems.
+#include "bsp.h" //
 #include "command.h"
 #include "delay.h"
 #include "flash_eraseprogram.h"
@@ -39,6 +39,10 @@
 // * NMEA parser
 // * AT command parser
 // *
+
+// Teaching idea:
+// * There's defensive programming,
+// and there's redundant, unnecessary, paranoia-induced programming.
 
 extern uint8_t ic_version;
 
@@ -185,7 +189,7 @@ bool            motion_flags     = 0;
 extern char DATABUFF[500];
 
 // clang-format on
-
+void powerLED(void);
 void send_exti(void);
 void lora_send_fsm(void);
 void send_data(void);
@@ -1987,3 +1991,16 @@ void OnPressButtonTimeoutEvent(void) {
 	press_button_times = 0;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+void powerLED(void) {
+	BSP_powerLED_Init();
+	LED0_1;
+	DelayMs(200);
+	LED0_0;
+	LED1_1;
+	DelayMs(200);
+	LED1_0;
+	LED3_1;
+	DelayMs(200);
+	LED3_0;
+}
