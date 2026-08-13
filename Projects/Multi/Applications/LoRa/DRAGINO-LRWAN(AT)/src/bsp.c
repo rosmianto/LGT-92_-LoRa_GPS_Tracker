@@ -157,9 +157,7 @@ void  BSP_powerLED_DeInit( void  )
 	
 }
 
-void powerLED(void)
-{
-
+void powerLED(void) {
 	BSP_powerLED_Init();
 	LED0_1 ;
 	DelayMs(200);
@@ -169,8 +167,7 @@ void powerLED(void)
   LED1_0;	
 	LED3_1 ;
 	DelayMs(200);
-  LED3_0;		
-
+  LED3_0;
 }
 void  BSP_battery_Init( void )
 {

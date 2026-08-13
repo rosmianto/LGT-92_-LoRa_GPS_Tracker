@@ -19,7 +19,7 @@
 #define DOWNLINK_CMD_NBTRANS_MAX                 0x33
 #define DOWNLINK_CMD_ACK_MODE                    0x34
 #define DOWNLINK_CMD_MOVEMENT_DETECTION_MODE     0xA5
-#define DOWNLINK_CMD_UNKNOWN                     0xA8
+#define DOWNLINK_CMD_SET_RGB_STATE               0xA8
 #define DOWNLINK_CMD_KEEPALIVE_TIME              0xA9
 #define DOWNLINK_CMD_GPS_FIXTIME                 0xAA
 #define DOWNLINK_CMD_NAVIGATION_MODE             0xAB

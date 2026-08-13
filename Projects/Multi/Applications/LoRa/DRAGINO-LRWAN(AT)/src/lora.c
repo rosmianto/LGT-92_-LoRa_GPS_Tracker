@@ -1493,8 +1493,8 @@ void MPU9250_INT(void)
 		mpuint_flags=1;		 
 		if(MLON == 1)
 		 {			
-			BSP_sensor_Init();		 
-			LED3_1; 
+			BSP_sensor_Init();
+			LED3_1;
 			DelayMs(500);
 			LED3_0;
 			DelayMs(500);

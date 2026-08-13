@@ -1,3 +1,4 @@
+
 #include "IIC.h"
 #include "at.h"
 #include "bsp.h"
@@ -21,7 +22,7 @@
 // TODO: printf not available via UART, enable or not?
 // So far it's routed through TraceSend().
 
-// TODO: Some ideas around device config.
+// TODO: Some ideas around device config:
 // * Skip flash, use EEPROM only. Better that way.
 // * Use versioning, because EEPROM can persist between different firmware
 // variants/versions
@@ -50,6 +51,7 @@ extern uint8_t ic_version;
 #include <LoRaWAN_Configurations.h>
 
 static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
+static lora_AppData_t AppData = {AppDataBuff, 0, 0};
 
 // clang-format off
 bool     rxpr_flags                          	= 0;
@@ -128,8 +130,12 @@ static float k30=0.0f,k31=0.0f,k32=0.0f,k33=0.0f;
 static float k40=0.0f,k41=0.0f,k42=0.0f,k43=0.0f;
 
 // LED-related variables (?)
-uint32_t led_red =0,led_blue=0,led_greed=0;
-bool red =0,blue=0,greed=0;
+uint32_t led_red_delay    = 0;
+uint32_t led_blue_delay   = 0;
+uint32_t led_green_delay  = 0;
+bool red_on         = 0;
+bool blue_on        = 0;
+bool green_on       = 0;
 
 // various extern variables
 extern __IO uint16_t AD_code2;
@@ -190,8 +196,6 @@ void send_data(void);
 void send_exti(void);
 void send_moin(void);
 void gps_Identify();
-
-static lora_AppData_t AppData = {AppDataBuff, 0, 0};
 
 /* call back when LoRa endNode has received a frame*/
 static void LORA_RxData(lora_AppData_t *AppData);
@@ -845,48 +849,48 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
 		break;
 	}
-	case DOWNLINK_CMD_UNKNOWN: {
+	case DOWNLINK_CMD_SET_RGB_STATE: {
 		if (AppData->BuffSize == 10) {
 			if (AppData->Buff[1] == 0x01) {
 				BSP_powerLED_Init();
 				LED3_1;
-				red = 1;
-				led_red = AppData->Buff[2] << 8 | AppData->Buff[3];
-				if (led_red != 0) {
-					DelayMs(led_red);
+				red_on = 1;
+				led_red_delay = AppData->Buff[2] << 8 | AppData->Buff[3];
+				if (led_red_delay != 0) {
+					DelayMs(led_red_delay);
 					LED3_0;
-					red = 0;
+					red_on = 0;
 				}
 			} else {
-				red = 0;
+				red_on = 0;
 				LED3_0;
 			}
 			if (AppData->Buff[4] == 0x01) {
 				BSP_powerLED_Init();
 				LED1_1;
-				blue = 1;
-				led_blue = AppData->Buff[5] << 8 | AppData->Buff[6];
-				if (led_blue != 0) {
-					DelayMs(led_blue);
+				blue_on = 1;
+				led_blue_delay = AppData->Buff[5] << 8 | AppData->Buff[6];
+				if (led_blue_delay != 0) {
+					DelayMs(led_blue_delay);
 					LED1_0;
-					blue = 0;
+					blue_on = 0;
 				}
 			} else {
-				blue = 0;
+				blue_on = 0;
 				LED1_0;
 			}
 			if (AppData->Buff[7] == 0x01) {
 				BSP_powerLED_Init();
 				LED0_1;
-				greed = 1;
-				led_greed = AppData->Buff[8] << 8 | AppData->Buff[9];
-				if (led_blue != 0) {
-					DelayMs(led_greed);
+				green_on = 1;
+				led_green_delay = AppData->Buff[8] << 8 | AppData->Buff[9];
+				if (led_blue_delay != 0) {
+					DelayMs(led_green_delay);
 					LED0_0;
-					greed = 0;
+					green_on = 0;
 				}
 			} else {
-				blue = 0;
+				blue_on = 0;
 				LED0_0;
 			}
 		}
@@ -1493,13 +1497,14 @@ void send_data(void) {
 #endif
 	ENABLE_IRQ();
 	BSP_sensor_Init();
-	if (red == 1) {
+
+	if (red_on == 1) {
 		LED3_1;
 	}
-	if (blue == 1) {
+	if (blue_on == 1) {
 		LED1_1;
 	}
-	if (greed == 1) {
+	if (green_on == 1) {
 		LED0_1;
 	}
 	if (Positioning_time == 0) {
