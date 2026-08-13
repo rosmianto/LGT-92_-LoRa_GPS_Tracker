@@ -1069,6 +1069,7 @@ void read_data(uint8_t size,uint8_t *data1,uint32_t data3,uint32_t data4,uint32_
 		break;
 	}
 }
+
 void Store_key(void)
 {
 	store_data(8,lora_config.DevEui,0);
@@ -1082,6 +1083,155 @@ void Store_key(void)
 	FLASH_program(FLASH_USER_START_ADDR_KEY,s_key,key_count);//store key
 	
 	key_count=0;
+}
+
+void Store_Config_new(void) {
+
+	/*
+	   What to store:
+	   mib.Param.AdrEnable
+
+	*/
+	uint32_t combination_data1 = 0;
+	uint32_t combination_data2 = 0;
+
+	MibRequestConfirm_t mib;
+	LoRaMacStatus_t status;
+
+	mib.Type = MIB_ADR;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	combination_data1 |= mib.Param.AdrEnable << 24;
+
+	mib.Type = MIB_CHANNELS_TX_POWER;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	combination_data1 |= mib.Param.ChannelsTxPower << 16;
+
+	combination_data1 |= lora_config.TxDatarate << 8;
+
+	combination_data1 |= lora_config.duty_cycle;
+	s_config[config_count++] = combination_data1;
+
+	mib.Type = MIB_PUBLIC_NETWORK;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	combination_data2 |= mib.Param.EnablePublicNetwork << 24;
+
+	combination_data2 |= lora_config.otaa << 16;
+
+	mib.Type = MIB_DEVICE_CLASS;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	combination_data2 |= mib.Param.Class << 8; // 0:CLASS A
+
+	combination_data2 |= lora_config.ReqAck;
+	s_config[config_count++] = combination_data2;
+
+	mib.Type = MIB_RX2_CHANNEL;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	s_config[config_count++] = mib.Param.Rx2Channel.Frequency;
+
+	mib.Type = MIB_RX2_CHANNEL;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	s_config[config_count++] = mib.Param.Rx2Channel.Datarate;
+
+	mib.Type = MIB_RECEIVE_DELAY_1;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	s_config[config_count++] = mib.Param.ReceiveDelay1;
+
+	mib.Type = MIB_RECEIVE_DELAY_2;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	s_config[config_count++] = mib.Param.ReceiveDelay2;
+
+	mib.Type = MIB_JOIN_ACCEPT_DELAY_1;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	s_config[config_count++] = mib.Param.JoinAcceptDelay1;
+
+	mib.Type = MIB_JOIN_ACCEPT_DELAY_2;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	s_config[config_count++] = mib.Param.JoinAcceptDelay2;
+
+	mib.Type = MIB_NET_ID;
+	status = LoRaMacMibGetRequestConfirm(&mib);
+	if (status != LORAMAC_STATUS_OK) {
+		PRINTF("LORAMAC STATUS ERROR\n\r");
+	}
+	s_config[config_count++] = mib.Param.NetID;
+
+	s_config[config_count++] = Server_TX_DUTYCYCLE;
+
+	s_config[config_count++] = (dwelltime << 8) | lora_config.application_port;
+
+	s_config[config_count++] = customize_config.freq1;
+
+	s_config[config_count++] = (REJOIN_TX_DUTYCYCLE << 16) |
+							   (response_level << 8) |
+							   customize_config.set8channel;
+
+	s_config[config_count++] = (symbtime1_value << 24) | (flag1 << 16) |
+							   (symbtime2_value << 8) | flag2;
+
+	s_config[config_count++] = (mode << 24) | (inmode << 16) | power_time;
+
+	s_config[config_count++] = set_sgm;
+
+	s_config[config_count++] = Positioning_time;
+
+	s_config[config_count++] = LON;
+
+	s_config[config_count++] = MD;
+
+	s_config[config_count++] = MLON;
+
+	s_config[config_count++] = Threshold;
+
+	s_config[config_count++] = Freq;
+
+	s_config[config_count++] = Alarm_TX_DUTYCYCLE;
+
+	s_config[config_count++] = Keep_TX_DUTYCYCLE;
+
+	s_config[config_count++] = (symbtime1_value << 24) | (flag1 << 16) |
+							   (symbtime2_value << 8) | flag2;
+
+	s_config[config_count++] = pdop_value * 100;
+
+	s_config[config_count++] = (gps_navigation_mode << 8) | (gps_search_mode);
+
+	s_config[config_count++] = LP;
+
+	FLASH_erase(FLASH_USER_START_ADDR_CONFIG); // Page800
+	FLASH_program(FLASH_USER_START_ADDR_CONFIG, s_config,
+				  config_count); // store config
+
+	config_count = 0;
 }
 
 void Store_Config(void)
@@ -1163,52 +1313,38 @@ void Store_Config(void)
 	
 	mib.Type = MIB_NET_ID;
   status = LoRaMacMibGetRequestConfirm(&mib);
-	if(status!=LORAMAC_STATUS_OK)
-	{PRINTF("LORAMAC STATUS ERROR\n\r");}
-	s_config[config_count++]=mib.Param.NetID;
-	
-	s_config[config_count++]=Server_TX_DUTYCYCLE;
-	
-	s_config[config_count++]=(dwelltime<<8)|lora_config.application_port;
-	
-	s_config[config_count++]=customize_config.freq1;
-	
-	s_config[config_count++]=(REJOIN_TX_DUTYCYCLE<<16)|(response_level<<8)|customize_config.set8channel;
-	
-	s_config[config_count++]=(symbtime1_value<<24)|(flag1<<16)|(symbtime2_value<<8)| flag2;
+  if (status != LORAMAC_STATUS_OK) {
+	  PRINTF("LORAMAC STATUS ERROR\n\r");
+  }
 
-	s_config[config_count++]=(mode<<24)|(inmode<<16)|power_time;
+  // clang-format off
+	s_config[config_count++]    = mib.Param.NetID;
+	s_config[config_count++]    = Server_TX_DUTYCYCLE;
+	s_config[config_count++]    = (dwelltime<<8)|lora_config.application_port;
+	s_config[config_count++]    = customize_config.freq1;
+	s_config[config_count++]    = (REJOIN_TX_DUTYCYCLE<<16)|(response_level<<8)|customize_config.set8channel;
+	s_config[config_count++]    = (symbtime1_value<<24)|(flag1<<16)|(symbtime2_value<<8)| flag2;
+	s_config[config_count++]    = (mode<<24)|(inmode<<16)|power_time;
+  s_config[config_count++]    = set_sgm;
+	s_config[config_count++]    = Positioning_time;
+	s_config[config_count++]    = LON;
+	s_config[config_count++]    = MD;
+	s_config[config_count++]    = MLON;
+	s_config[config_count++]    = Threshold;
+	s_config[config_count++]    = Freq;	
+	s_config[config_count++]    = Alarm_TX_DUTYCYCLE;
+	s_config[config_count++]    = Keep_TX_DUTYCYCLE;
+	s_config[config_count++]    = (symbtime1_value<<24)|(flag1<<16)|(symbtime2_value<<8)| flag2;	
+	s_config[config_count++]    = pdop_value*100;
+	s_config[config_count++]    = (gps_navigation_mode << 8) | (gps_search_mode);
+	s_config[config_count++]    = LP;
+  // clang-format on
 
-		s_config[config_count++]=set_sgm;
-	
-	s_config[config_count++]=Positioning_time;
-	
-	s_config[config_count++]=LON;
-	
-	s_config[config_count++]=MD;
-	
-	s_config[config_count++]=MLON;
-	
-	s_config[config_count++]=Threshold;
-	
-	s_config[config_count++]=Freq;	
+  FLASH_erase(FLASH_USER_START_ADDR_CONFIG); // Page800
+  FLASH_program(FLASH_USER_START_ADDR_CONFIG, s_config,
+				config_count); // store config
 
-	s_config[config_count++]=Alarm_TX_DUTYCYCLE;
-
-	s_config[config_count++]=Keep_TX_DUTYCYCLE;
-	
-	s_config[config_count++]=(symbtime1_value<<24)|(flag1<<16)|(symbtime2_value<<8)| flag2;	
-
-	s_config[config_count++]=pdop_value*100;
-
-	s_config[config_count++] = (gps_navigation_mode << 8) | (gps_search_mode);
-
-	s_config[config_count++]=LP;
-	
-	FLASH_erase(FLASH_USER_START_ADDR_CONFIG);//Page800 
-	FLASH_program(FLASH_USER_START_ADDR_CONFIG,s_config,config_count);//store config
-	
-	config_count=0;
+  config_count = 0;
 }
 
 void Read_Config(void)
@@ -1306,19 +1442,16 @@ void Read_Config(void)
 	LoRaMacMibSetRequestConfirm( &mib );		
   }
 
-  if((rx2_flags==0)||(lora_config.otaa==LORA_DISABLE))
-  {			
-	mib.Type = MIB_RECEIVE_DELAY_2;
-	mib.Param.ReceiveDelay2=r_config[5];
-	LoRaMacMibSetRequestConfirm( &mib );
+  if ((rx2_flags == 0) || (lora_config.otaa == LORA_DISABLE)) {
+	  mib.Type = MIB_RECEIVE_DELAY_2;
+	  mib.Param.ReceiveDelay2 = r_config[5];
+	  LoRaMacMibSetRequestConfirm(&mib);
+  } else if (rx2_flags == 1) {
+	  mib.Type = MIB_RECEIVE_DELAY_2;
+	  mib.Param.ReceiveDelay2 = rx2_de;
+	  LoRaMacMibSetRequestConfirm(&mib);
   }
-  else if(rx2_flags==1)
-	{
-	mib.Type = MIB_RECEIVE_DELAY_2;
-	mib.Param.ReceiveDelay2=rx2_de;
-	LoRaMacMibSetRequestConfirm( &mib );		
-  }
-	
+
 	mib.Type = MIB_JOIN_ACCEPT_DELAY_1;
 	mib.Param.JoinAcceptDelay1=r_config[6];
 	LoRaMacMibSetRequestConfirm( &mib );
@@ -1330,69 +1463,38 @@ void Read_Config(void)
 	mib.Type = MIB_NET_ID;
 	mib.Param.NetID=r_config[8];
 	LoRaMacMibSetRequestConfirm( &mib );
-	
-	Server_TX_DUTYCYCLE=r_config[9];
 
-	dwelltime=(r_config[10]>>8)&0xFF;
-	
-	lora_config.application_port=r_config[10]&0xFF;
-	
-	customize_config.freq1=r_config[11];
-
-	REJOIN_TX_DUTYCYCLE=(r_config[12]>>16)&0xFFFF;
-	
-	response_level=(r_config[12]>>8)&0xFF;
-	
-	customize_config.set8channel=r_config[12]&0xFF;
-	
-	symbtime1_value=(r_config[13]>>24)&0xFF;
-	
-	flag1=(r_config[13]>>16)&0xFF;
-	
-	symbtime2_value=(r_config[13]>>8)&0xFF;
-	
-	flag2=r_config[13]&0xFF;
-	
-	mode=(r_config[14]>>24)&0xFF;
-	
-	inmode=(r_config[14]>>16)&0xFF;	
-
-	power_time=(r_config[14])&0xFFFF;	
-	
+	Server_TX_DUTYCYCLE = r_config[9];
+	dwelltime = (r_config[10] >> 8) & 0xFF;
+	lora_config.application_port = r_config[10] & 0xFF;
+	customize_config.freq1 = r_config[11];
+	REJOIN_TX_DUTYCYCLE = (r_config[12] >> 16) & 0xFFFF;
+	response_level = (r_config[12] >> 8) & 0xFF;
+	customize_config.set8channel = r_config[12] & 0xFF;
+	symbtime1_value = (r_config[13] >> 24) & 0xFF;
+	flag1 = (r_config[13] >> 16) & 0xFF;
+	symbtime2_value = (r_config[13] >> 8) & 0xFF;
+	flag2 = r_config[13] & 0xFF;
+	mode = (r_config[14] >> 24) & 0xFF;
+	inmode = (r_config[14] >> 16) & 0xFF;
+	power_time = (r_config[14]) & 0xFFFF;
 	set_sgm = r_config[15];
-	
 	Positioning_time = r_config[16];
-	
 	LON = r_config[17];
-	
 	MD = r_config[18];
-	
-	MLON = r_config[19]; 
-
-  Threshold = r_config[20];
-	
+	MLON = r_config[19];
+	Threshold = r_config[20];
 	Freq = r_config[21];
-
 	Alarm_TX_DUTYCYCLE = r_config[22];
-
 	Keep_TX_DUTYCYCLE = r_config[23];
-	
-	symbtime1_value=(r_config[24]>>24)&0xFF;
-	
-	flag1=(r_config[24]>>16)&0xFF;
-	
-	symbtime2_value=(r_config[24]>>8)&0xFF;
-	
-	flag2=r_config[24]&0xFF;
-
+	symbtime1_value = (r_config[24] >> 24) & 0xFF;
+	flag1 = (r_config[24] >> 16) & 0xFF;
+	symbtime2_value = (r_config[24] >> 8) & 0xFF;
+	flag2 = r_config[24] & 0xFF;
 	pdop_value = (float)r_config[25] / 100;
-
 	gps_navigation_mode = (r_config[25] >> 8) & 0xFF;
-
 	gps_search_mode = r_config[26] & 0xFF;
-
-	LP=r_config[27]&0xFF;	
-	
+	LP = r_config[27] & 0xFF;
 }
 
 void EEPROM_Store_Config(void)
@@ -1501,56 +1603,16 @@ void MPU9250_INT(void)
 		 }	 
 	 } 
 }
-void lora_state_Led(void)
-{
-	State = STATE_LED;
-}
-
-void lora_state_Wake_Join(void)
-{
-	State = STATE_WAKE_JOIN;
-}
-
-void lora_state_LoRa_Alarm(void)
-{
-		State = STATE_LORA_ALARM;
-}
-
-void lora_state_GPS_Alarm(void)
-{
-  State = STATE_GPS_ALARM;
-}
-
-void lora_state_GPS_Send(void)
-{
- State = STATE_GPS_SEND;
-}
-void gps_state_on(void)
-{
-	GPSState = STATE_GPS_ON;
-}
-
-void gps_state_no(void)
-{
-	GPSState = STATE_GPS_NO;
-}
-
-void gps_state_off(void)
-{
-	GPSState = STATE_GPS_OFF;
-}
-void LOG_GPS(void)
-{
-	State = STATE_GPS_LOG;
-}
-
-void LORA_GPS(void)
-{
-	SGM =  STATE_SEND_GPS;
-}
-
-void LORA_GPS_MPU(void)
-{
-	SGM =  STATE_SEND_GPS_MPU;
-}
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+// clang-format off
+void lora_state_Led(void)        { State    = STATE_LED;           }
+void lora_state_Wake_Join(void)  { State    = STATE_WAKE_JOIN;     }
+void lora_state_LoRa_Alarm(void) { State    = STATE_LORA_ALARM;    }
+void lora_state_GPS_Alarm(void)  { State    = STATE_GPS_ALARM;     }
+void lora_state_GPS_Send(void)   { State    = STATE_GPS_SEND;      }
+void gps_state_on(void)          { GPSState = STATE_GPS_ON;        }
+void gps_state_no(void)          { GPSState = STATE_GPS_NO;        }
+void gps_state_off(void)         { GPSState = STATE_GPS_OFF;       }
+void LOG_GPS(void)               { State    = STATE_GPS_LOG;       }
+void LORA_GPS(void)              { SGM      = STATE_SEND_GPS;      }
+void LORA_GPS_MPU(void)          { SGM      = STATE_SEND_GPS_MPU;  }
+// clang-format on
