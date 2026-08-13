@@ -122,8 +122,8 @@ uint16_t hardware_version=167;
 uint8_t joinrx2_dr;
 float pdop_value;
 
-extern uint8_t se_mode;
-extern uint8_t fr_mode;
+extern uint8_t gps_search_mode;
+extern uint8_t gps_navigation_mode;
 extern uint8_t symbtime1_value;
 extern uint8_t flag1;
 
@@ -1201,8 +1201,8 @@ void Store_Config(void)
 
 	s_config[config_count++]=pdop_value*100;
 
-	s_config[config_count++]=(fr_mode<<8)|(se_mode);
-	
+	s_config[config_count++] = (gps_navigation_mode << 8) | (gps_search_mode);
+
 	s_config[config_count++]=LP;
 	
 	FLASH_erase(FLASH_USER_START_ADDR_CONFIG);//Page800 
@@ -1385,12 +1385,12 @@ void Read_Config(void)
 	
 	flag2=r_config[24]&0xFF;
 
-	pdop_value=(float)r_config[25]/100;	
+	pdop_value = (float)r_config[25] / 100;
 
-	fr_mode=(r_config[25]>>8)&0xFF;
-	
-	se_mode=r_config[26]&0xFF;
-	
+	gps_navigation_mode = (r_config[25] >> 8) & 0xFF;
+
+	gps_search_mode = r_config[26] & 0xFF;
+
 	LP=r_config[27]&0xFF;	
 	
 }

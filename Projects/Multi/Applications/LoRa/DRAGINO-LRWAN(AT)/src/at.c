@@ -85,8 +85,8 @@ extern uint16_t hardware_version;
 extern float pdop_value;
 
 uint8_t LP = 0;
-uint8_t se_mode = 0;
-uint8_t fr_mode = 0;
+uint8_t gps_search_mode = 0;
+uint8_t gps_navigation_mode = 0;
 uint32_t Positioning_time = 150;
 uint32_t set_sgm = 0;
 uint32_t s_timer = 1;
@@ -1590,13 +1590,13 @@ ATEerror_t at_NMEA353_set(const char *param) {
 		return AT_PARAM_ERROR;
 	}
 
-	se_mode = se_mode1;
+	gps_search_mode = se_mode1;
 
 	return AT_OK;
 }
 
 ATEerror_t at_NMEA353_get(const char *param) {
-	PPRINTF("%d\r\n", se_mode);
+	PPRINTF("%d\r\n", gps_search_mode);
 
 	return AT_OK;
 }
@@ -1622,13 +1622,13 @@ ATEerror_t at_NMEA886_set(const char *param) {
 	//    return AT_PARAM_ERROR;
 	//	}
 
-	fr_mode = fr_mode1;
+	gps_navigation_mode = fr_mode1;
 
 	return AT_OK;
 }
 
 ATEerror_t at_NMEA886_get(const char *param) {
-	PPRINTF("%d\r\n", fr_mode);
+	PPRINTF("%d\r\n", gps_navigation_mode);
 
 	return AT_OK;
 }

@@ -2,27 +2,22 @@
 #include "at.h"
 #include "delay.h"
 #include "vcom.h"
-#define SEMICOLON   ','    
-#define ASTERISK    '*'    
-  
-//sscanf()  ������1K)
-//strncpy() ������300
-// atof()   ������4300 
-// atoi()   ������600  
+#define SEMICOLON ','
+#define ASTERISK '*'
 
-  GPSINFO  gps;  
-  char lasttime[20]; 
-  _Bool isrunning; 
-  uint32_t   isFirmwareUpdate = 0; 
-	int count =0;
-	uint8_t gpspower_flag=0;
-	float pdop_gps;
-	char *txdata353;
-  char *txdata886;
+GPSINFO gps;
+char lasttime[20];
+_Bool isrunning;
+uint32_t isFirmwareUpdate = 0;
+int count = 0;
+uint8_t gpspower_flag = 0;
+float pdop_gps;
+char *txdata353;
+char *txdata886;
 extern UART_HandleTypeDef uart1;
 extern uint8_t gps_setflags;
-extern uint8_t se_mode;
-extern uint8_t fr_mode;
+extern uint8_t gps_search_mode;
+extern uint8_t gps_navigation_mode;
 extern uint8_t ic_version;
 extern uint32_t loggps;
 
@@ -1100,18 +1095,16 @@ void POWER_ON()
 {
    GPS_init();
 	 GPS_POWER_ON();
-	 if((ic_version<=1)&&((se_mode!=0)||(fr_mode!=0)))
-   {		
-		if(gps_setflags==0)
-		{
-			send_setting(); 
-			gpspower_flag++;
-			if(gpspower_flag==30)
-			{
-				gps_setflags=1;
-				gpspower_flag=0;
-			}
-		}
+	 if ((ic_version <= 1) &&
+		 ((gps_search_mode != 0) || (gps_navigation_mode != 0))) {
+		 if (gps_setflags == 0) {
+			 send_setting();
+			 gpspower_flag++;
+			 if (gpspower_flag == 30) {
+				 gps_setflags = 1;
+				 gpspower_flag = 0;
+			 }
+		 }
 	 }
 }
 void POWER_OFF()
@@ -1124,65 +1117,47 @@ void send_setting(void)
 	 uint8_t txdata1[25];
 	 uint8_t txdata2[17];
 
-	 if((ic_version==1)&&(se_mode!=0))
-	 { 
-	 PMTK353();
-	 copytxdata(txdata1,txdata353);
-	 HAL_UART_Transmit(&uart1, txdata1, 25, 0xFFFF);  //Set search mode
-	 DelayMs(50); 
+	 if ((ic_version == 1) && (gps_search_mode != 0)) {
+		 PMTK353();
+		 copytxdata(txdata1, txdata353);
+		 HAL_UART_Transmit(&uart1, txdata1, 25, 0xFFFF); // Set search mode
+		 DelayMs(50);
 	 }
-	 
-	 if(fr_mode!=0)
-	 {
-	 PMTK886();	
-	 copytxdata(txdata2,txdata886);		 
-	 HAL_UART_Transmit(&uart1, txdata2, 17, 0xFFFF);  //Set fr mode
-	 DelayMs(50);
-	 }		 
+
+	 if (gps_navigation_mode != 0) {
+		 PMTK886();
+		 copytxdata(txdata2, txdata886);
+		 HAL_UART_Transmit(&uart1, txdata2, 17, 0xFFFF); // Set fr mode
+		 DelayMs(50);
+	 }
 }
 
 void PMTK353(void)
 {
-  if(se_mode==1)
-	{
+	if (gps_search_mode == 1) {
 		txdata353="$PMTK353,1,1,0,0,0*2B\r\n";
+	} else if (gps_search_mode == 2) {
+		txdata353 = "$PMTK353,1,0,0,0,1*2B\r\n";
+	} else if (gps_search_mode == 3) {
+		txdata353 = "$PMTK353,1,0,1,0,0*2B\r\n";
+	} else if (gps_search_mode == 4) {
+		txdata353 = "$PMTK353,1,1,1,0,0*2A\r\n";
 	}
-  else if(se_mode==2)	
-	{
-		txdata353="$PMTK353,1,0,0,0,1*2B\r\n";		
-	}
-	else if(se_mode==3)
-	{
-		txdata353="$PMTK353,1,0,1,0,0*2B\r\n";				
-	}
-	else if(se_mode==4)
-	{
-		txdata353="$PMTK353,1,1,1,0,0*2A\r\n";	
-	}	
 }
 
 void PMTK886(void)
 {
-  if(fr_mode==1)
-	{
+	if (gps_navigation_mode == 1) {
 		txdata886="$PMTK886,0*28\r\n";
-	}
-  else if(fr_mode==2)	
-	{
+	} else if (gps_navigation_mode == 2) {
 		txdata886="$PMTK886,1*29\r\n";
-	}
-	else if(fr_mode==3)
-	{
-		txdata886="$PMTK886,2*2A\r\n";		
-	}
-	else if(fr_mode==4)
-	{
+	} else if (gps_navigation_mode == 3) {
+		txdata886 = "$PMTK886,2*2A\r\n";
+	} else if (gps_navigation_mode == 4) {
 		txdata886="$PMTK886,3*2B\r\n";
+	} else if (gps_navigation_mode == 5) {
+		txdata886 = "$PMTK886,4*2C\r\n";
 	}
-	else if(fr_mode==5)
-	{
-		txdata886="$PMTK886,4*2C\r\n";		
-	}	
 }
 
 void copytxdata(uint8_t data1[],char *data2)

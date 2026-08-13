@@ -157,8 +157,8 @@ extern uint32_t           Freq;
 extern uint8_t            mpuint_flags;
 extern bool               button_exitflag;
 extern bool               moinint_exitflag;
-extern uint32_t           se_mode;
-extern uint32_t           fr_mode;
+extern uint32_t           gps_search_mode;
+extern uint32_t           gps_navigation_mode;
 extern uint8_t            LP;
 extern uint8_t            Alarm_times;
 extern uint8_t            Alarm_times1;
@@ -546,8 +546,6 @@ static void Send(void) {
 
 	MPU_Write_Byte(MPU9250_ADDR, 0x6B, 0X00); // ����
 	MPU_Init();
-	//    MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT2_REG,0X00);
-	//    //���ٶ��������Ƕ�����
 	yaw = 0;
 	for (int H = 0; H < 10; H++) {
 		//			MPU_Get_Gyro(&igx,&igy,&igz,&gx,&gy,&gz);
@@ -812,14 +810,14 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 	}
 	case DOWNLINK_CMD_NAVIGATION_MODE: {
 		if (AppData->BuffSize == 2) {
-			fr_mode = AppData->Buff[1];
+			gps_navigation_mode = AppData->Buff[1];
 		}
 		Store_Config();
 		break;
 	}
 	case DOWNLINK_CMD_GPS_SEARCH_MODE: {
 		if (AppData->BuffSize == 2) {
-			se_mode = AppData->Buff[1];
+			gps_search_mode = AppData->Buff[1];
 		}
 		Store_Config();
 
@@ -1324,12 +1322,8 @@ void lora_send(void) {
 			GPS_INPUT();
 			Start_times++;
 			LP = 0;
-			//				LED3_0;
-			//				LED1_0;
 			LED0_0;
-		}
-
-		else if ((LP == 1) || (LP == 2)) {
+		} else if ((LP == 1) || (LP == 2)) {
 			gps_state_no();
 			if (motion_flags == 1) {
 				APP_TX_DUTYCYCLE = Keep_TX_DUTYCYCLE;
