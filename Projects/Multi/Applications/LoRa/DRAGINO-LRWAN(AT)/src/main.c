@@ -12,7 +12,7 @@
 #include "lora.h"
 #include "low_power_manager.h"
 #include "mpu9250.h"
-#include "subsystems/imu_fusion.h"
+#include "subsystems/IMU.h"
 #include "timeServer.h"
 #include <Downlink_Commands.h>
 
@@ -47,7 +47,6 @@
 // Teaching idea:
 // * There's defensive programming,
 // and there's redundant, unnecessary, paranoia-induced programming.
-
 extern uint8_t ic_version;
 
 #define FIRMWARE_VERSION 0x04
@@ -185,7 +184,6 @@ extern char DATABUFF[500];
 
 // clang-format on
 void led_power_anim(void);
-void send_exti(void);
 void lora_send_fsm(void);
 void send_data(void);
 void send_exti(void);
@@ -301,7 +299,7 @@ int main(void) {
 	/* Configure the system clock*/
 	SystemClock_Config();
 
-	// TODO: What's this again?
+	// Setup interrupt handler for button and MPU9250 INT
 	EXTI4_15_IRQHandler_Config();
 
 	/* Configure the debug mode*/
@@ -626,6 +624,12 @@ static void Send(void) {
 	PPRINTF("Pitch=%0.2f\r\n", ((int)(Pitch1 * 100)) / 100.0);
 
 #endif
+
+	// TODO: Will be calculated properly later.
+	// This time we will assume it's done and use mock values.
+	// CalculateAHRS(roll, pitch, yaw);
+	Roll1 = 12.34;
+	Pitch1 = 12.34;
 
 	printf_uplink();
 	FLAG = (int)(MD << 6 | LON << 5 | FIRMWARE_VERSION) & 0xFF;
@@ -1176,8 +1180,8 @@ static void LoraStartRejoin(TxEventType_t EventType) {
 static void LORA_ConfirmClass(DeviceClass_t Class) {
 	PRINTF("switch to class %c done\n\r", "ABC"[Class]);
 
-	/*Optionnal*/
-	/*informs the server that switch has occurred ASAP*/
+	/* Optionnal */
+	/* informs the server that switch has occurred ASAP*/
 	AppData.BuffSize = 0;
 	AppData.Port = LORAWAN_APP_PORT;
 
@@ -1531,6 +1535,11 @@ void send_ALARM_data(void) {
 }
 
 void user_key_event(void) {
+	// TODO: What's this mess?
+	// Handling different button presse patterns
+	// to perform different tasks.
+	// main.c shouldn't care about Button handling.
+	// What does it care is what event the button triggered.
 	if (user_key_exti_flag == 1) {
 		user_key_exti_flag = 0;
 

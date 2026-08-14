@@ -1347,6 +1347,9 @@ void Store_Config(void)
   config_count = 0;
 }
 
+/*
+
+*/
 void Read_Config(void)
 {
 	uint32_t star_address=0,r_config[28],r_key[17];
@@ -1585,24 +1588,22 @@ void lora_state_INT(void)
 //		State = STATE_GPS_SEND;
 	}
 }
-void MPU9250_INT(void)
-{
+void MPU9250_INT(void) {
 	int in2 = 0;
-	in2=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_12);
-  if(in2 == 1)
-	 {		 
+	in2 = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12);
+	if (in2 == 1) {
 		PPRINTF("In Motion\n\r");
-		mpuint_flags=1;		 
-		if(MLON == 1)
-		 {			
+		mpuint_flags = 1;
+		if (MLON == 1) {
 			BSP_sensor_Init();
 			ledRedOn();
 			DelayMs(500);
 			ledRedOff();
 			DelayMs(500);
-		 }	 
-	 } 
+		}
+	}
 }
+
 // clang-format off
 void lora_state_Led(void)        { State    = STATE_LED;           }
 void lora_state_Wake_Join(void)  { State    = STATE_WAKE_JOIN;     }

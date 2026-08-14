@@ -1,5 +1,6 @@
-#include "imu_fusion.h"
+#include "IMU.h"
 
+#if 0
 static float pitchoffset, rolloffset, yawoffset;
 
 /*
@@ -280,3 +281,4 @@ void CalibrateToZero(void) {
 	rolloffset = 0;
 	yawoffset = 0;
 }
+#endif
