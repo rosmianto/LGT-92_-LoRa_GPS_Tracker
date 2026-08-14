@@ -215,15 +215,26 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define LED3_0             HAL_GPIO_WritePin(LED3_PORT ,LED3_PIN,GPIO_PIN_RESET)
 #define LED3_1             HAL_GPIO_WritePin(LED3_PORT ,LED3_PIN,GPIO_PIN_SET)
 
-/* ---------------------------  OIL FLOAT definition -------------------------------*/
-#define battery_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()
-#define battery_CONTROL_PORT          GPIOA	 
-#define battery_CONTROL_PIN           GPIO_PIN_2
-#define battery_LEVEL_PORT            GPIOA
-#define battery_LEVEL_PIN             GPIO_PIN_0 
-#define ADC_Channel_battery           ADC_CHANNEL_0
+ // LED3 -> Red
+ // LED0 -> Green
+ // LED1 -> Blue
+ static inline void ledRedOn() { LED3_1; }
+ static inline void ledRedOff() { LED3_0; }
+ static inline void ledGreenOn() { LED0_1; }
+ static inline void ledGreenOff() { LED0_0; }
+ static inline void ledBlueOn() { LED1_1; }
+ static inline void ledBlueOff() { LED1_0; }
+
+ /* ---------------------------  OIL FLOAT definition
+  * -------------------------------*/
+#define battery_CLK_ENABLE() __HAL_RCC_GPIOA_CLK_ENABLE()
+#define battery_CONTROL_PORT GPIOA
+#define battery_CONTROL_PIN GPIO_PIN_2
+#define battery_LEVEL_PORT GPIOA
+#define battery_LEVEL_PIN GPIO_PIN_0
+#define ADC_Channel_battery ADC_CHANNEL_0
 #ifdef __cplusplus
-}
+ }
 #endif
 
 #endif /* __HW_CONF_L0_H__ */

@@ -12,6 +12,7 @@
 #include "lora.h"
 #include "low_power_manager.h"
 #include "mpu9250.h"
+#include "subsystems/imu_fusion.h"
 #include "timeServer.h"
 #include <Downlink_Commands.h>
 
@@ -122,20 +123,11 @@ static float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
 static float exInt = 0, eyInt = 0, ezInt = 0; 
 static short turns=0;
 static float newdata=0.0f,olddata=0.0f;
-static float pitchoffset,rolloffset,yawoffset;
 
 static float k10=0.0f,k11=0.0f,k12=0.0f,k13=0.0f;
 static float k20=0.0f,k21=0.0f,k22=0.0f,k23=0.0f;
 static float k30=0.0f,k31=0.0f,k32=0.0f,k33=0.0f;
 static float k40=0.0f,k41=0.0f,k42=0.0f,k43=0.0f;
-
-// LED-related variables (?)
-uint32_t led_red_delay    = 0;
-uint32_t led_blue_delay   = 0;
-uint32_t led_green_delay  = 0;
-bool red_on         = 0;
-bool blue_on        = 0;
-bool green_on       = 0;
 
 // various extern variables
 extern __IO uint16_t AD_code2;
@@ -189,7 +181,7 @@ bool            motion_flags     = 0;
 extern char DATABUFF[500];
 
 // clang-format on
-void powerLED(void);
+void led_power_anim(void);
 void send_exti(void);
 void lora_send_fsm(void);
 void send_data(void);
@@ -279,15 +271,18 @@ static LoRaParam_t LoRaParamInit = {LORAWAN_ADR_STATE,
 									LORAWAN_DEFAULT_DATA_RATE,
 									LORAWAN_PUBLIC_NETWORK, JOINREQ_NBTRIALS};
 
-float invSqrt(float number);
-void AHRSupdate(float gx, float gy, float gz, float ax, float ay, float az,
-				float mx, float my, float mz, float *roll, float *pitch,
-				float *yaw);
-void CountTurns(float *newdata, float *olddata, short *turns);
-void CalYaw(float *yaw, short *turns);
-void CalibrateToZero(void);
-
 uint8_t flag_2 = 1;
+
+// Yeah the packed attrib is GCC specific.
+// Not really focusing on full portability for now.
+struct __attribute__((packed)) RgbLedState {
+	uint8_t isRedOn;
+	uint16_t redOnDuration;
+	uint8_t isBlueOn;
+	uint16_t blueOnDuration;
+	uint8_t isGreenOn;
+	uint16_t greenOnDuration;
+};
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -320,7 +315,7 @@ int main(void) {
 	/* USER CODE END 1 */
 	CMD_Init();
 
-	powerLED();
+	led_power_anim();
 
 	IIC_GPIO_MODE_Config();
 
@@ -412,11 +407,11 @@ static void LORA_HasJoined(void) {
 	AT_PRINTF("JOINED\r\n");
 
 	BSP_sensor_Init();
-	LED3_1;
-	LED1_1;
+	ledRedOn();
+	ledBlueOn();
 	DelayMs(1000);
-	LED3_0;
-	LED1_0;
+	ledRedOff();
+	ledBlueOff();
 
 	rejoin_keep_status = 0;
 
@@ -544,13 +539,13 @@ static void Send(void) {
 		LP = 0;
 	}
 
+	// Enable the MPU9250 and try to calculate Pitch and Roll value
+#if 0
 	MPU_Write_Byte(MPU9250_ADDR, 0x6B, 0X00); // ����
 	MPU_Init();
 	yaw = 0;
 	for (int H = 0; H < 10; H++) {
-		//			MPU_Get_Gyro(&igx,&igy,&igz,&gx,&gy,&gz);
 		MPU_Get_Accel(&iax, &iay, &iaz, &ax, &ay, &az);
-		//			MPU_Get_Mag(&imx,&imy,&imz,&mx,&my,&mz);
 		AHRSupdate(0, 0, 0, ax, ay, az, 0, 0, 0, &roll, &pitch, &yaw);
 		olddata = newdata;
 		newdata = yaw;
@@ -561,9 +556,7 @@ static void Send(void) {
 		yaw += yawoffset;
 	}
 	for (int H = 0; H < 30; H++) {
-		//			MPU_Get_Gyro(&igx,&igy,&igz,&gx,&gy,&gz);
 		MPU_Get_Accel(&iax, &iay, &iaz, &ax, &ay, &az);
-		//			MPU_Get_Mag(&imx,&imy,&imz,&mx,&my,&mz);
 		AHRSupdate(0, 0, 0, ax, ay, az, 0, 0, 0, &roll, &pitch, &yaw);
 		olddata = newdata;
 		newdata = yaw;
@@ -628,6 +621,8 @@ static void Send(void) {
 	TimerTime_t ts = TimerGetCurrentTime();
 	PPRINTF("Roll=%0.2f  ", ((int)(Roll1 * 100)) / 100.0);
 	PPRINTF("Pitch=%0.2f\r\n", ((int)(Pitch1 * 100)) / 100.0);
+
+#endif
 
 	printf_uplink();
 	FLAG = (int)(MD << 6 | LON << 5 | FIRMWARE_VERSION) & 0xFF;
@@ -765,10 +760,10 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 				ALARM = 0;
 				if (LON == 1) {
 					BSP_sensor_Init();
-					LED1_1;
+					ledBlueOn();
 					DelayMs(1000);
 				}
-				LED1_0;
+				ledBlueOff();
 				PRINTF("Exit Alarm\r\n");
 			}
 		}
@@ -847,53 +842,39 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
 		break;
 	}
+
 	case DOWNLINK_CMD_SET_RGB_STATE: {
 		if (AppData->BuffSize == 10) {
-			if (AppData->Buff[1] == 0x01) {
-				BSP_powerLED_Init();
-				LED3_1;
-				red_on = 1;
-				led_red_delay = AppData->Buff[2] << 8 | AppData->Buff[3];
-				if (led_red_delay != 0) {
-					DelayMs(led_red_delay);
-					LED3_0;
-					red_on = 0;
-				}
+			struct RgbLedState state;
+
+			// Copy the downlink payload into struct, so we
+			// can easily interact with the data
+			memcpy(&state, &(AppData->Buff[1]), 9);
+
+			if (state.isRedOn == true) {
+				ledRedOn();
+				DelayMs(state.redOnDuration);
+				ledRedOff();
 			} else {
-				red_on = 0;
-				LED3_0;
+				ledRedOff();
 			}
-			if (AppData->Buff[4] == 0x01) {
-				BSP_powerLED_Init();
-				LED1_1;
-				blue_on = 1;
-				led_blue_delay = AppData->Buff[5] << 8 | AppData->Buff[6];
-				if (led_blue_delay != 0) {
-					DelayMs(led_blue_delay);
-					LED1_0;
-					blue_on = 0;
-				}
+
+			if (state.isGreenOn == true) {
+				ledGreenOn();
+				DelayMs(state.greenOnDuration);
+				ledGreenOn();
 			} else {
-				blue_on = 0;
-				LED1_0;
+				ledGreenOn();
 			}
-			if (AppData->Buff[7] == 0x01) {
-				BSP_powerLED_Init();
-				LED0_1;
-				green_on = 1;
-				led_green_delay = AppData->Buff[8] << 8 | AppData->Buff[9];
-				if (led_blue_delay != 0) {
-					DelayMs(led_green_delay);
-					LED0_0;
-					green_on = 0;
-				}
+
+			if (state.isBlueOn == true) {
+				ledBlueOn();
+				DelayMs(state.blueOnDuration);
+				ledBlueOn();
 			} else {
-				blue_on = 0;
-				LED0_0;
+				ledBlueOn();
 			}
 		}
-		Store_Config();
-
 		break;
 	}
 	case DOWNLINK_CMD_INCLUDE_MOTION_DATA: {
@@ -1263,9 +1244,9 @@ void lora_send(void) {
 			if (GPS_ALARM == 0) {
 				gps_state_on();
 				if (LON == 1) {
-					LED1_1;
+					ledBlueOn();
 					DelayMs(200);
-					LED1_0;
+					ledBlueOff();
 					DelayMs(200);
 				}
 				send_data();
@@ -1276,10 +1257,10 @@ void lora_send(void) {
 				if (Alarm_times <= 60) {
 					gps_state_on();
 					if (LON == 1) {
-						LED3_1;
+						ledRedOn();
 						DelayMs(1000);
 					}
-					LED3_0;
+					ledRedOff();
 					send_ALARM_data();
 					a = 100;
 					GPS_ALARM = 1;
@@ -1292,10 +1273,10 @@ void lora_send(void) {
 					GPS_ALARM = 0;
 					if (LON == 1) {
 						BSP_sensor_Init();
-						LED1_1;
+						ledBlueOn();
 						DelayMs(1000);
 					}
-					LED1_0;
+					ledBlueOff();
 					PPRINTF("Exit Alarm\r\n");
 				}
 			}
@@ -1307,10 +1288,10 @@ void lora_send(void) {
 			if (GS == 1) {
 				ALARM = 1;
 				gps_state_off();
-				LED3_1;
+				ledRedOn();
 				Send();
 				DelayMs(5000);
-				LED3_0;
+				ledRedOff();
 				GS = 0;
 				gps_time = 0;
 				Alarm_times1 = 1;
@@ -1322,7 +1303,7 @@ void lora_send(void) {
 			GPS_INPUT();
 			Start_times++;
 			LP = 0;
-			LED0_0;
+			ledGreenOff();
 		} else if ((LP == 1) || (LP == 2)) {
 			gps_state_no();
 			if (motion_flags == 1) {
@@ -1364,7 +1345,7 @@ void lora_send(void) {
 			gps_time++;
 			TimerStart(&IWDGRefreshTimer);
 			if (LON == 1) {
-				LED0_1;
+				ledGreenOn();
 			}
 			TIMES = 10000;
 			DelayMs(200);
@@ -1393,33 +1374,33 @@ void lora_send(void) {
 				//					}
 			}
 			if (GPS_ALARM == 0) {
-				LED3_0;
-				LED1_0;
-				LED0_0;
+				ledRedOff();
+				ledBlueOff();
+				ledGreenOff();
 				gps_state_off();
 				a = 100;
 				if (LON == 1) {
-					LED3_1;
+					ledRedOn();
 					DelayMs(200);
-					LED3_0;
+					ledRedOff();
 					DelayMs(200);
-					LED3_1;
+					ledRedOn();
 					DelayMs(200);
-					LED3_0;
+					ledRedOff();
 					DelayMs(200);
 				}
 				send_data();
 				GPS_ALARM = 0;
 			} else if (GPS_ALARM == 1) {
 				if (Alarm_times <= 60) {
-					LED3_0;
-					LED1_0;
-					LED0_0;
+					ledRedOff();
+					ledBlueOff();
+					ledGreenOff();
 					if (LON == 1) {
-						LED3_1;
+						ledRedOn();
 						DelayMs(1000);
 					}
-					LED3_0;
+					ledRedOff();
 					gps_state_off();
 					send_ALARM_data();
 					GPS_ALARM = 1;
@@ -1433,10 +1414,10 @@ void lora_send(void) {
 					GPS_ALARM = 0;
 					if (LON == 1) {
 						BSP_sensor_Init();
-						LED1_1;
+						ledBlueOn();
 						DelayMs(1000);
 					}
-					LED1_0;
+					ledBlueOff();
 					PPRINTF("Exit Alarm\r\n");
 				}
 			}
@@ -1492,15 +1473,20 @@ void send_data(void) {
 	ENABLE_IRQ();
 	BSP_sensor_Init();
 
+#if 0
+	// TODO: Turn on LEDs but not turning off again?
+	// Weird technical decision to make.
 	if (red_on == 1) {
-		LED3_1;
+		ledRedOn();
 	}
 	if (blue_on == 1) {
-		LED1_1;
+		ledBlueOn();
 	}
 	if (green_on == 1) {
-		LED0_1;
+		ledGreenOn();
 	}
+#endif
+
 	if (Positioning_time == 0) {
 		DelayMs(2000);
 		LPM_SetOffMode(LPM_APPLI_Id, LPM_Enable);
@@ -1651,285 +1637,6 @@ void user_key_event(void) {
 	}
 }
 
-/*
- *@Features: Quickly get an open countdown
- *
- *
- */
-float invSqrt(float number) {
-	long i;
-	float x, y;
-	const float f = 1.5f;
-
-	x = number * 0.5f;
-	y = number;
-	i = *((long *)&y);
-	i = 0x5f375a86 - (i >> 1);
-	y = *((float *)&i);
-	y = y * (f - (x * y * y));
-	return y;
-}
-
-/*
- *@Features: Fusion accelerometer and magnetometer for attitude adjustment
- *
- *
- */
-void AHRSupdate(float gx, float gy, float gz, float ax, float ay, float az,
-				float mx, float my, float mz, float *roll, float *pitch,
-				float *yaw) {
-	if (flag_2 == 1) {
-		flag_2 = 0;
-		ax_old = ax;
-		ay_old = ay;
-		az_old = az;
-
-		gx_old = gx;
-		gy_old = gy;
-		gz_old = gz;
-
-		mx_old = mx;
-		my_old = my;
-		mz_old = mz;
-	}
-
-	ax = (ax + ax_old) / 2.0;
-	ay = (ay + ay_old) / 2.0;
-	az = (az + az_old) / 2.0;
-
-	gx = (gx + gx_old) / 2.0;
-	gx = (gx + gx_old) / 2.0;
-	gx = (gx + gx_old) / 2.0;
-
-	mx = (mx + mx_old) / 2.0;
-	mx = (mx + mx_old) / 2.0;
-	mx = (mx + mx_old) / 2.0;
-
-	ax_old = ax;
-	ay_old = ay;
-	az_old = az;
-
-	gx_old = gx;
-	gy_old = gy;
-	gz_old = gz;
-
-	mx_old = mx;
-	my_old = my;
-	mz_old = mz;
-
-	float norm;				  // For unitization
-	float hx, hy, hz, bx, bz; //
-	float vx, vy, vz, wx, wy, wz;
-	float ex, ey, ez;
-	//					 float tmp0,tmp1,tmp2,tmp3;
-
-	// auxiliary variables to reduce number of repeated operations
-	float q0q0 = q0 * q0;
-	float q0q1 = q0 * q1;
-	float q0q2 = q0 * q2;
-	float q0q3 = q0 * q3;
-	float q1q1 = q1 * q1;
-	float q1q2 = q1 * q2;
-	float q1q3 = q1 * q3;
-	float q2q2 = q2 * q2;
-	float q2q3 = q2 * q3;
-	float q3q3 = q3 * q3;
-
-	// normalise the measurements
-	norm = invSqrt(ax * ax + ay * ay + az * az);
-	ax = ax * norm;
-	ay = ay * norm;
-	az = az * norm;
-	norm = invSqrt(mx * mx + my * my + mz * mz);
-	mx = mx * norm;
-	my = my * norm;
-	mz = mz * norm;
-
-	// compute reference direction of magnetic field
-	// hx,hy,hz is mx,my,mz Representation in the reference coordinate system
-	hx = 2 * mx * (0.50 - q2q2 - q3q3) + 2 * my * (q1q2 - q0q3) +
-		 2 * mz * (q1q3 + q0q2);
-	hy = 2 * mx * (q1q2 + q0q3) + 2 * my * (0.50 - q1q1 - q3q3) +
-		 2 * mz * (q2q3 - q0q1);
-	hz = 2 * mx * (q1q3 - q0q2) + 2 * my * (q2q3 + q0q1) +
-		 2 * mz * (0.50 - q1q1 - q2q2);
-	// bx,by,bz Is the representation of the Earth's magnetic field in the
-	// reference coordinate system
-	bx = sqrt((hx * hx) + (hy * hy));
-	bz = hz;
-
-	// estimated direction of gravity and magnetic field (v and w)
-	// vx,vy,vz Is the representation of gravity acceleration in the object
-	// coordinate system
-	vx = 2 * (q1q3 - q0q2);
-	vy = 2 * (q0q1 + q2q3);
-	vz = q0q0 - q1q1 - q2q2 + q3q3;
-	// wx,wy,wz Is the representation of the earth's magnetic field in the
-	// object coordinate system
-	wx = 2 * bx * (0.5 - q2q2 - q3q3) + 2 * bz * (q1q3 - q0q2);
-	wy = 2 * bx * (q1q2 - q0q3) + 2 * bz * (q0q1 + q2q3);
-	wz = 2 * bx * (q0q2 + q1q3) + 2 * bz * (0.5 - q1q1 - q2q2);
-
-	// error is sum ofcross product between reference direction of fields and
-	// directionmeasured by sensors
-	// ex,ey,ezIt is the error between the acceleration and the measured
-	// direction of the magnetometer and the actual gravity acceleration and the
-	// geomagnetic direction.
-	// The error is expressed by the cross product, and the weight of the
-	// accelerometer and the magnetometer are the same.
-	ex = (ay * vz - az * vy) + (my * wz - mz * wy);
-	ey = (az * vx - ax * vz) + (mz * wx - mx * wz);
-	ez = (ax * vy - ay * vx) + (mx * wy - my * wx);
-
-	// integral error scaled integral gain
-	exInt = exInt + ex * Ki * dt;
-	eyInt = eyInt + ey * Ki * dt;
-	ezInt = ezInt + ez * Ki * dt;
-	// printf("exInt=%0.1f eyInt=%0.1f ezInt=%0.1f ",exInt,eyInt,ezInt);
-	// adjusted gyroscope measurements
-	gx = gx + Kp * ex + exInt;
-	gy = gy + Kp * ey + eyInt;
-	gz = gz + Kp * ez + ezInt;
-	// printf("gx=%0.1f gy=%0.1f gz=%0.1f",gx,gy,gz);
-
-	// integrate quaernion rate aafnd normalaizle
-
-	//           tmp0 = q0 + (-q1*gx - q2*gy - q3*gz)*halfT;
-	//           tmp1 = q1 + ( q0*gx + q2*gz - q3*gy)*halfT;
-	//           tmp2 = q2 + ( q0*gy - q1*gz + q3*gx)*halfT;
-	//           tmp3 = q3 + ( q0*gz + q1*gy - q2*gx)*halfT;
-	//					 q0=tmp0;
-	//					 q1=tmp1;
-	//					 q2=tmp2;
-	//					 q3=tmp3;
-	// printf("q0=%0.1f q1=%0.1f q2=%0.1f q3=%0.1f",q0,q1,q2,q3);
-	////RUNGE_KUTTA Solving differential equation
-	k10 = 0.5 * (-gx * q1 - gy * q2 - gz * q3);
-	k11 = 0.5 * (gx * q0 + gz * q2 - gy * q3);
-	k12 = 0.5 * (gy * q0 - gz * q1 + gx * q3);
-	k13 = 0.5 * (gz * q0 + gy * q1 - gx * q2);
-
-	k20 =
-		0.5 *
-		(halfT * (q0 + halfT * k10) + (halfT - gx) * (q1 + halfT * k11) +
-		 (halfT - gy) * (q2 + halfT * k12) + (halfT - gz) * (q3 + halfT * k13));
-	k21 =
-		0.5 *
-		((halfT + gx) * (q0 + halfT * k10) + halfT * (q1 + halfT * k11) +
-		 (halfT + gz) * (q2 + halfT * k12) + (halfT - gy) * (q3 + halfT * k13));
-	k22 =
-		0.5 *
-		((halfT + gy) * (q0 + halfT * k10) + (halfT - gz) * (q1 + halfT * k11) +
-		 halfT * (q2 + halfT * k12) + (halfT + gx) * (q3 + halfT * k13));
-	k23 =
-		0.5 *
-		((halfT + gz) * (q0 + halfT * k10) + (halfT + gy) * (q1 + halfT * k11) +
-		 (halfT - gx) * (q2 + halfT * k12) + halfT * (q3 + halfT * k13));
-
-	k30 =
-		0.5 *
-		(halfT * (q0 + halfT * k20) + (halfT - gx) * (q1 + halfT * k21) +
-		 (halfT - gy) * (q2 + halfT * k22) + (halfT - gz) * (q3 + halfT * k23));
-	k31 =
-		0.5 *
-		((halfT + gx) * (q0 + halfT * k20) + halfT * (q1 + halfT * k21) +
-		 (halfT + gz) * (q2 + halfT * k22) + (halfT - gy) * (q3 + halfT * k23));
-	k32 =
-		0.5 *
-		((halfT + gy) * (q0 + halfT * k20) + (halfT - gz) * (q1 + halfT * k21) +
-		 halfT * (q2 + halfT * k22) + (halfT + gx) * (q3 + halfT * k23));
-	k33 =
-		0.5 *
-		((halfT + gz) * (q0 + halfT * k20) + (halfT + gy) * (q1 + halfT * k21) +
-		 (halfT - gx) * (q2 + halfT * k22) + halfT * (q3 + halfT * k23));
-
-	k40 = 0.5 * (dt * (q0 + dt * k30) + (dt - gx) * (q1 + dt * k31) +
-				 (dt - gy) * (q2 + dt * k32) + (dt - gz) * (q3 + dt * k33));
-	k41 = 0.5 * ((dt + gx) * (q0 + dt * k30) + dt * (q1 + dt * k31) +
-				 (dt + gz) * (q2 + dt * k32) + (dt - gy) * (q3 + dt * k33));
-	k42 = 0.5 * ((dt + gy) * (q0 + dt * k30) + (dt - gz) * (q1 + dt * k31) +
-				 dt * (q2 + dt * k32) + (dt + gx) * (q3 + dt * k33));
-	k43 = 0.5 * ((dt + gz) * (q0 + dt * k30) + (dt + gy) * (q1 + dt * k31) +
-				 (dt - gx) * (q2 + dt * k32) + dt * (q3 + dt * k33));
-
-	q0 = q0 + dt / 6.0 * (k10 + 2 * k20 + 2 * k30 + k40);
-	q1 = q1 + dt / 6.0 * (k11 + 2 * k21 + 2 * k31 + k41);
-	q2 = q2 + dt / 6.0 * (k12 + 2 * k22 + 2 * k32 + k42);
-	q3 = q3 + dt / 6.0 * (k13 + 2 * k23 + 2 * k33 + k43);
-
-	// normalise quaternion
-	norm = invSqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
-	q0 = q0 * norm;
-	q1 = q1 * norm;
-	q2 = q2 * norm;
-	q3 = q3 * norm;
-
-	*pitch = -asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3; // pitch
-	*roll = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) *
-			57.3; // roll
-	*yaw =
-		atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) *
-		57.3; // yaw
-}
-
-/*
- *@Features: Calculate the number of turns in the horizontal direction
- *
- *
- */
-void CountTurns(float *newdata, float *olddata, short *turns) {
-	if (*newdata < -170.0f && *olddata > 170.0f)
-		(*turns)++;
-	if (*newdata > 170.0f && *olddata < -170.0f)
-		(*turns)--;
-}
-
-/*
- *@Features: Calculate the yaw angle
- *
- *
- */
-void CalYaw(float *yaw, short *turns) { *yaw = 360.0 * *turns + *yaw; }
-
-/*
- *@Features: Compensate for Euler angle offset, mainly to compensate for yaw
- * angle
- *
- *
- */
-void CalibrateToZero(void) {
-	uint8_t t = 0;
-	float sumpitch = 0, sumroll = 0, sumyaw = 0;
-	float pitch, roll, yaw;
-	short igx, igy, igz;
-	short iax, iay, iaz;
-	short imx, imy, imz;
-	float gx, gy, gz;
-	float ax, ay, az;
-	float mx, my, mz;
-	for (t = 0; t < 150; t++) {
-		MPU_Get_Gyro(&igx, &igy, &igz, &gx, &gy, &gz);
-		MPU_Get_Accel(&iax, &iay, &iaz, &ax, &ay, &az);
-		MPU_Get_Mag(&imx, &imy, &imz, &mx, &my, &mz);
-		AHRSupdate(gx, gy, gz, ax, ay, az, mx, my, mz, &roll, &pitch, &yaw);
-		//			delay_us(6430);
-		DelayMs(7);
-		if (t >= 100) {
-			sumpitch += pitch;
-			sumroll += roll;
-			sumyaw += yaw;
-		}
-	}
-	pitchoffset = -sumpitch / 150.0f;
-	rolloffset = -sumroll / 150.0f;
-	yawoffset = -sumyaw / 150.0f;
-
-	//			PRINTF("offset %0.1f %0.1f\n\r",rolloffset,pitchoffset);
-	pitchoffset = 0;
-	rolloffset = 0;
-	yawoffset = 0;
-}
-
 void gps_Identify() {
 	char *ublox_buff = "u-blox";
 	char *l76K_buff = "IC=AT6558R";
@@ -1969,6 +1676,7 @@ void send_moin(void) {
 		moinint_exitflag = 0;
 	}
 }
+
 void OndownlinkLedEvent(void) {
 	TimerStop(&downlinkLedTimer);
 	HAL_GPIO_WritePin(LED1_PORT, LED3_PIN | LED1_PIN, GPIO_PIN_RESET);
@@ -1990,17 +1698,16 @@ void OnPressButtonTimeoutEvent(void) {
 	OnPressButtonTimeout_status = 0;
 	press_button_times = 0;
 }
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
-void powerLED(void) {
+void led_power_anim(void) {
 	BSP_powerLED_Init();
-	LED0_1;
+	ledGreenOn();
 	DelayMs(200);
-	LED0_0;
-	LED1_1;
+	ledGreenOff();
+	ledBlueOn();
 	DelayMs(200);
-	LED1_0;
-	LED3_1;
+	ledBlueOff();
+	ledRedOn();
 	DelayMs(200);
-	LED3_0;
+	ledRedOff();
 }

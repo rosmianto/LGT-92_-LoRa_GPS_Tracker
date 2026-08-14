@@ -29,6 +29,7 @@ set(SRC_FILES
     "../src/lora.c"
     "../src/tiny_sscanf.c"
     "../src/tiny_vsnprintf.c"
+    "../src/subsystems/imu_fusion.c"
 
     # Startup Assembly
     "${BASE_DIR}/Drivers/CMSIS/Device/ST/STM32L0xx/Source/Templates/gcc/startup_stm32l072xx.s"
@@ -151,6 +152,7 @@ target_include_directories(${PROJECT_NAME}.elf PRIVATE
     "${BASE_DIR}/Middlewares/Third_Party/Lora/Mac"
     "${BASE_DIR}/Middlewares/Third_Party/Lora/Phy"
     "${BASE_DIR}/Middlewares/Third_Party/Lora/Utilities"
+    "${BASE_DIR}/src/subsystems"
 )
 
 # 8. Linker Commands & Libraries
