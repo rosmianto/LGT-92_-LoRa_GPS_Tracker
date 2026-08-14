@@ -19,6 +19,9 @@
 // TODO: printf not available via UART, enable or not?
 // So far it's routed through TraceSend().
 
+// TODO: The MPU9250 driver code is awful, and they
+// bitbanged the I2C line when PA9 and PA10 are I2C capable?
+
 // TODO: Some ideas around device config:
 // * Skip flash, use EEPROM only. Better that way.
 // * Use versioning, because EEPROM can persist between different firmware

@@ -54,10 +54,10 @@ uint8_t MPU_Init(void)
     uint8_t res=0;
    
     MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT1_REG,0X80);//reset MPU9250
-    DelayMs(100);  //ÑÓÊ±100ms
+    DelayMs(100);  //ï¿½ï¿½Ê±100ms
     MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT1_REG,0X00);//wake MPU9250
-    MPU_Set_Gyro_Fsr(3);					        	//Gyro sensor,¡À2000dps
-	  MPU_Set_Accel_Fsr(2);					       	 	//Acceleration gyro sensor,¡À8g
+    MPU_Set_Gyro_Fsr(3);					        	//Gyro sensor,ï¿½ï¿½2000dps
+	  MPU_Set_Accel_Fsr(2);					       	 	//Acceleration gyro sensor,ï¿½ï¿½8g
     MPU_Set_Rate(200);						       	 	//Set sampling frequency 200Hz
     MPU_Write_Byte(MPU9250_ADDR,MPU_INT_EN_REG,0X00);   //Close all interrupts	
 	
@@ -128,20 +128,20 @@ void MPU_INT_Init(void)
 //	DelayMs(200);
 }
 //Set the MPU9250 gyro sensor full-scale range
-//fsr:0,¡À250dps;1,¡À500dps;2,¡À1000dps;3,¡À2000dps
+//fsr:0,ï¿½ï¿½250dps;1,ï¿½ï¿½500dps;2,ï¿½ï¿½1000dps;3,ï¿½ï¿½2000dps
 //Return value: 0,set successfully
 //          Other,setup failed
 uint8_t MPU_Set_Gyro_Fsr(uint8_t fsr)
 {
-	return MPU_Write_Byte(MPU9250_ADDR,MPU_GYRO_CFG_REG,(fsr<<3)|3);//ÉèÖÃÍÓÂÝÒÇÂúÁ¿³Ì·¶Î§  
+	return MPU_Write_Byte(MPU9250_ADDR,MPU_GYRO_CFG_REG,(fsr<<3)|3);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì·ï¿½Î§  
 }
 //Set the MPU9250 accelerometer full-scale range
-//fsr:0,¡À2g;1,¡À4g;2,¡À8g;3,¡À16g
+//fsr:0,ï¿½ï¿½2g;1,ï¿½ï¿½4g;2,ï¿½ï¿½8g;3,ï¿½ï¿½16g
 //Return value: 0,set successfully
 //          Other,setup failed
 uint8_t MPU_Set_Accel_Fsr(uint8_t fsr)
 {
-	return MPU_Write_Byte(MPU9250_ADDR,MPU_ACCEL_CFG_REG,fsr<<3);//ÉèÖÃ¼ÓËÙ¶È´«¸ÐÆ÷ÂúÁ¿³Ì·¶Î§  
+	return MPU_Write_Byte(MPU9250_ADDR,MPU_ACCEL_CFG_REG,fsr<<3);//ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½Ù¶È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì·ï¿½Î§  
 }
 
 //Set the digital low-pass filter of the MPU9250
@@ -342,9 +342,8 @@ uint8_t MPU_Get_Gyro(short *igx,short *igy,short *igz,float *gx,float *gy,float 
 //ax,ay,az:Raw data of the acceleration X, Y, Z axis (with symbol)
 //Return value: 0,set successfully
 //          Other,error code
-uint8_t MPU_Get_Accelerometer(short *ay,short *ax,short *az)
-{
-    uint8_t buf[6],res;  
+uint8_t MPU_Get_Accelerometer(uint16_t *ay, uint16_t *ax, uint16_t *az) {
+	uint8_t buf[6],res;  
 	res=MPU_Read_Len(MPU9250_ADDR,MPU_ACCEL_XOUTH_REG,6,buf);
 	if(res==0)
 	{
@@ -392,8 +391,8 @@ uint8_t MPU_Get_Accel(short *iax,short *iay,short *iaz,float *ax,float *ay,float
 	}
 	return res;
 }
-//µÃµ½´ÅÁ¦¼ÆÖµ(Ô­Ê¼Öµ)£¬Æ½¾ùÂË²¨²¢µ÷Õû·½Î»
-//mx,my,mz:´ÅÁ¦¼Æx,y,zÖáµÄÔ­Ê¼¶ÁÊý(´ø·ûºÅ)
+//ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ(Ô­Ê¼Öµ)ï¿½ï¿½Æ½ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»
+//mx,my,mz:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½x,y,zï¿½ï¿½ï¿½Ô­Ê¼ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
 //Get the acceleration value(original value),low pass filter and adjust acceleration orientation
 //mx,my,mz:Raw data of the acceleration X, Y, Z axis (with symbol)
 //Return value: 0,set successfully
@@ -416,12 +415,12 @@ uint8_t MPU_Get_Magnetometer(short *mx,short *my,short *mz)
 		magoldy=*my;
 		magoldz=*mz;
 	} 	 
-	MPU_Write_Byte(AK8963_ADDR,MAG_CNTL1,0X11); //AK8963Ã¿´Î¶ÁÍêÒÔºó¶¼ÐèÒªÖØÐÂÉèÖÃÎªµ¥´Î²âÁ¿Ä£Ê½
+	MPU_Write_Byte(AK8963_ADDR,MAG_CNTL1,0X11); //AK8963Ã¿ï¿½Î¶ï¿½ï¿½ï¿½ï¿½Ôºï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Î²ï¿½ï¿½ï¿½Ä£Ê½
     return res;
 }
 
 /*
-*@Function:£º»ñµÃ´ÅÁ¦¼ÆÊý¾Ý£¬µ¥Î»¸ßË¹£¬²¢¶Ô´ÅÁ¦¼Æ½øÐÐ²¹³¥
+*@Function:ï¿½ï¿½ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½Î»ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Ð²ï¿½ï¿½ï¿½
 *
 *
 */
@@ -441,29 +440,29 @@ uint8_t MPU_Get_Mag(short *imx,short *imy,short *imz,float *mx,float *my,float *
 	return res;
 }
 
-//IICÁ¬ÐøÐ´
-//addr:Æ÷¼þµØÖ· 
-//reg:¼Ä´æÆ÷µØÖ·
-//len:Ð´Èë³¤¶È
-//buf:Êý¾ÝÇø
-//·µ»ØÖµ:0,Õý³£
-//    ÆäËû,´íÎó´úÂë
+//IICï¿½ï¿½ï¿½ï¿½Ð´
+//addr:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö· 
+//reg:ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+//len:Ð´ï¿½ë³¤ï¿½ï¿½
+//buf:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½Öµ:0,ï¿½ï¿½ï¿½ï¿½
+//    ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 uint8_t MPU_Write_Len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf)
 {
     uint8_t i;
     IIC_Start();
-     IIC_SendByte((addr<<1)|0); //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
-    if(IIC_WaitAck())          //µÈ´ýÓ¦´ð
+     IIC_SendByte((addr<<1)|0); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·+Ð´ï¿½ï¿½ï¿½ï¿½
+    if(IIC_WaitAck())          //ï¿½È´ï¿½Ó¦ï¿½ï¿½
     {
         IIC_Stop();
         return 1;
     }
-     IIC_SendByte(reg);         //Ð´¼Ä´æÆ÷µØÖ·
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
+     IIC_SendByte(reg);         //Ð´ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+    IIC_WaitAck();             //ï¿½È´ï¿½Ó¦ï¿½ï¿½
     for(i=0;i<len;i++)
     {
-         IIC_SendByte(buf[i]);  //·¢ËÍÊý¾Ý
-        if(IIC_WaitAck())      //µÈ´ýACK
+         IIC_SendByte(buf[i]);  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if(IIC_WaitAck())      //ï¿½È´ï¿½ACK
         {
             IIC_Stop();
             return 1;
@@ -473,57 +472,57 @@ uint8_t MPU_Write_Len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf)
     return 0;
 } 
 
-//IICÁ¬Ðø¶Á
-//addr:Æ÷¼þµØÖ·
-//reg:Òª¶ÁÈ¡µÄ¼Ä´æÆ÷µØÖ·
-//len:Òª¶ÁÈ¡µÄ³¤¶È
-//buf:¶ÁÈ¡µ½µÄÊý¾Ý´æ´¢Çø
-//·µ»ØÖµ:0,Õý³£
-//    ÆäËû,´íÎó´úÂë
+//IICï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//addr:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+//reg:Òªï¿½ï¿½È¡ï¿½Ä¼Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+//len:Òªï¿½ï¿½È¡ï¿½Ä³ï¿½ï¿½ï¿½
+//buf:ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý´æ´¢ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½Öµ:0,ï¿½ï¿½ï¿½ï¿½
+//    ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 uint8_t MPU_Read_Len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf)
 { 
     IIC_Start();
-     IIC_SendByte((addr<<1)|0); //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
-    if(IIC_WaitAck())          //µÈ´ýÓ¦´ð
+     IIC_SendByte((addr<<1)|0); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·+Ð´ï¿½ï¿½ï¿½ï¿½
+    if(IIC_WaitAck())          //ï¿½È´ï¿½Ó¦ï¿½ï¿½
     {
         IIC_Stop();
         return 1;
     }
-     IIC_SendByte(reg);         //Ð´¼Ä´æÆ÷µØÖ·
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
+     IIC_SendByte(reg);         //Ð´ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+    IIC_WaitAck();             //ï¿½È´ï¿½Ó¦ï¿½ï¿½
 	  IIC_Start();                
-     IIC_SendByte((addr<<1)|1); //·¢ËÍÆ÷¼þµØÖ·+¶ÁÃüÁî
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
+     IIC_SendByte((addr<<1)|1); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    IIC_WaitAck();             //ï¿½È´ï¿½Ó¦ï¿½ï¿½
     while(len)
     {
-        if(len==1)*buf=IIC_ReadByte(0);//¶ÁÊý¾Ý,·¢ËÍnACK 
-		else *buf=IIC_ReadByte(1);		//¶ÁÊý¾Ý,·¢ËÍACK  
+        if(len==1)*buf=IIC_ReadByte(0);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½nACK 
+		else *buf=IIC_ReadByte(1);		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ACK  
 		len--;
 		buf++;  
     }
-    IIC_Stop();                 //²úÉúÒ»¸öÍ£Ö¹Ìõ¼þ
+    IIC_Stop();                 //ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½ï¿½
     return 0;       
 }
 
-//IICÐ´Ò»¸ö×Ö½Ú 
-//devaddr:Æ÷¼þIICµØÖ·
-//reg:¼Ä´æÆ÷µØÖ·
-//data:Êý¾Ý
-//·µ»ØÖµ:0,Õý³£
-//    ÆäËû,´íÎó´úÂë
+//IICÐ´Ò»ï¿½ï¿½ï¿½Ö½ï¿½ 
+//devaddr:ï¿½ï¿½ï¿½ï¿½IICï¿½ï¿½Ö·
+//reg:ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+//data:ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½Öµ:0,ï¿½ï¿½ï¿½ï¿½
+//    ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 uint8_t MPU_Write_Byte(uint8_t addr,uint8_t reg,uint8_t data)
 {
     IIC_Start();
-    IIC_SendByte((addr<<1)|0); //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
-    if(IIC_WaitAck())          //µÈ´ýÓ¦´ð
+    IIC_SendByte((addr<<1)|0); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·+Ð´ï¿½ï¿½ï¿½ï¿½
+    if(IIC_WaitAck())          //ï¿½È´ï¿½Ó¦ï¿½ï¿½
     {
         IIC_Stop();
         return 1;
     }
-    IIC_SendByte(reg);         //Ð´¼Ä´æÆ÷µØÖ·
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-    IIC_SendByte(data);        //·¢ËÍÊý¾Ý
-    if(IIC_WaitAck())          //µÈ´ýACK
+    IIC_SendByte(reg);         //Ð´ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+    IIC_WaitAck();             //ï¿½È´ï¿½Ó¦ï¿½ï¿½
+    IIC_SendByte(data);        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    if(IIC_WaitAck())          //ï¿½È´ï¿½ACK
     {
         IIC_Stop();
         return 1;
@@ -532,22 +531,22 @@ uint8_t MPU_Write_Byte(uint8_t addr,uint8_t reg,uint8_t data)
     return 0;
 }
 
-//IIC¶ÁÒ»¸ö×Ö½Ú 
-//reg:¼Ä´æÆ÷µØÖ· 
-//·µ»ØÖµ:¶Áµ½µÄÊý¾Ý
+//IICï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ö½ï¿½ 
+//reg:ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö· 
+//ï¿½ï¿½ï¿½ï¿½Öµ:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 uint8_t MPU_Read_Byte(uint8_t addr,uint8_t reg)
 {
     uint8_t res;
     IIC_Start();
-    IIC_SendByte((addr<<1)|0); //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-    IIC_SendByte(reg);         //Ð´¼Ä´æÆ÷µØÖ·
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
+    IIC_SendByte((addr<<1)|0); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·+Ð´ï¿½ï¿½ï¿½ï¿½
+    IIC_WaitAck();             //ï¿½È´ï¿½Ó¦ï¿½ï¿½
+    IIC_SendByte(reg);         //Ð´ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+    IIC_WaitAck();             //ï¿½È´ï¿½Ó¦ï¿½ï¿½
 	IIC_Start();                
-    IIC_SendByte((addr<<1)|1); //·¢ËÍÆ÷¼þµØÖ·+¶ÁÃüÁî
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-    res=IIC_ReadByte(0);		//¶ÁÊý¾Ý,·¢ËÍnACK  
-    IIC_Stop();                 //²úÉúÒ»¸öÍ£Ö¹Ìõ¼þ
+    IIC_SendByte((addr<<1)|1); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    IIC_WaitAck();             //ï¿½È´ï¿½Ó¦ï¿½ï¿½
+    res=IIC_ReadByte(0);		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½nACK  
+    IIC_Stop();                 //ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½ï¿½
     return res;  
 }
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
