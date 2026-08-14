@@ -6,14 +6,10 @@
 #include "delay.h"
 #include "flash_eraseprogram.h"
 #include "gpio_exti.h"
-#include "gps.h"
-#include "hw.h"
 #include "iwdg.h"
-#include "lora.h"
-#include "low_power_manager.h"
 #include "mpu9250.h"
 #include "subsystems/IMU.h"
-#include "timeServer.h"
+#include "subsystems/LED.h"
 #include <Downlink_Commands.h>
 
 // TODO: printf not available via UART, enable or not?
@@ -49,136 +45,89 @@
 // and there's redundant, unnecessary, paranoia-induced programming.
 extern uint8_t ic_version;
 
+// Emergency externs
+extern lora_AppData_t AppData;
+
 #define FIRMWARE_VERSION 0x04
 
-#include <LoRaWAN_Configurations.h>
-
-static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
-static lora_AppData_t AppData = {AppDataBuff, 0, 0};
-
-// clang-format off
-bool     rxpr_flags                          	= 0;
-int      exti_flag                           	= 0;
-uint32_t COUNT                               	= 0;
-uint8_t  TDC_flag                            	= 0;
-uint8_t  join_flag                           	= 0;
-uint8_t  device_reset_trigger                   = 0;
-uint8_t  payloadlens							= 0;
-bool     is_time_to_IWDG_Refresh             	= 0;
-bool     JoinReq_NbTrails_over               	= 0;
-bool     unconfirmed_downlink_data_ans_status	= 0;
-bool     confirmed_downlink_data_ans_status  	= 0;
-bool     rejoin_status                       	= 0;
-bool     rejoin_keep_status                  	= 0;
-bool     MAC_COMMAND_ANS_status              	= 0;
-uint8_t  response_level                      	= 0;
-uint16_t REJOIN_TX_DUTYCYCLE                 	= 20;  // minutes
-
-uint32_t Altitude           					= 0;
-uint32_t APP_TX_DUTYCYCLE   					= 300000;
-uint32_t Server_TX_DUTYCYCLE					= 300000;
-uint32_t Alarm_TX_DUTYCYCLE 					= 60000;
-uint32_t Keep_TX_DUTYCYCLE  					= 21600000;
-uint32_t GPS_ALARM          					= 0;
-uint32_t GS                 					= 0;
-
-// GPS-related variables (?)
-uint8_t  gps_setflags     = 0;
-uint8_t  position_flags   = 0;
-float    pdop_comp        = 7.0;
-float    pdop_fixed       = 0.0;
-uint32_t Start_times      = 0;
-uint32_t End_times        = 0;
-uint32_t gps_time         = 0;
-FP32     gps_latitude     = 0.0;
-FP32     gps_longitude    = 0.0;
-int32_t  longitude        = 0;
-int32_t  latitude         = 0;
-
-// IMU-related variables (?)
-float Roll_basic=0,Pitch_basic=0,Yaw_basic=0;
-float Roll_sum=0,Pitch_sum=0,Yaw_sum=0;
-float Roll=0,Pitch=0,Yaw=0;
-float Roll1=0,Pitch1=0,Yaw1=0;
-float Roll_new=0,Pitch_new=0,Yaw_new=0;
-float Roll_old=0,Pitch_old=0,Yaw_old=0;
-
-#define Kp 40.0f        // proportional gain governs rate of convergence toaccelerometer/magnetometer
-#define Ki 0.02f        // integral gain governs rate of convergenceof gyroscope biases
-#define halfT 0.0048f   // half the sample period
+#define Kp                                                                     \
+	40.0f		 // proportional gain governs rate of convergence
+				 // toaccelerometer/magnetometer
+#define Ki 0.02f // integral gain governs rate of convergenceof gyroscope biases
+#define halfT 0.0048f // half the sample period
 #define dt 0.0096f
 
-float pitch,roll,yaw;
-float pitch_sum,roll_sum,yaw_sum;
-short igx,igy,igz;
-short iax,iay,iaz;
-short imx,imy,imz;
-float gx,gy,gz;
-float ax,ay,az;
-float mx,my,mz;
+float pitch, roll, yaw;
+float pitch_sum, roll_sum, yaw_sum;
+short igx, igy, igz;
+short iax, iay, iaz;
+short imx, imy, imz;
+float gx, gy, gz;
+float ax, ay, az;
+float mx, my, mz;
 
-float gx_old,gy_old,gz_old;
-float ax_old,ay_old,az_old;
-float mx_old,my_old,mz_old;
+float gx_old, gy_old, gz_old;
+float ax_old, ay_old, az_old;
+float mx_old, my_old, mz_old;
 
-static float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
-static float exInt = 0, eyInt = 0, ezInt = 0; 
-static short turns=0;
-static float newdata=0.0f,olddata=0.0f;
+static float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
+static float exInt = 0, eyInt = 0, ezInt = 0;
+static short turns = 0;
+static float newdata = 0.0f, olddata = 0.0f;
 
-static float k10=0.0f,k11=0.0f,k12=0.0f,k13=0.0f;
-static float k20=0.0f,k21=0.0f,k22=0.0f,k23=0.0f;
-static float k30=0.0f,k31=0.0f,k32=0.0f,k33=0.0f;
-static float k40=0.0f,k41=0.0f,k42=0.0f,k43=0.0f;
+static float k10 = 0.0f, k11 = 0.0f, k12 = 0.0f, k13 = 0.0f;
+static float k20 = 0.0f, k21 = 0.0f, k22 = 0.0f, k23 = 0.0f;
+static float k30 = 0.0f, k31 = 0.0f, k32 = 0.0f, k33 = 0.0f;
+static float k40 = 0.0f, k41 = 0.0f, k42 = 0.0f, k43 = 0.0f;
 
 // various extern variables
 extern __IO uint16_t AD_code2;
 extern __IO uint16_t AD_code3;
-extern uint8_t            mode;
-extern uint8_t            inmode;
-extern uint16_t           power_time;
-extern bool               rx2_flags;
-extern uint32_t           LoRaMacState;
-extern uint8_t            dwelltime;
-extern bool               debug_flags;
-extern uint16_t           dr_power;
-extern uint32_t           set_sgm;
-extern uint32_t           LON;
-extern uint32_t           MD;
-extern uint32_t           MLON;
-extern uint32_t           Threshold;
-extern uint32_t           Freq;
-extern uint8_t            mpuint_flags;
-extern bool               button_exitflag;
-extern bool               moinint_exitflag;
-extern uint32_t           gps_search_mode;
-extern uint32_t           gps_navigation_mode;
-extern uint8_t            LP;
-extern uint8_t            Alarm_times;
-extern uint8_t            Alarm_times1;
-extern uint32_t           Positioning_time;
-extern uint8_t            md_flags;
-extern float              pdop_value;
-extern float              pdop_gps;
-extern bool               rx2_flags;
+extern uint8_t mode;
+extern uint8_t inmode;
+extern uint16_t power_time;
+extern bool rx2_flags;
+extern uint32_t LoRaMacState;
+extern uint8_t dwelltime;
+extern bool debug_flags;
+extern uint16_t dr_power;
+extern uint32_t set_sgm;
+extern uint32_t LON;
+extern uint32_t MD;
+extern uint32_t MLON;
+extern uint32_t Threshold;
+extern uint32_t Freq;
+extern uint8_t mpuint_flags;
+extern bool button_exitflag;
+extern bool moinint_exitflag;
+extern uint32_t gps_search_mode;
+extern uint32_t gps_navigation_mode;
+extern uint8_t LP;
+extern uint8_t Alarm_times;
+extern uint8_t Alarm_times1;
+extern uint32_t Positioning_time;
+extern uint8_t md_flags;
+extern float pdop_value;
+extern float pdop_gps;
+extern bool rx2_flags;
 
 static uint32_t ServerSetTDC;
-uint32_t        CHE              = 0;
-int             ALARM            = 0;
-uint32_t        FLAG             = 0;
-uint8_t         send_fail        = 0;
-uint32_t        a                = 1;
-int             basic_flag       = 0;
-uint32_t        start_time       = 0;
-uint32_t        AlarmSetTDC      = 0;
-uint8_t         flag_1           = 1;
-uint8_t         alarm_flags      = 0;
-uint8_t         stop_flag        = 0;
-uint32_t        SendData         = 0;
-uint16_t        batteryLevel_mV  = 0;
-uint16_t        TIMES            = 10000;
-bool            is_lora_joined   = 0;
-bool            motion_flags     = 0;
+uint32_t CHE = 0;
+int ALARM = 0;
+uint32_t FLAG = 0;
+uint8_t send_fail = 0;
+uint32_t a = 1;
+int basic_flag = 0;
+uint32_t start_time = 0;
+uint32_t AlarmSetTDC = 0;
+uint8_t flag_1 = 1;
+uint8_t alarm_flags = 0;
+uint8_t stop_flag = 0;
+uint32_t SendData = 0;
+uint16_t batteryLevel_mV = 0;
+uint16_t TIMES = 10000;
+bool is_lora_joined = 0;
+bool motion_flags = 0;
 
 extern char DATABUFF[500];
 
@@ -408,11 +357,11 @@ static void LORA_HasJoined(void) {
 	AT_PRINTF("JOINED\r\n");
 
 	BSP_sensor_Init();
-	ledRedOn();
-	ledBlueOn();
+	LED::ledRedOn();
+	LED::ledBlueOn();
 	DelayMs(1000);
-	ledRedOff();
-	ledBlueOff();
+	LED::ledRedOff();
+	LED::ledBlueOff();
 
 	rejoin_keep_status = 0;
 
@@ -767,7 +716,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 				ALARM = 0;
 				if (LON == 1) {
 					BSP_sensor_Init();
-					ledBlueOn();
+					LED::ledBlueOn();
 					DelayMs(1000);
 				}
 				ledBlueOff();
@@ -859,27 +808,27 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 			memcpy(&state, &(AppData->Buff[1]), 9);
 
 			if (state.isRedOn == true) {
-				ledRedOn();
+				LED::ledRedOn();
 				DelayMs(state.redOnDuration);
-				ledRedOff();
+				LED::ledRedOff();
 			} else {
-				ledRedOff();
+				LED::ledRedOff();
 			}
 
 			if (state.isGreenOn == true) {
-				ledGreenOn();
+				LED::ledGreenOn();
 				DelayMs(state.greenOnDuration);
-				ledGreenOn();
+				LED::ledGreenOn();
 			} else {
-				ledGreenOn();
+				LED::ledGreenOn();
 			}
 
 			if (state.isBlueOn == true) {
-				ledBlueOn();
+				LED::ledBlueOn();
 				DelayMs(state.blueOnDuration);
-				ledBlueOn();
+				LED::ledBlueOn();
 			} else {
-				ledBlueOn();
+				LED::ledBlueOn();
 			}
 		}
 		break;
@@ -1251,7 +1200,7 @@ void lora_send(void) {
 			if (GPS_ALARM == 0) {
 				gps_state_on();
 				if (LON == 1) {
-					ledBlueOn();
+					LED::ledBlueOn();
 					DelayMs(200);
 					ledBlueOff();
 					DelayMs(200);
@@ -1264,10 +1213,10 @@ void lora_send(void) {
 				if (Alarm_times <= 60) {
 					gps_state_on();
 					if (LON == 1) {
-						ledRedOn();
+						LED::ledRedOn();
 						DelayMs(1000);
 					}
-					ledRedOff();
+					LED::ledRedOff();
 					send_ALARM_data();
 					a = 100;
 					GPS_ALARM = 1;
@@ -1280,7 +1229,7 @@ void lora_send(void) {
 					GPS_ALARM = 0;
 					if (LON == 1) {
 						BSP_sensor_Init();
-						ledBlueOn();
+						LED::ledBlueOn();
 						DelayMs(1000);
 					}
 					ledBlueOff();
@@ -1295,10 +1244,10 @@ void lora_send(void) {
 			if (GS == 1) {
 				ALARM = 1;
 				gps_state_off();
-				ledRedOn();
+				LED::ledRedOn();
 				Send();
 				DelayMs(5000);
-				ledRedOff();
+				LED::ledRedOff();
 				GS = 0;
 				gps_time = 0;
 				Alarm_times1 = 1;
@@ -1352,7 +1301,7 @@ void lora_send(void) {
 			gps_time++;
 			TimerStart(&IWDGRefreshTimer);
 			if (LON == 1) {
-				ledGreenOn();
+				LED::ledGreenOn();
 			}
 			TIMES = 10000;
 			DelayMs(200);
@@ -1381,33 +1330,33 @@ void lora_send(void) {
 				//					}
 			}
 			if (GPS_ALARM == 0) {
-				ledRedOff();
-				ledBlueOff();
-				ledGreenOff();
+				LED::ledRedOff();
+				LED::ledBlueOff();
+				LED::ledGreenOff();
 				gps_state_off();
 				a = 100;
 				if (LON == 1) {
-					ledRedOn();
+					LED::ledRedOn();
 					DelayMs(200);
-					ledRedOff();
+					LED::ledRedOff();
 					DelayMs(200);
-					ledRedOn();
+					LED::ledRedOn();
 					DelayMs(200);
-					ledRedOff();
+					LED::ledRedOff();
 					DelayMs(200);
 				}
 				send_data();
 				GPS_ALARM = 0;
 			} else if (GPS_ALARM == 1) {
 				if (Alarm_times <= 60) {
-					ledRedOff();
-					ledBlueOff();
-					ledGreenOff();
+					LED::ledRedOff();
+					LED::ledBlueOff();
+					LED::ledGreenOff();
 					if (LON == 1) {
-						ledRedOn();
+						LED::ledRedOn();
 						DelayMs(1000);
 					}
-					ledRedOff();
+					LED::ledRedOff();
 					gps_state_off();
 					send_ALARM_data();
 					GPS_ALARM = 1;
@@ -1421,7 +1370,7 @@ void lora_send(void) {
 					GPS_ALARM = 0;
 					if (LON == 1) {
 						BSP_sensor_Init();
-						ledBlueOn();
+						LED::ledBlueOn();
 						DelayMs(1000);
 					}
 					ledBlueOff();
@@ -1484,13 +1433,13 @@ void send_data(void) {
 	// TODO: Turn on LEDs but not turning off again?
 	// Weird technical decision to make.
 	if (red_on == 1) {
-		ledRedOn();
+		LED::ledRedOn();
 	}
 	if (blue_on == 1) {
-		ledBlueOn();
+		LED::ledBlueOn();
 	}
 	if (green_on == 1) {
-		ledGreenOn();
+		LED::ledGreenOn();
 	}
 #endif
 
@@ -1691,18 +1640,20 @@ void send_moin(void) {
 
 void OndownlinkLedEvent(void) {
 	TimerStop(&downlinkLedTimer);
-	HAL_GPIO_WritePin(LED1_PORT, LED3_PIN | LED1_PIN, GPIO_PIN_RESET);
+	LED::ledRedOff();
+	LED::ledBlueOff();
 }
 
 void OnNetworkJoinedLedEvent(void) {
 	TimerStop(&NetworkJoinedLedTimer);
-	HAL_GPIO_WritePin(LED1_PORT, LED3_PIN | LED0_PIN | LED1_PIN,
-					  GPIO_PIN_RESET);
+	LED::ledRedOff();
+	LED::ledGreenOff();
+	LED::ledBlueOff();
 }
 
 void OnPressButtonTimesLedEvent(void) {
 	TimerStop(&PressButtonTimesLedTimer);
-	HAL_GPIO_WritePin(LED1_PORT, LED3_PIN, GPIO_PIN_RESET);
+	LED::ledRedOff();
 }
 
 void OnPressButtonTimeoutEvent(void) {
@@ -1713,13 +1664,13 @@ void OnPressButtonTimeoutEvent(void) {
 
 void led_power_anim(void) {
 	BSP_powerLED_Init();
-	ledGreenOn();
+	LED::ledGreenOn();
 	DelayMs(200);
-	ledGreenOff();
-	ledBlueOn();
+	LED::ledGreenOff();
+	LED::ledBlueOn();
 	DelayMs(200);
-	ledBlueOff();
-	ledRedOn();
+	LED::ledBlueOff();
+	LED::ledRedOn();
 	DelayMs(200);
-	ledRedOff();
+	LED::ledRedOff();
 }

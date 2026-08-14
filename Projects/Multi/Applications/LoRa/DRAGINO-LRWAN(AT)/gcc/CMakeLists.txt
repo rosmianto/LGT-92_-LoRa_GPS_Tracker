@@ -19,7 +19,8 @@ set(SRC_FILES
     "../src/hw_gpio.c"
     "../src/hw_rtc.c"
     "../src/hw_spi.c"
-    "../src/main.c"
+    "../src/main.cpp"
+    "../src/app.c"
     "../src/stm32l0xx_hal_msp.c"
     "../src/stm32l0xx_hw.c"
     "../src/stm32l0xx_it.c"
@@ -29,7 +30,7 @@ set(SRC_FILES
     "../src/lora.c"
     "../src/tiny_sscanf.c"
     "../src/tiny_vsnprintf.c"
-    "../src/subsystems/imu_fusion.c"
+    # "../src/subsystems/imu_fusion.c"
 
     # Startup Assembly
     "${BASE_DIR}/Drivers/CMSIS/Device/ST/STM32L0xx/Source/Templates/gcc/startup_stm32l072xx.s"

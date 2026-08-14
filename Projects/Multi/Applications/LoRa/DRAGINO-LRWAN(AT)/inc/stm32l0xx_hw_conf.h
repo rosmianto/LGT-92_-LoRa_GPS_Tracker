@@ -215,16 +215,6 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define LED3_0             HAL_GPIO_WritePin(LED3_PORT ,LED3_PIN,GPIO_PIN_RESET)
 #define LED3_1             HAL_GPIO_WritePin(LED3_PORT ,LED3_PIN,GPIO_PIN_SET)
 
- // LED3 -> Red
- // LED0 -> Green
- // LED1 -> Blue
- static inline void ledRedOn() { LED3_1; }
- static inline void ledRedOff() { LED3_0; }
- static inline void ledGreenOn() { LED0_1; }
- static inline void ledGreenOff() { LED0_0; }
- static inline void ledBlueOn() { LED1_1; }
- static inline void ledBlueOff() { LED1_0; }
-
  /* ---------------------------  OIL FLOAT definition
   * -------------------------------*/
 #define battery_CLK_ENABLE() __HAL_RCC_GPIOA_CLK_ENABLE()

@@ -1535,6 +1535,9 @@ uint16_t string_touint(void)
 	return versi;
 }
 
+// TODO: This function will just erase current config
+// if it detects a new firmware.
+// Poor technical decision and should be replaced with new approach.
 void new_firmware_update(void)
 {
 	uint32_t update_flags[1];
