@@ -169,8 +169,6 @@ int user_key_exti_flag = 0;
 uint8_t user_key_duration = 0;
 void user_key_event(void);
 
-TimerEvent_t downlinkLedTimer;
-TimerEvent_t NetworkJoinedLedTimer;
 TimerEvent_t PressButtonTimesLedTimer;
 TimerEvent_t PressButtonTimeoutTimer;
 
@@ -178,8 +176,6 @@ uint8_t press_button_times = 0; // Press the button times in a row fast
 uint8_t OnPressButtonTimeout_status = 0;
 extern TimerEvent_t TxDelayedTimer;
 
-void OndownlinkLedEvent(void);
-void OnNetworkJoinedLedEvent(void);
 void OnPressButtonTimesLedEvent(void);
 void OnPressButtonTimeoutEvent(void);
 
@@ -1234,19 +1230,6 @@ void send_moin(void) {
 		MPU9250_INT();
 		moinint_exitflag = 0;
 	}
-}
-
-void OndownlinkLedEvent(void) {
-	TimerStop(&downlinkLedTimer);
-	LED::ledRedOff();
-	LED::ledBlueOff();
-}
-
-void OnNetworkJoinedLedEvent(void) {
-	TimerStop(&NetworkJoinedLedTimer);
-	LED::ledRedOff();
-	LED::ledGreenOff();
-	LED::ledBlueOff();
 }
 
 void OnPressButtonTimesLedEvent(void) {
