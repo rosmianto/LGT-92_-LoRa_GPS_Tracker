@@ -10,8 +10,10 @@
 #include "mpu9250.h"
 #include "subsystems/IMU.h"
 #include "subsystems/LED.h"
+#include "subsystems/LoRa.h"
 #include <Downlink_Commands.h>
 
+LoRa lora;
 // TODO: printf not available via UART, enable or not?
 // So far it's routed through TraceSend().
 
@@ -81,8 +83,6 @@ static float k30 = 0.0f, k31 = 0.0f, k32 = 0.0f, k33 = 0.0f;
 static float k40 = 0.0f, k41 = 0.0f, k42 = 0.0f, k43 = 0.0f;
 
 // various extern variables
-extern __IO uint16_t AD_code2;
-extern __IO uint16_t AD_code3;
 extern uint8_t mode;
 extern uint8_t inmode;
 extern uint16_t power_time;
@@ -129,7 +129,7 @@ uint16_t TIMES = 10000;
 bool is_lora_joined = 0;
 bool motion_flags = 0;
 
-extern char DATABUFF[500];
+extern char gpsUartBuffer[500];
 
 // clang-format on
 void led_power_anim(void);
@@ -192,7 +192,6 @@ extern TimerEvent_t RxWindowTimer1;
 extern TimerEvent_t RxWindowTimer2;
 
 TimerEvent_t downlinkLedTimer;
-TimerEvent_t downlinkLedTimer;
 TimerEvent_t NetworkJoinedLedTimer;
 TimerEvent_t PressButtonTimesLedTimer;
 TimerEvent_t PressButtonTimeoutTimer;
@@ -208,18 +207,6 @@ void OnPressButtonTimeoutEvent(void);
 
 /* Private variables ---------------------------------------------------------*/
 /* load Main call backs structure*/
-static LoRaMainCallback_t LoRaMainCallbacks = {
-	HW_GetBatteryLevel, HW_GetTemperatureLevel,
-	HW_GetUniqueId,		HW_GetRandomSeed,
-	LORA_RxData,		LORA_HasJoined,
-	LORA_ConfirmClass};
-
-/* !
- *Initialises the Lora Parameters
- */
-static LoRaParam_t LoRaParamInit = {LORAWAN_ADR_STATE,
-									LORAWAN_DEFAULT_DATA_RATE,
-									LORAWAN_PUBLIC_NETWORK, JOINREQ_NBTRIALS};
 
 uint8_t flag_2 = 1;
 
@@ -278,8 +265,7 @@ int main(void) {
 	/*Disbale Stand-by mode*/
 	LPM_SetOffMode(LPM_APPLI_Id, LPM_Disable);
 
-	/* Configure the Lora Stack*/
-	LORA_Init(&LoRaMainCallbacks, &LoRaParamInit);
+	lora.init();
 
 	gps_Identify();
 
@@ -1126,17 +1112,6 @@ static void LoraStartRejoin(TxEventType_t EventType) {
 }
 #endif
 
-static void LORA_ConfirmClass(DeviceClass_t Class) {
-	PRINTF("switch to class %c done\n\r", "ABC"[Class]);
-
-	/* Optionnal */
-	/* informs the server that switch has occurred ASAP*/
-	AppData.BuffSize = 0;
-	AppData.Port = LORAWAN_APP_PORT;
-
-	LORA_send(&AppData, LORAWAN_UNCONFIRMED_MSG);
-}
-
 void lora_send(void) {
 	switch (lora_getState()) {
 	case STATE_LED: {
@@ -1602,15 +1577,15 @@ void gps_Identify() {
 	char *ublox_buff = "u-blox";
 	char *l76K_buff = "IC=AT6558R";
 	char *l76L_buff = "MTKGPS*08";
-	if (strstr(DATABUFF, ublox_buff) != NULL) {
+	if (strstr(gpsUartBuffer, ublox_buff) != NULL) {
 		ic_version = 2;
 		pdop_value = 7.00;
 		//   AT_PRINTF("gps module:%s\n\r","ublox-MAX7");
-	} else if (strstr(DATABUFF, l76K_buff) != NULL) {
+	} else if (strstr(gpsUartBuffer, l76K_buff) != NULL) {
 		ic_version = 4;
 		pdop_value = 3.00;
 		//		AT_PRINTF("gps module:%s\n\r","L76K");
-	} else if (strstr(DATABUFF, l76L_buff) != NULL) {
+	} else if (strstr(gpsUartBuffer, l76L_buff) != NULL) {
 		ic_version = 1;
 		pdop_value = 3.00;
 		//		AT_PRINTF("gps module:%s\n\r","L76L");
@@ -1621,7 +1596,7 @@ void gps_Identify() {
 		pdop_value = 3.00;
 	}
 	Store_Config();
-	memset(DATABUFF, 0, sizeof(DATABUFF));
+	memset(gpsUartBuffer, 0, sizeof(gpsUartBuffer));
 }
 
 void send_exti(void) {

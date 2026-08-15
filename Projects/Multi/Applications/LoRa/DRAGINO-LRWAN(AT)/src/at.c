@@ -1608,20 +1608,6 @@ ATEerror_t at_NMEA886_set(const char *param) {
 		return AT_PARAM_ERROR;
 	}
 
-	//	if(ic_version>1)
-	//	{
-	//    return AT_PARAM_ERROR;
-	//	}
-	//
-	//	if((ic_version==0)&&(fr_mode1>4))
-	//	{
-	//    return AT_PARAM_ERROR;
-	//	}
-	// 	else if((ic_version==1)&&(fr_mode1>5))
-	//	{
-	//    return AT_PARAM_ERROR;
-	//	}
-
 	gps_navigation_mode = fr_mode1;
 
 	return AT_OK;

@@ -115,14 +115,6 @@ void  GPS_Init(void);
  */
 void BSP_sensor_Read( sensor_t *sensor_data);
 
-/**
- * @brief  sensor  read. 
- *
- * @note none
- * @retval sensor_data
- */
-void BSP_sensor_Read( sensor_t *sensor_data);
-
 #ifdef __cplusplus
 }
 #endif

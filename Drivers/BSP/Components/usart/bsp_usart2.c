@@ -17,7 +17,7 @@ __IO uint16_t iw1=0;
 /* buffe r read index*/
 //static uint16_t ir=0;
 
-char DATABUFF[500];
+char gpsUartBuffer[500];
 uint16_t jishu =0;
 
 
@@ -178,7 +178,7 @@ void usart1_IRQHandler(UART_HandleTypeDef *huart)
 //		PRINTF("%c",rx);
 		if(jishu<200)
 		{
-     DATABUFF[jishu]=rx;
+			gpsUartBuffer[jishu] = rx;
 		}
 		jishu++;
 	}
