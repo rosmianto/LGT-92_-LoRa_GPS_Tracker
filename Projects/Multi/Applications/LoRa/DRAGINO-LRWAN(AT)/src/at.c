@@ -1163,6 +1163,9 @@ ATEerror_t at_CFG_run(const char *param) {
 	PPRINTF(
 		"\n\rStop Tx events,Please wait for all configurations to print\r\n");
 	PPRINTF("\r\n");
+	// TODO: What these timers are used for?
+	// Why stop macstate (which is an internal timer?) from outside?
+	// Can't you just call the abort API?
 	TimerStop(&MacStateCheckTimer);
 	TimerStop(&TxDelayedTimer);
 	TimerStop(&AckTimeoutTimer);

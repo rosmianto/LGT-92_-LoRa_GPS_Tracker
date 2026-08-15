@@ -3681,3 +3681,12 @@ void LoRaMacTestSetChannel( uint8_t channel )
 {
     Channel = channel;
 }
+
+void LoRaMacStop() {
+	TimerStop(&MacStateCheckTimer);
+	TimerStop(&TxDelayedTimer);
+	TimerStop(&AckTimeoutTimer);
+
+	TimerStop(&RxWindowTimer1);
+	TimerStop(&RxWindowTimer2);
+}

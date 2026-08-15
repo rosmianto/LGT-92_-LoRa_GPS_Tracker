@@ -12,6 +12,7 @@
 #include "subsystems/LED.h"
 #include "subsystems/LoRa.h"
 #include <Downlink_Commands.h>
+#include <stdint.h>
 
 LoRa lora;
 // TODO: printf not available via UART, enable or not?
@@ -47,8 +48,7 @@ LoRa lora;
 // and there's redundant, unnecessary, paranoia-induced programming.
 extern uint8_t ic_version;
 
-// Emergency externs
-extern lora_AppData_t AppData;
+uint8_t loraPayloadBuffer[100];
 
 #define FIRMWARE_VERSION 0x04
 
@@ -139,22 +139,6 @@ void send_exti(void);
 void send_moin(void);
 void gps_Identify();
 
-/* call back when LoRa endNode has received a frame*/
-static void LORA_RxData(lora_AppData_t *AppData);
-
-/* call back when LoRa endNode has just joined*/
-static void LORA_HasJoined(void);
-
-/* call back when LoRa endNode has just switch the class*/
-static void LORA_ConfirmClass(DeviceClass_t Class);
-
-/* LoRa endNode send request*/
-static void Send(void);
-
-static void lora_send(void);
-
-void send_ALARM_data(void);
-
 #if defined(LoRa_Sensor_Node)
 /* start the tx process*/
 static void LoraStartTx(TxEventType_t EventType);
@@ -184,12 +168,6 @@ bool sleep_status = 0; // AT+SLEEP
 int user_key_exti_flag = 0;
 uint8_t user_key_duration = 0;
 void user_key_event(void);
-
-extern TimerEvent_t MacStateCheckTimer;
-extern TimerEvent_t TxDelayedTimer;
-extern TimerEvent_t AckTimeoutTimer;
-extern TimerEvent_t RxWindowTimer1;
-extern TimerEvent_t RxWindowTimer2;
 
 TimerEvent_t downlinkLedTimer;
 TimerEvent_t NetworkJoinedLedTimer;
@@ -568,422 +546,72 @@ static void Send(void) {
 
 	printf_uplink();
 	FLAG = (int)(MD << 6 | LON << 5 | FIRMWARE_VERSION) & 0xFF;
+	i = 0;
 	if (lora_getGPSState() == STATE_GPS_OFF) {
-		AppData.Buff[i++] = 0x00;
-		AppData.Buff[i++] = 0x00;
-		AppData.Buff[i++] = 0x00;
-		AppData.Buff[i++] = 0x00;
-		AppData.Buff[i++] = 0x00;
-		AppData.Buff[i++] = 0x00;
-		AppData.Buff[i++] = 0x00;
-		AppData.Buff[i++] = 0x00;
+		loraPayloadBuffer[i++] = 0x00;
+		loraPayloadBuffer[i++] = 0x00;
+		loraPayloadBuffer[i++] = 0x00;
+		loraPayloadBuffer[i++] = 0x00;
+		loraPayloadBuffer[i++] = 0x00;
+		loraPayloadBuffer[i++] = 0x00;
+		loraPayloadBuffer[i++] = 0x00;
+		loraPayloadBuffer[i++] = 0x00;
 	} else if (lora_getGPSState() == STATE_GPS_NO) {
-		AppData.Buff[i++] = 0xFF;
-		AppData.Buff[i++] = 0xFF;
-		AppData.Buff[i++] = 0xFF;
-		AppData.Buff[i++] = 0xFF;
-		AppData.Buff[i++] = 0xFF;
-		AppData.Buff[i++] = 0xFF;
-		AppData.Buff[i++] = 0xFF;
-		AppData.Buff[i++] = 0xFF;
+		loraPayloadBuffer[i++] = 0xFF;
+		loraPayloadBuffer[i++] = 0xFF;
+		loraPayloadBuffer[i++] = 0xFF;
+		loraPayloadBuffer[i++] = 0xFF;
+		loraPayloadBuffer[i++] = 0xFF;
+		loraPayloadBuffer[i++] = 0xFF;
+		loraPayloadBuffer[i++] = 0xFF;
+		loraPayloadBuffer[i++] = 0xFF;
 	} else {
-		AppData.Buff[i++] = (int)latitude >> 24 & 0xFF;
-		AppData.Buff[i++] = (int)latitude >> 16 & 0xFF;
-		AppData.Buff[i++] = (int)latitude >> 8 & 0xFF;
-		AppData.Buff[i++] = (int)latitude & 0xFF;
-		AppData.Buff[i++] = (int)longitude >> 24 & 0xFF;
-		AppData.Buff[i++] = (int)longitude >> 16 & 0xFF;
-		AppData.Buff[i++] = (int)longitude >> 8 & 0xFF;
-		AppData.Buff[i++] = (int)longitude & 0xFF;
+		loraPayloadBuffer[i++] = (int)latitude >> 24 & 0xFF;
+		loraPayloadBuffer[i++] = (int)latitude >> 16 & 0xFF;
+		loraPayloadBuffer[i++] = (int)latitude >> 8 & 0xFF;
+		loraPayloadBuffer[i++] = (int)latitude & 0xFF;
+		loraPayloadBuffer[i++] = (int)longitude >> 24 & 0xFF;
+		loraPayloadBuffer[i++] = (int)longitude >> 16 & 0xFF;
+		loraPayloadBuffer[i++] = (int)longitude >> 8 & 0xFF;
+		loraPayloadBuffer[i++] = (int)longitude & 0xFF;
 	}
 	if (set_sgm == 1) {
 		if (ALARM == 1) {
-			AppData.Buff[i++] =
+			loraPayloadBuffer[i++] =
 				(int)(sensor_data.bat_mv) >> 8 | 0x40; // battery
-			AppData.Buff[i++] = (int)sensor_data.bat_mv;
+			loraPayloadBuffer[i++] = (int)sensor_data.bat_mv;
 
 		} else {
-			AppData.Buff[i++] = (int)(sensor_data.bat_mv) >> 8; // battery
-			AppData.Buff[i++] = (int)sensor_data.bat_mv;
+			loraPayloadBuffer[i++] = (int)(sensor_data.bat_mv) >> 8; // battery
+			loraPayloadBuffer[i++] = (int)sensor_data.bat_mv;
 		}
-		AppData.Buff[i++] = (int)FLAG;
+		loraPayloadBuffer[i++] = (int)FLAG;
 	} else if (set_sgm == 0) {
 		if (ALARM == 1) {
-			AppData.Buff[i++] =
+			loraPayloadBuffer[i++] =
 				(int)(sensor_data.bat_mv) >> 8 | 0x40; // battery
-			AppData.Buff[i++] = (int)sensor_data.bat_mv;
+			loraPayloadBuffer[i++] = (int)sensor_data.bat_mv;
 		} else {
-			AppData.Buff[i++] = (int)(sensor_data.bat_mv) >> 8; // battery
-			AppData.Buff[i++] = (int)sensor_data.bat_mv;
+			loraPayloadBuffer[i++] = (int)(sensor_data.bat_mv) >> 8; // battery
+			loraPayloadBuffer[i++] = (int)sensor_data.bat_mv;
 		}
-		AppData.Buff[i++] = (int)FLAG;
-		AppData.Buff[i++] = (int)(Roll1 * 100) >> 8; // Roll
-		AppData.Buff[i++] = (int)(Roll1 * 100);
-		AppData.Buff[i++] = (int)(Pitch1 * 100) >> 8; // Pitch
-		AppData.Buff[i++] = (int)(Pitch1 * 100);
-		AppData.Buff[i++] = (int)(gps.HDOP * 100);			// HDOP
-		AppData.Buff[i++] = (int)(gps.altitude * 100) >> 8; // Altitude
-		AppData.Buff[i++] = (int)(gps.altitude * 100);
+		loraPayloadBuffer[i++] = (int)FLAG;
+		loraPayloadBuffer[i++] = (int)(Roll1 * 100) >> 8; // Roll
+		loraPayloadBuffer[i++] = (int)(Roll1 * 100);
+		loraPayloadBuffer[i++] = (int)(Pitch1 * 100) >> 8; // Pitch
+		loraPayloadBuffer[i++] = (int)(Pitch1 * 100);
+		loraPayloadBuffer[i++] = (int)(gps.HDOP * 100);			 // HDOP
+		loraPayloadBuffer[i++] = (int)(gps.altitude * 100) >> 8; // Altitude
+		loraPayloadBuffer[i++] = (int)(gps.altitude * 100);
 	}
 
 	gps.flag = 1;
 	gps_setflags = 0;
 	press_button_times = 0;
-	AppData.BuffSize = i;
 	payloadlens = i;
 	IWDG_Refresh();
-	LORA_send(&AppData, lora_config_reqack_get());
-}
-
-static void LORA_RxData(lora_AppData_t *AppData) {
-
-	set_at_receive(AppData->Port, AppData->Buff, AppData->BuffSize);
-
-	switch (AppData->Buff[0] & 0xff) {
-	case DOWNLINK_CMD_SET_TRANSMIT_INTERVAL: {
-		if (AppData->BuffSize == 4) //---->AT+TDC
-		{
-			ServerSetTDC = (AppData->Buff[1] << 16 | AppData->Buff[2] << 8 |
-							AppData->Buff[3]); // S
-
-			if (ServerSetTDC < 6) {
-				Server_TX_DUTYCYCLE = 6000;
-			} else {
-				TDC_flag = 1;
-				Server_TX_DUTYCYCLE = ServerSetTDC * 1000;
-			}
-			rxpr_flags = 1;
-		}
-		break;
-	}
-
-	case DOWNLINK_CMD_DEVICE_TRIGGER: {
-		if (AppData->BuffSize == 2) {
-			if (AppData->Buff[1] == 0xFF) //---->ATZ
-			{
-				device_reset_trigger = 1;
-				rxpr_flags = 1;
-			} else if (AppData->Buff[1] == 0xFE) //---->AT+FDR
-			{
-				FLASH_erase(0x8018F80); // page 799
-				FLASH_program_on_addr(0x8018F80, 0x12);
-				FLASH_erase(FLASH_USER_START_ADDR_CONFIG); // Page800
-				device_reset_trigger = 1;
-				rxpr_flags = 1;
-			}
-		}
-		break;
-	}
-
-	case DOWNLINK_CMD_CONFIRM_MODE: {
-		if (AppData->BuffSize == 2) {
-			if (AppData->Buff[1] == 0x01) //---->AT+CFM=1
-			{
-				lora_config_reqack_set(LORAWAN_CONFIRMED_MSG);
-				Store_Config();
-				rxpr_flags = 1;
-			} else if (AppData->Buff[1] == 0x00) //---->AT+CFM=0
-			{
-				lora_config_reqack_set(LORAWAN_UNCONFIRMED_MSG);
-				Store_Config();
-				rxpr_flags = 1;
-			}
-		}
-		break;
-	}
-
-	case DOWNLINK_CMD_EXIT_ALARM_MODE: {
-		if (AppData->BuffSize == 2) {
-			if (AppData->Buff[1] == 0x01) {
-				start_time = HW_RTC_GetTimerValue();
-				Alarm_times = 60;
-				Alarm_times1 = 60;
-				GPS_ALARM = 0;
-				ALARM = 0;
-				if (LON == 1) {
-					BSP_sensor_Init();
-					LED::ledBlueOn();
-					DelayMs(1000);
-				}
-				ledBlueOff();
-				PRINTF("Exit Alarm\r\n");
-			}
-		}
-		break;
-	}
-	case DOWNLINK_CMD_MOVEMENT_DETECTION_MODE: {
-		if (AppData->BuffSize == 2) {
-			MD = AppData->Buff[1];
-			PRINTF("MD: %02x\n\r", MD);
-			if (AppData->Buff[1] != 0x00) {
-				start_time = HW_RTC_GetTimerValue();
-			}
-		} else if (AppData->BuffSize == 4) {
-			if (AppData->Buff[1] == 0x03) {
-				MD = AppData->Buff[1];
-				Threshold = AppData->Buff[2];
-				Freq = AppData->Buff[3];
-				PRINTF("Set MD: %02x,%02x,%02x\n\r", MD, Threshold, Freq);
-			}
-			if (AppData->Buff[1] != 0x00) {
-				start_time = HW_RTC_GetTimerValue();
-			}
-		}
-		md_flags = 1;
-		Store_Config();
-		break;
-	}
-	case DOWNLINK_CMD_GPS_FIXTIME: {
-		if (AppData->BuffSize == 3) {
-			Positioning_time = (AppData->Buff[1] << 8 | AppData->Buff[2]);
-			if (Positioning_time == 1203) {
-				LP = 2;
-			} else {
-				LP = 0;
-			}
-		}
-		Store_Config();
-		break;
-	}
-	case DOWNLINK_CMD_NAVIGATION_MODE: {
-		if (AppData->BuffSize == 2) {
-			gps_navigation_mode = AppData->Buff[1];
-		}
-		Store_Config();
-		break;
-	}
-	case DOWNLINK_CMD_GPS_SEARCH_MODE: {
-		if (AppData->BuffSize == 2) {
-			gps_search_mode = AppData->Buff[1];
-		}
-		Store_Config();
-
-		break;
-	}
-	case DOWNLINK_CMD_GPS_PDOP: {
-		if (AppData->BuffSize == 3) {
-			pdop_value = (AppData->Buff[1] << 8 | AppData->Buff[2]) / 10.0;
-		}
-		Store_Config();
-
-		break;
-	}
-	case DOWNLINK_CMD_LED_ON: {
-		if (AppData->BuffSize == 2) {
-			LON = AppData->Buff[1];
-		}
-		Store_Config();
-
-		break;
-	}
-	case DOWNLINK_CMD_MOVEMENT_LED_ON: {
-		if (AppData->BuffSize == 2) {
-			MLON = AppData->Buff[1];
-		}
-		Store_Config();
-
-		break;
-	}
-
-	case DOWNLINK_CMD_SET_RGB_STATE: {
-		if (AppData->BuffSize == 10) {
-			struct RgbLedState state;
-
-			// Copy the downlink payload into struct, so we
-			// can easily interact with the data
-			memcpy(&state, &(AppData->Buff[1]), 9);
-
-			if (state.isRedOn == true) {
-				LED::ledRedOn();
-				DelayMs(state.redOnDuration);
-				LED::ledRedOff();
-			} else {
-				LED::ledRedOff();
-			}
-
-			if (state.isGreenOn == true) {
-				LED::ledGreenOn();
-				DelayMs(state.greenOnDuration);
-				LED::ledGreenOn();
-			} else {
-				LED::ledGreenOn();
-			}
-
-			if (state.isBlueOn == true) {
-				LED::ledBlueOn();
-				DelayMs(state.blueOnDuration);
-				LED::ledBlueOn();
-			} else {
-				LED::ledBlueOn();
-			}
-		}
-		break;
-	}
-	case DOWNLINK_CMD_INCLUDE_MOTION_DATA: {
-		if (AppData->BuffSize == 2) {
-			set_sgm = AppData->Buff[1];
-		}
-		Store_Config();
-
-		break;
-	}
-	case DOWNLINK_CMD_ALARM_TX_INTERVAL: {
-		ServerSetTDC = (AppData->Buff[1] << 16 | AppData->Buff[2] << 8 |
-						AppData->Buff[3]); // S
-		if (ServerSetTDC < 6) {
-			PRINTF("ACE setting must be more than 10S\n\r");
-			Alarm_TX_DUTYCYCLE = 10000;
-		} else {
-			TDC_flag = 1;
-			Alarm_TX_DUTYCYCLE = ServerSetTDC * 1000;
-			PRINTF("Set ACE: %d ms\n\r", Alarm_TX_DUTYCYCLE);
-		}
-		Store_Config();
-
-		break;
-	}
-	case DOWNLINK_CMD_KEEPALIVE_TIME: {
-		if (AppData->BuffSize == 4) {
-			ServerSetTDC = (AppData->Buff[1] << 16 | AppData->Buff[2] << 8 |
-							AppData->Buff[3]); // S
-
-			if (ServerSetTDC < 360) {
-				PRINTF("KAT setting must be more than 6m\n\r");
-				Keep_TX_DUTYCYCLE = 360000;
-			} else {
-				Keep_TX_DUTYCYCLE = ServerSetTDC * 1000;
-				PRINTF("Set KAT: %d ms\n\r", Keep_TX_DUTYCYCLE);
-			}
-			Store_Config();
-		}
-		break;
-	}
-	case DOWNLINK_CMD_NETWORK_JOINMODE: {
-		if (AppData->BuffSize == 2) {
-			if ((AppData->Buff[1] == 0x00) || (AppData->Buff[1] == 0x01)) {
-				if (AppData->Buff[1] == 0x01) //---->AT+NJM=1
-				{
-					lora_config_otaa_set(LORA_ENABLE);
-				} else //---->AT+NJM=0
-				{
-					lora_config_otaa_set(LORA_DISABLE);
-				}
-				Store_Config();
-				device_reset_trigger = 1;
-				rxpr_flags = 1;
-			}
-		}
-		break;
-	}
-
-	case DOWNLINK_CMD_PACKET_RESPONSE_LEVEL: {
-		if ((AppData->BuffSize == 2) && (AppData->Buff[1] <= 4)) {
-			response_level =
-				(AppData->Buff[1]); // 0~4					//---->AT++RPL
-			Store_Config();
-			rxpr_flags = 1;
-		}
-		break;
-	}
-
-	case DOWNLINK_CMD_ADAPTIVE_DATARATE: {
-		MibRequestConfirm_t mib;
-		if ((AppData->BuffSize == 2) &&
-			(AppData->Buff[1] == 0x01)) //---->AT+ADR=1
-		{
-			mib.Type = MIB_ADR;
-			mib.Param.AdrEnable = AppData->Buff[1];
-			LoRaMacMibSetRequestConfirm(&mib);
-			Store_Config();
-			rxpr_flags = 1;
-		} else if ((AppData->BuffSize == 4) &&
-				   (AppData->Buff[1] == 0x00)) //---->AT+ADR=0
-		{
-			mib.Type = MIB_ADR;
-			mib.Param.AdrEnable = AppData->Buff[1];
-			LoRaMacMibSetRequestConfirm(&mib);
-			if (AppData->Buff[2] != 0xff) //---->AT+DR
-			{
-				mib.Type = MIB_CHANNELS_DATARATE;
-				mib.Param.ChannelsDatarate = AppData->Buff[2];
-				LoRaMacMibSetRequestConfirm(&mib);
-			}
-			if (AppData->Buff[3] != 0xff) //---->AT+TXP
-			{
-				mib.Type = MIB_CHANNELS_TX_POWER;
-				mib.Param.ChannelsTxPower = AppData->Buff[3];
-				LoRaMacMibSetRequestConfirm(&mib);
-			}
-			Store_Config();
-			rxpr_flags = 1;
-		}
-		break;
-	}
-
-	case DOWNLINK_CMD_APP_PORT: {
-		if (AppData->BuffSize == 2) {
-			lora_config_application_port_set(AppData->Buff[1]); //---->AT+PORT
-			Store_Config();
-			rxpr_flags = 1;
-		}
-		break;
-	}
-
-	case DOWNLINK_CMD_EIGHT_CH_MODE: {
-#if defined(REGION_US915) || defined(REGION_AU915) || defined(REGION_CN470)
-		if (AppData->BuffSize == 2) {
-			if (AppData->Buff[1] <= 0x0C) {
-				customize_set8channel_set(AppData->Buff[1]); //---->AT+CHE
-				Store_Config();
-				rxpr_flags = 1;
-			}
-		}
-#endif
-		break;
-	}
-
-	case DOWNLINK_CMD_DWELLTIME: {
-#if defined(REGION_AS923) || defined(REGION_AU915)
-		if (AppData->BuffSize == 2) {
-			if ((AppData->Buff[1] == 0x00) ||
-				(AppData->Buff[1] == 0x01)) //---->AT+DWELLT
-			{
-				dwelltime = AppData->Buff[1];
-				Store_Config();
-				device_reset_trigger = 1;
-				rxpr_flags = 1;
-			}
-		}
-#endif
-		break;
-	}
-
-	default:
-		break;
-	}
-
-	if (TDC_flag == 1) {
-		Store_Config();
-		TimerInit(&TxTimer, OnTxTimerEvent);
-		TimerSetValue(&TxTimer, APP_TX_DUTYCYCLE);
-		TimerStart(&TxTimer);
-		TimerStart(&IWDGRefreshTimer);
-		TDC_flag = 0;
-	}
-
-	AT_PRINTF("\r\n");
-	AT_PRINTF("Receive data\n\r");
-	if ((AppData->BuffSize <= 8) && (rxpr_flags == 1)) {
-		AT_PRINTF("%d:", AppData->Port);
-		for (int i = 0; i < AppData->BuffSize; i++) {
-			AT_PRINTF("%02x ", AppData->Buff[i]);
-		}
-		AT_PRINTF("\n\r");
-	} else {
-		AT_PRINTF("BuffSize:%d,Run AT+RECVB=? to see detail\r\n",
-				  AppData->BuffSize);
-	}
-	rxpr_flags = 0;
+	lora.sendPayload(loraPayloadBuffer,
+					 i); // TODO: Weird to use variable i to specify len.
 }
 
 #if defined(LoRa_Sensor_Node)
@@ -1516,12 +1144,7 @@ void user_key_event(void) {
 		case 2: // sleep
 		{
 			sleep_status = 1;
-			TimerStop(&MacStateCheckTimer);
-			TimerStop(&TxDelayedTimer);
-			TimerStop(&AckTimeoutTimer);
-
-			TimerStop(&RxWindowTimer1);
-			TimerStop(&RxWindowTimer2);
+			lora.stop();
 			TimerStop(&TxTimer);
 
 			DelayMs(500);

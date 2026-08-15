@@ -1968,4 +1968,6 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t *mcpsRequest );
 
 /*! \} defgroup LORAMAC */
 
+void LoRaMacStop();
+
 #endif // __LORAMAC_H__
