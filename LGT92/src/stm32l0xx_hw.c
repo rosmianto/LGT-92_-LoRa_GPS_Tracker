@@ -78,7 +78,7 @@ Maintainer: Miguel Luis and Gregory Cristian
  /* Internal voltage reference, parameter VREFINT_CAL*/
 #define VREFINT_CAL       ((uint16_t*) ((uint32_t) 0x1FF80078))
 #define LORAWAN_MAX_BAT   254
-extern uint16_t batteryLevel_mV;
+extern uint16_t batteryLevel_mV; // bsp.c
 
 /* Internal temperature sensor: constants data used for indicative values in  */
 /* this example. Refer to device datasheet for min/typ/max values.            */

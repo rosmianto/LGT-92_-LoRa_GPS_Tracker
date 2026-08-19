@@ -230,8 +230,6 @@ int32_t latitude;
 
 uint32_t SendData = 0;
 
-uint16_t batteryLevel_mV;
-
 uint16_t TIMES = 10000;
 
 bool is_lora_joined = 0;
