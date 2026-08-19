@@ -58,7 +58,7 @@
 
 #if defined( REGION_EU868 )
 
-#include "LoRaMacTest.h"
+// #include "LoRaMacTest.h"
 
 /*!
  * LoRaWAN ETSI duty cycle control enable/disable

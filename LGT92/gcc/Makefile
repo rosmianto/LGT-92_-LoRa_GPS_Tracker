@@ -76,14 +76,14 @@ MIDDLEWARES_LORA_CRYPTO = \
         cmac.c
 PROJECTS_END_NODE = \
         at.c \
-        battery.c \
+        subsystems/battery.c \
         bsp.c \
         command.c \
         debug.c \
         hw_gpio.c \
         hw_rtc.c \
         hw_spi.c \
-        led.c \
+        subsystems/led.c \
         lora.c \
         main.c \
         stm32l0xx_hal_msp.c \
@@ -181,14 +181,16 @@ $(BUILDDIR)/$(NAME).elf: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(BUILDDIR)/%.c.o: %.c
+	mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.s.o: %.s
+	mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS) -c $< -o $@
 
-$(OBJS): | $(BUILDDIR)
-$(BUILDDIR):
-	mkdir $@
+# $(OBJS): | $(BUILDDIR)
+# $(BUILDDIR):
+# 	mkdir $@
 
 size: $(BUILDDIR)/$(NAME).elf
 	$(SZ) --format=SysV --radix=16 $^ | egrep "^.text|^.data|^.bss"

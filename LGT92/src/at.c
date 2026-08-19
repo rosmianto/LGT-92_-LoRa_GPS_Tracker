@@ -46,7 +46,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "at.h"
-#include "LoRaMacTest.h"
+// #include "LoRaMacTest.h"
 #include "bsp.h"
 #include "command.h"
 #include "delay.h"
@@ -536,12 +536,14 @@ ATEerror_t at_DataRate_set(const char *param) {
 
 ATEerror_t at_DutyCycle_set(const char *param) {
   switch (param[0]) {
+    // I disable this feature because it's not
+    // for regular operation even for testing.
+    // It's for Compliance Testing Mode and should be
+    // have a dedicated mode (not weaved into normal operation mode).
   case '0':
-    lora_config_duty_cycle_set(LORA_DISABLE);
-    break;
+    // lora_config_duty_cycle_set(LORA_DISABLE);
   case '1':
-    lora_config_duty_cycle_set(LORA_ENABLE);
-    break;
+    // lora_config_duty_cycle_set(LORA_ENABLE);
   default:
     return AT_PARAM_ERROR;
   }

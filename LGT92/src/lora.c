@@ -257,7 +257,7 @@ static lora_configuration_t lora_config =
 
 #if defined( REGION_EU868 )
 
-#include "LoRaMacTest.h"
+// #include "LoRaMacTest.h"
 
 /*!
  * LoRaWAN ETSI duty cycle control enable/disable
@@ -857,7 +857,8 @@ LoraState_t lora_config_otaa_get(void)
 void lora_config_duty_cycle_set(LoraState_t duty_cycle)
 {
   lora_config.duty_cycle = duty_cycle;
-  LoRaMacTestSetDutyCycleOn((duty_cycle == LORA_ENABLE) ? 1 : 0);
+  // Disabled because why?
+  // LoRaMacTestSetDutyCycleOn((duty_cycle == LORA_ENABLE) ? 1 : 0);
 }
 
 LoraState_t lora_config_duty_cycle_get(void)
@@ -1253,33 +1254,34 @@ void Read_Config(void)
 		lora_config.duty_cycle=LORA_ENABLE;
 	  else
 			lora_config.duty_cycle=LORA_DISABLE;
-		
-	LoRaMacTestSetDutyCycleOn((lora_config.duty_cycle == LORA_ENABLE) ? 1 : 0);
-	
-	mib.Type = MIB_PUBLIC_NETWORK;
-	mib.Param.EnablePublicNetwork=(r_config[1]>>24)&0xFF;
-	LoRaMacMibSetRequestConfirm( &mib );
-	
-	if(((r_config[1]>>16)&0xFF)==0x01)
-		lora_config.otaa=LORA_ENABLE;
-	  else
-			lora_config.otaa=LORA_DISABLE;
-		
-	mib.Type = MIB_DEVICE_CLASS;
-	mib.Param.Class=(DeviceClass_t)((r_config[1]>>8)&0xFF);
-	LoRaMacMibSetRequestConfirm( &mib );
-		
-	if((r_config[1]&0xFF)==0x01)
-		lora_config.ReqAck=LORAWAN_CONFIRMED_MSG;
-	  else
-			lora_config.ReqAck=LORAWAN_UNCONFIRMED_MSG;
-	
-	mib.Type = MIB_RX2_CHANNEL;
-	mib.Param.Rx2Channel.Frequency=r_config[2];
-	LoRaMacMibSetRequestConfirm( &mib );
-	
-  if((rx2_flags==0)||(lora_config.otaa==LORA_DISABLE))
-  {		
+
+          // Disabled because why?
+          // LoRaMacTestSetDutyCycleOn((lora_config.duty_cycle == LORA_ENABLE) ?
+          // 1 : 0);
+
+          mib.Type = MIB_PUBLIC_NETWORK;
+          mib.Param.EnablePublicNetwork = (r_config[1] >> 24) & 0xFF;
+          LoRaMacMibSetRequestConfirm(&mib);
+
+          if (((r_config[1] >> 16) & 0xFF) == 0x01)
+            lora_config.otaa = LORA_ENABLE;
+          else
+            lora_config.otaa = LORA_DISABLE;
+
+          mib.Type = MIB_DEVICE_CLASS;
+          mib.Param.Class = (DeviceClass_t)((r_config[1] >> 8) & 0xFF);
+          LoRaMacMibSetRequestConfirm(&mib);
+
+          if ((r_config[1] & 0xFF) == 0x01)
+            lora_config.ReqAck = LORAWAN_CONFIRMED_MSG;
+      else
+        lora_config.ReqAck = LORAWAN_UNCONFIRMED_MSG;
+
+      mib.Type = MIB_RX2_CHANNEL;
+      mib.Param.Rx2Channel.Frequency = r_config[2];
+      LoRaMacMibSetRequestConfirm(&mib);
+
+      if ((rx2_flags == 0) || (lora_config.otaa == LORA_DISABLE)) {		
 	mib.Type = MIB_RX2_CHANNEL;
 	mib.Param.Rx2Channel.Datarate=r_config[3];
 	joinrx2_dr=r_config[3];				

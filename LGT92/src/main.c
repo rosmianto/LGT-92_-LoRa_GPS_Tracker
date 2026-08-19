@@ -19,8 +19,8 @@
 #include <led.h>
 
 /*
-  This variable is used in:
-  at.c   -> as get/set value for GPS type
+  ic_version variable is used in:
+  at.c   -> as get/set value for GPS type (hardware version)
   lora.c -> to be stored in EEPROM as config
   main.c -> to change payload content and setting GPS PDOP value
   gps.c  -> to determine search mode and navigation mode upon waking up
@@ -2045,3 +2045,8 @@ void OnPressButtonTimeoutEvent(void) {
   press_button_times = 0;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+int _close(int file) { return -1; }
+int _lseek(int file, int ptr, int dir) { return 0; }
+int _read(int file, char *ptr, int len) { return 0; }
+int _write(int file, char *ptr, int len) { return len; }
