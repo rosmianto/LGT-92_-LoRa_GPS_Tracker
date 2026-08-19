@@ -14,12 +14,23 @@
 #include <Downlink_Commands.h>
 #include <stdint.h>
 
+// STM32-specific includes
+#include <stm32l0xx_hal.h>
+
 LoRa lora;
 // TODO: printf not available via UART, enable or not?
 // So far it's routed through TraceSend().
 
 // TODO: The MPU9250 driver code is awful, and they
 // bitbanged the I2C line when PA9 and PA10 are I2C capable?
+
+// TODO: Button needs ButtonEvents that produces events:
+// 1,2,3,4,5 clicks within 5-sec window.
+// 1->Undefined
+// 2->Sleep
+// 3->Device reset
+// 4->Activate Alarm Mode
+// 5->Exit Alarm Mode
 
 // TODO: Some ideas around device config:
 // * Skip flash, use EEPROM only. Better that way.
