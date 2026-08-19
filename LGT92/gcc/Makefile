@@ -140,9 +140,9 @@ CSRCDIRS = \
 ASRCDIRS = \
         Drivers/CMSIS/Device/ST/STM32L0xx/Source/Templates/gcc
 
-vpath %.c ../src $(addprefix ../../../../../../,$(CSRCDIRS))
-vpath %.s $(addprefix ../../../../../../,$(ASRCDIRS))
-INCFLAGS = -I../inc $(patsubst %,-I../../../../../../%,$(INCDIRS))
+vpath %.c ../src $(addprefix ../../,$(CSRCDIRS))
+vpath %.s $(addprefix ../../,$(ASRCDIRS))
+INCFLAGS = -I../inc $(patsubst %,-I../../%,$(INCDIRS))
 
 # Toolchain setup
 CROSS_COMPILE = arm-none-eabi-
