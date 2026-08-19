@@ -76,6 +76,7 @@ MIDDLEWARES_LORA_CRYPTO = \
         cmac.c
 PROJECTS_END_NODE = \
         at.c \
+        battery.c \
         bsp.c \
         command.c \
         debug.c \

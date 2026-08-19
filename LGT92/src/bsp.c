@@ -50,6 +50,7 @@
 #include "hw.h"
 #include "lora.h"
 #include "timeServer.h"
+#include <battery.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -63,21 +64,9 @@
  * ---------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static __IO uint16_t AD_code1 = 0;
-static __IO uint16_t AD_code2 = 0;
-uint16_t AD_code3 = 0;
-
-uint16_t batteryLevel_mV = 0;
 
 void BSP_sensor_Read(sensor_t *sensor_data) {
-  HAL_GPIO_WritePin(battery_CONTROL_PORT, battery_CONTROL_PIN, GPIO_PIN_RESET);
-  AD_code1 = HW_AdcReadChannel(ADC_Channel_battery);
-  HAL_GPIO_WritePin(battery_CONTROL_PORT, battery_CONTROL_PIN, GPIO_PIN_SET);
-
-  HW_GetBatteryLevel();
-  AD_code2 = AD_code1 * batteryLevel_mV / 4095;
-  AD_code3 = (AD_code2 * 57 / 47);
-  sensor_data->bat_mv = AD_code2 * (47 + 10) / 47;
+  sensor_data->bat_mv = battery_get_voltage_mV() * 1.0;
 }
 
 void BSP_sensor_Init(void) {

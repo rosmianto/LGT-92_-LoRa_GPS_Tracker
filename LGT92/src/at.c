@@ -105,8 +105,7 @@ uint32_t MD = 1;
 uint32_t MLON = 0;
 uint32_t Threshold = 0;
 uint32_t Freq = 0;
-uint32_t loggps =0;
-extern uint16_t AD_code3;
+uint32_t loggps = 0;
 
 /* External variables --------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -1833,11 +1832,13 @@ ATEerror_t at_PDOP_get(const char *param)
 
 ATEerror_t at_BAT_get(const char *param)
 {
-	sensor_t sensor_data;
-	BSP_sensor_Read( &sensor_data );
-	PPRINTF("%d\r\n",AD_code3);
-	
-  return AT_OK;		
+  sensor_t sensor_data;
+  BSP_sensor_Read(&sensor_data);
+
+  uint16_t batt_mv = (uint16_t)sensor_data.bat_mv;
+  PPRINTF("%d\r\n", batt_mv);
+
+  return AT_OK;
 }
 
 ATEerror_t at_NMEA353_set(const char *param)

@@ -57,13 +57,15 @@ Maintainer: Miguel Luis and Gregory Cristian
   *
   ******************************************************************************
   */
-#include "hw.h"
-#include "radio.h"
-#include "debug.h"
 #include "bsp.h"
-#include "vcom.h"
-#include "lora.h"
 #include "bsp_usart2.h"
+#include "debug.h"
+#include "hw.h"
+#include "lora.h"
+#include "radio.h"
+#include "vcom.h"
+#include <battery.h>
+
 /*!
  *  \brief Unique Devices IDs register set ( STM32L0xxx )
  */
@@ -75,10 +77,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  * \brief ADC Vbat measurement constants
  */
 
- /* Internal voltage reference, parameter VREFINT_CAL*/
-#define VREFINT_CAL       ((uint16_t*) ((uint32_t) 0x1FF80078))
-#define LORAWAN_MAX_BAT   254
-extern uint16_t batteryLevel_mV; // bsp.c
+/* Internal voltage reference, parameter VREFINT_CAL*/
+#define VREFINT_CAL ((uint16_t *)((uint32_t)0x1FF80078))
 
 /* Internal temperature sensor: constants data used for indicative values in  */
 /* this example. Refer to device datasheet for min/typ/max values.            */
@@ -333,37 +333,7 @@ uint16_t HW_GetTemperatureLevel( void )
   * @param none
   * @retval the battery level  1 (very low) to 254 (fully charged)
   */
-uint8_t HW_GetBatteryLevel( void ) 
-{
-  uint8_t batteryLevel = 0;
-  uint16_t measuredLevel = 0;
-  uint32_t batteryLevelmV;
-
-  measuredLevel = HW_AdcReadChannel( ADC_CHANNEL_VREFINT ); 
-
-  if (measuredLevel == 0)
-  {
-    batteryLevel_mV = 0;
-  }
-  else
-  {
-    batteryLevel_mV= (( (uint32_t) VDDA_VREFINT_CAL * (*VREFINT_CAL ) )/ measuredLevel);
-  }
-
-  if (batteryLevel_mV > VDD_BAT)
-  {
-    batteryLevel = LORAWAN_MAX_BAT;
-  }
-  else if (batteryLevelmV < VDD_MIN)
-  {
-    batteryLevel = 0;
-  }
-  else
-  {
-    batteryLevel = (( (uint32_t) (batteryLevelmV - VDD_MIN)*LORAWAN_MAX_BAT) /(VDD_BAT-VDD_MIN) ); 
-  }
-  return batteryLevel;
-}
+uint8_t HW_GetBatteryLevel(void) { return battery_get_voltage_byte(); }
 
 /**
   * @brief This function initializes the ADC
