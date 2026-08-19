@@ -59,6 +59,7 @@
 #include "timeServer.h"
 #include "tiny_sscanf.h"
 #include "version.h"
+#include <led.h>
 
 #if defined( REGION_AS923 )
 #define Firm_FQ 0x0001
@@ -1488,16 +1489,15 @@ void MPU9250_INT(void)
   if(in2 == 1)
 	 {		 
 		PPRINTF("In Motion\n\r");
-		mpuint_flags=1;		 
-		if(MLON == 1)
-		 {			
-			BSP_sensor_Init();		 
-			LED3_1; 
-			DelayMs(500);
-			LED3_0;
-			DelayMs(500);
-		 }	 
-	 } 
+		mpuint_flags=1;
+                if (MLON == 1) {
+                  BSP_sensor_Init();
+                  led_red_on;
+                  DelayMs(500);
+                  led_red_off();
+                  DelayMs(500);
+                }
+         } 
 }
 void lora_state_Led(void)
 {

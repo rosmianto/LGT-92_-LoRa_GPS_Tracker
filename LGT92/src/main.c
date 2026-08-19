@@ -1,49 +1,3 @@
-/******************************************************************************
- * @file    main.c
- * @author  MCD Application Team
- * @version V1.1.4
- * @date    08-January-2018
- * @brief   this is the main!
- ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V.
- * All rights reserved.</center></h2>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted, provided that the following conditions are met:
- *
- * 1. Redistribution of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of STMicroelectronics nor the names of other
- *    contributors to this software may be used to endorse or promote products
- *    derived from this software without specific written permission.
- * 4. This software, including modifications and/or derivative works of this
- *    software, must execute solely and exclusively on microcontroller or
- *    microprocessor devices manufactured by or for STMicroelectronics.
- * 5. Redistribution and use of this software other than as permitted under
- *    this license is void and will automatically terminate your rights under
- *    this license.
- *
- * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
- * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
- * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************
- */
-
 /* Includes ------------------------------------------------------------------*/
 #include "IIC.h"
 #include "at.h"
@@ -62,7 +16,18 @@
 #include "timeServer.h"
 #include "vcom.h"
 #include "version.h"
+#include <led.h>
 
+/*
+  This variable is used in:
+  at.c   -> as get/set value for GPS type
+  lora.c -> to be stored in EEPROM as config
+  main.c -> to change payload content and setting GPS PDOP value
+  gps.c  -> to determine search mode and navigation mode upon waking up
+
+  Somehow it used as a dynamic identifier for GPS module installed.
+  And used to set PDOP value
+*/
 extern uint8_t ic_version;
 
 /* Private typedef -----------------------------------------------------------*/
@@ -218,7 +183,6 @@ extern UART_HandleTypeDef uart1;
 extern bool rx2_flags;
 
 uint32_t Start_times = 0, End_times = 0, gps_time = 0;
-;
 
 FP32 gps_latitude, gps_longitude;
 
@@ -413,7 +377,9 @@ int main(void) {
   /* USER CODE END 1 */
   CMD_Init();
 
-  powerLED();
+  led_init();
+
+  led_run_animation();
 
   IIC_GPIO_MODE_Config();
 
@@ -505,11 +471,11 @@ static void LORA_HasJoined(void) {
   AT_PRINTF("JOINED\r\n");
 
   BSP_sensor_Init();
-  LED3_1;
-  LED1_1;
+  led_red_on();
+  led_blue_on();
   DelayMs(1000);
-  LED3_0;
-  LED1_0;
+  led_red_off();
+  led_blue_off();
 
   rejoin_keep_status = 0;
 
@@ -870,10 +836,10 @@ static void LORA_RxData(lora_AppData_t *AppData) {
         ALARM = 0;
         if (LON == 1) {
           BSP_sensor_Init();
-          LED1_1;
+          led_blue_on();
           DelayMs(1000);
         }
-        LED1_0;
+        led_blue_off();
         PRINTF("Exit Alarm\r\n");
       }
     }
@@ -956,45 +922,45 @@ static void LORA_RxData(lora_AppData_t *AppData) {
     if (AppData->BuffSize == 10) {
       if (AppData->Buff[1] == 0x01) {
         BSP_powerLED_Init();
-        LED3_1;
+        led_red_on();
         red = 1;
         led_red = AppData->Buff[2] << 8 | AppData->Buff[3];
         if (led_red != 0) {
           DelayMs(led_red);
-          LED3_0;
+          led_red_off();
           red = 0;
         }
       } else {
         red = 0;
-        LED3_0;
+        led_red_off();
       }
       if (AppData->Buff[4] == 0x01) {
         BSP_powerLED_Init();
-        LED1_1;
+        led_blue_on();
         blue = 1;
         led_blue = AppData->Buff[5] << 8 | AppData->Buff[6];
         if (led_blue != 0) {
           DelayMs(led_blue);
-          LED1_0;
+          led_blue_off();
           blue = 0;
         }
       } else {
         blue = 0;
-        LED1_0;
+        led_blue_off();
       }
       if (AppData->Buff[7] == 0x01) {
         BSP_powerLED_Init();
-        LED0_1;
+        led_green_on();
         greed = 1;
         led_greed = AppData->Buff[8] << 8 | AppData->Buff[9];
         if (led_blue != 0) {
           DelayMs(led_greed);
-          LED0_0;
+          led_green_off();
           greed = 0;
         }
       } else {
-        blue = 0;
-        LED0_0;
+        greed = 0;
+        led_green_off();
       }
     }
     Store_Config();
@@ -1336,10 +1302,7 @@ void lora_send(void) {
           SendData = 1;
           TimerStart(&IWDGRefreshTimer);
           if (Positioning_time != 0) {
-            //						 if(GPS_ALARM == 0)
-            //							{
             GPS_POWER_OFF();
-            //							}
           }
         } else if (pdop_value < pdop_gps) {
           if ((pdop_gps < pdop_comp) && (pdop_gps != 0.0)) {
@@ -1353,11 +1316,7 @@ void lora_send(void) {
             (gps_latitude > 0 && gps_longitude > 0)) {
           SendData = 1;
           if (Positioning_time != 0) {
-            //							if(GPS_ALARM ==
-            // 0)
-            //							{
             GPS_POWER_OFF();
-            //							}
           }
         }
       }
@@ -1367,9 +1326,9 @@ void lora_send(void) {
       if (GPS_ALARM == 0) {
         gps_state_on();
         if (LON == 1) {
-          LED1_1;
+          led_blue_on();
           DelayMs(200);
-          LED1_0;
+          led_blue_off();
           DelayMs(200);
         }
         send_data();
@@ -1380,10 +1339,10 @@ void lora_send(void) {
         if (Alarm_times <= 60) {
           gps_state_on();
           if (LON == 1) {
-            LED3_1;
+            led_red_on();
             DelayMs(1000);
           }
-          LED3_0;
+          led_red_off();
           send_ALARM_data();
           a = 100;
           GPS_ALARM = 1;
@@ -1396,10 +1355,10 @@ void lora_send(void) {
           GPS_ALARM = 0;
           if (LON == 1) {
             BSP_sensor_Init();
-            LED1_1;
+            led_blue_on();
             DelayMs(1000);
           }
-          LED1_0;
+          led_blue_off();
           PPRINTF("Exit Alarm\r\n");
         }
       }
@@ -1411,10 +1370,10 @@ void lora_send(void) {
       if (GS == 1) {
         ALARM = 1;
         gps_state_off();
-        LED3_1;
+        led_red_on();
         Send();
         DelayMs(5000);
-        LED3_0;
+        led_red_off();
         GS = 0;
         gps_time = 0;
         Alarm_times1 = 1;
@@ -1426,9 +1385,7 @@ void lora_send(void) {
       GPS_INPUT();
       Start_times++;
       LP = 0;
-      //				LED3_0;
-      //				LED1_0;
-      LED0_0;
+      led_green_off();
     }
 
     else if ((LP == 1) || (LP == 2)) {
@@ -1475,7 +1432,7 @@ void lora_send(void) {
       gps_time++;
       TimerStart(&IWDGRefreshTimer);
       if (LON == 1) {
-        LED0_1;
+        led_green_on();
       }
       TIMES = 10000;
       DelayMs(200);
@@ -1498,39 +1455,36 @@ void lora_send(void) {
          ((Positioning_time == 0) && (End_times >= 150)))) {
       send_fail = 1;
       if (Positioning_time != 0) {
-        //					if(GPS_ALARM == 0)
-        //					{
         GPS_POWER_OFF();
-        //					}
       }
       if (GPS_ALARM == 0) {
-        LED3_0;
-        LED1_0;
-        LED0_0;
+        led_red_off();
+        led_blue_off();
+        led_green_off();
         gps_state_off();
         a = 100;
         if (LON == 1) {
-          LED3_1;
+          led_red_on();
           DelayMs(200);
-          LED3_0;
+          led_red_off();
           DelayMs(200);
-          LED3_1;
+          led_red_on();
           DelayMs(200);
-          LED3_0;
+          led_red_off();
           DelayMs(200);
         }
         send_data();
         GPS_ALARM = 0;
       } else if (GPS_ALARM == 1) {
         if (Alarm_times <= 60) {
-          LED3_0;
-          LED1_0;
-          LED0_0;
+          led_red_off();
+          led_blue_off();
+          led_green_off();
           if (LON == 1) {
-            LED3_1;
+            led_red_on();
             DelayMs(1000);
           }
-          LED3_0;
+          led_red_off();
           gps_state_off();
           send_ALARM_data();
           GPS_ALARM = 1;
@@ -1544,10 +1498,10 @@ void lora_send(void) {
           GPS_ALARM = 0;
           if (LON == 1) {
             BSP_sensor_Init();
-            LED1_1;
+            led_blue_on();
             DelayMs(1000);
           }
-          LED1_0;
+          led_blue_off();
           PPRINTF("Exit Alarm\r\n");
         }
       }
@@ -1603,13 +1557,13 @@ void send_data(void) {
   ENABLE_IRQ();
   BSP_sensor_Init();
   if (red == 1) {
-    LED3_1;
+    led_red_on();
   }
   if (blue == 1) {
-    LED1_1;
+    led_blue_on();
   }
   if (greed == 1) {
-    LED0_1;
+    led_green_on();
   }
   if (Positioning_time == 0) {
     DelayMs(2000);

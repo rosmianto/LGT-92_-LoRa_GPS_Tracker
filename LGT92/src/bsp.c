@@ -127,20 +127,6 @@ void BSP_powerLED_DeInit(void) {
   HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
-void powerLED(void) {
-
-  BSP_powerLED_Init();
-  LED0_1;
-  DelayMs(200);
-  LED0_0;
-  LED1_1;
-  DelayMs(200);
-  LED1_0;
-  LED3_1;
-  DelayMs(200);
-  LED3_0;
-}
-
 void BSP_battery_Init(void) {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   __HAL_RCC_GPIOA_CLK_ENABLE();

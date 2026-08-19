@@ -83,6 +83,7 @@ PROJECTS_END_NODE = \
         hw_gpio.c \
         hw_rtc.c \
         hw_spi.c \
+        led.c \
         lora.c \
         main.c \
         stm32l0xx_hal_msp.c \

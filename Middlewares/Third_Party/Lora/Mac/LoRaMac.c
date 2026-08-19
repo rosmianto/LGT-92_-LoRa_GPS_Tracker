@@ -2516,11 +2516,11 @@ LoRaMacStatus_t SendFrameOnChannel( uint8_t channel )
 			{
 		  if(GPS_ALARM == 0)
 			{
-				BSP_sensor_Init();					
-				LED1_1;
-				DelayMs(200);	
-				LED1_0;
-				DelayMs(200);				
+                    BSP_sensor_Init();
+                    led_blue_on();
+                    DelayMs(200);
+                    led_blue_off();
+                    DelayMs(200);				
 			}	
 			}			
     }	
