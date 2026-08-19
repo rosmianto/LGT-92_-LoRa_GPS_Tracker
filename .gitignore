@@ -17,6 +17,8 @@
 *.obj
 *.OBJ
 
+.vscode/compile_commands.json
+
 # Listing Files
 *.COD
 *.cod

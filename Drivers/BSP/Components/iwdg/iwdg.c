@@ -101,8 +101,7 @@ void iwdg_init(void)
   * @param  None
   * @retval LSI Frequency
   */
-static uint32_t GetLSIFrequency(void)
-{
+uint32_t GetLSIFrequency(void) {
   TIM_IC_InitTypeDef    TIMInput_Config;
 
   RCC_OscInitTypeDef oscinit = {0};

@@ -65,31 +65,41 @@ Maintainer: Miguel Luis and Gregory Cristian
 #ifdef __cplusplus
  extern "C" {
 #endif
-/* Includes ------------------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
 
-/* Exported constants --------------------------------------------------------*/
-/* External variables --------------------------------------------------------*/
-/* Exported macros -----------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */ 
-// See also MPU-9250 Register Map and Descriptions, Revision 4.0, RM-MPU-9250A-00, Rev. 1.4, 9/9/2013 for registers not listed in 
-// above document; the MPU9250 and MPU9150 are virtually identical but the latter has a different register map
-//
-//Magnetometer Registers
-void IIC_GPIO_MODE_Config(void);
-void IIC_delay(void);
-void IIC_Start(void);
-void IIC_Stop(void);
-uint8_t IIC_WaitAck(void);
-void IIC_NAck(void);
-void IIC_Ack(void);
-void IIC_SendByte(uint8_t _ucByte);
-uint8_t IIC_ReadByte(unsigned char ack);
-void SDA_OUT(void);
-void SDA_IN(void);
-	 
+#include <stdint.h>
+ /* Includes
+  * ------------------------------------------------------------------*/
+ /* Exported types
+  * ------------------------------------------------------------*/
+
+ /* Exported constants
+  * --------------------------------------------------------*/
+ /* External variables
+  * --------------------------------------------------------*/
+ /* Exported macros
+  * -----------------------------------------------------------*/
+ /* Exported functions -------------------------------------------------------
+  */
+ // See also MPU-9250 Register Map and Descriptions, Revision 4.0,
+ // RM-MPU-9250A-00, Rev. 1.4, 9/9/2013 for registers not listed in above
+ // document; the MPU9250 and MPU9150 are virtually identical but the latter has
+ // a different register map
+ //
+ // Magnetometer Registers
+ void IIC_GPIO_MODE_Config(void);
+ void IIC_delay(void);
+ void IIC_Start(void);
+ void IIC_Stop(void);
+ uint8_t IIC_WaitAck(void);
+ void IIC_NAck(void);
+ void IIC_Ack(void);
+ void IIC_SendByte(uint8_t _ucByte);
+ uint8_t IIC_ReadByte(unsigned char ack);
+ void SDA_OUT(void);
+ void SDA_IN(void);
+
 #ifdef __cplusplus
-}
+ }
 #endif
 
 #endif /* __IIC_H__ */

@@ -45,23 +45,23 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
-#include "flash_eraseprogram.h"
-#include "low_power_manager.h"
-#include "lora.h"
+#include "IIC.h"
+#include "at.h"
 #include "bsp.h"
+#include "bsp_usart2.h"
+#include "command.h"
+#include "delay.h"
+#include "flash_eraseprogram.h"
+#include "gpio_exti.h"
+#include "gps.h"
+#include "hw.h"
+#include "iwdg.h"
+#include "lora.h"
+#include "low_power_manager.h"
+#include "mpu9250.h"
 #include "timeServer.h"
 #include "vcom.h"
 #include "version.h"
-#include "command.h"
-#include "at.h"
-#include "gpio_exti.h"
-#include "iwdg.h"
-#include "delay.h"
-#include "GPS.h"  
-#include "bsp_usart2.h"
-#include "IIC.h"
-#include "mpu9250.h"
 extern uint8_t ic_version;
 
 /* Private typedef -----------------------------------------------------------*/
@@ -671,9 +671,9 @@ static void Send( void )
 		LP = 0;
 	}
 
-	  MPU_Write_Byte(MPU9250_ADDR,0x6B,0X00);//»½ÐÑ
+	  MPU_Write_Byte(MPU9250_ADDR,0x6B,0X00);//ï¿½ï¿½ï¿½ï¿½
 	  MPU_Init();
-//    MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT2_REG,0X00);  	//¼ÓËÙ¶ÈÓëÍÓÂÝÒÇ¶¼¹¤×÷
+//    MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT2_REG,0X00);  	//ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¶ï¿½ï¿½ï¿½ï¿½ï¿½
     yaw = 0;
 		for(int H=0; H<10; H++)
 		{
