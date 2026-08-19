@@ -10,7 +10,7 @@
 #include "stm32l0xx_nucleo.h"
 
 #include "bsp_usart2.h"
-
+#include <ctype.h>
 
 #ifndef NULL
 #define NULL    ((void *)0)
@@ -26,22 +26,22 @@
 #define GPS_POWER_ON()  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET)		
 #define GPS_POWER_OFF()  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET)
 
-typedef unsigned char  INT8U; // ÎÞ·ûºÅ8Î»ÕûÐÍ±äÁ¿ // 
-typedef signed char    INT8S; // ÓÐ·ûºÅ8Î»ÕûÐÍ±äÁ¿ // 
-typedef unsigned short INT16U; // ÎÞ·ûºÅ16Î»ÕûÐÍ±äÁ¿ // 
-typedef signed short   INT16S; // ÓÐ·ûºÅ16Î»ÕûÐÍ±äÁ¿ // 
-typedef unsigned int   INT32U; // ÎÞ·ûºÅ32Î»ÕûÐÍ±äÁ¿ // 
-typedef signed int     INT32S; // ÓÐ·ûºÅ32Î»ÕûÐÍ±äÁ¿ // 
-typedef float          FP32; // µ¥¾«¶È¸¡µãÊý(32Î»³¤¶È) // 
-typedef double         FP64; // Ë«¾«¶È¸¡µãÊý(64Î»³¤¶È) //  
+typedef unsigned char  INT8U; // ï¿½Þ·ï¿½ï¿½ï¿½8Î»ï¿½ï¿½ï¿½Í±ï¿½ï¿½ï¿½ // 
+typedef signed char    INT8S; // ï¿½Ð·ï¿½ï¿½ï¿½8Î»ï¿½ï¿½ï¿½Í±ï¿½ï¿½ï¿½ // 
+typedef unsigned short INT16U; // ï¿½Þ·ï¿½ï¿½ï¿½16Î»ï¿½ï¿½ï¿½Í±ï¿½ï¿½ï¿½ // 
+typedef signed short   INT16S; // ï¿½Ð·ï¿½ï¿½ï¿½16Î»ï¿½ï¿½ï¿½Í±ï¿½ï¿½ï¿½ // 
+typedef unsigned int   INT32U; // ï¿½Þ·ï¿½ï¿½ï¿½32Î»ï¿½ï¿½ï¿½Í±ï¿½ï¿½ï¿½ // 
+typedef signed int     INT32S; // ï¿½Ð·ï¿½ï¿½ï¿½32Î»ï¿½ï¿½ï¿½Í±ï¿½ï¿½ï¿½ // 
+typedef float          FP32; // ï¿½ï¿½ï¿½ï¿½ï¿½È¸ï¿½ï¿½ï¿½ï¿½ï¿½(32Î»ï¿½ï¿½ï¿½ï¿½) // 
+typedef double         FP64; // Ë«ï¿½ï¿½ï¿½È¸ï¿½ï¿½ï¿½ï¿½ï¿½(64Î»ï¿½ï¿½ï¿½ï¿½) //  
 //#define   BOOL     bool
  
 typedef	struct 
 	{ 
-		int satid;      //ÎÀÐÇÐòºÅ 
-		int elevation;  //ÎÀÐÇÑö½Ç£¨00 - 90£©¶È
-		int azimuth;    //ÎÀÐÇ·½Î»½Ç£¨00 - 359£©¶È
-		int snr;        //ÐÅÔë±È£¨00£­99£©dbHz 
+		int satid;      //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
+		int elevation;  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç£ï¿½00 - 90ï¿½ï¿½ï¿½ï¿½
+		int azimuth;    //ï¿½ï¿½ï¿½Ç·ï¿½Î»ï¿½Ç£ï¿½00 - 359ï¿½ï¿½ï¿½ï¿½
+		int snr;        //ï¿½ï¿½ï¿½ï¿½È£ï¿½00ï¿½ï¿½99ï¿½ï¿½dbHz 
 	} SatelliteInfo; 
 
 typedef  struct{
@@ -54,27 +54,27 @@ typedef  struct{
     uint8_t latNS;    
     FP32 longitude;
     uint8_t   lgtEW;
-    FP32 speed;       //µØÃæËÙ¶È£¬GPSÊä³öµ¥Î» ½Ú£¬Knots ÒÑ¾­×ª»¯Î»KM/H
-    FP32 direction;   //·½Î»½Ç£¬¶È £¬ÒÔÕæ±±Îª²Î¿¼
+    FP32 speed;       //ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È£ï¿½GPSï¿½ï¿½ï¿½ï¿½ï¿½Î» ï¿½Ú£ï¿½Knots ï¿½Ñ¾ï¿½×ªï¿½ï¿½Î»KM/H
+    FP32 direction;   //ï¿½ï¿½Î»ï¿½Ç£ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½æ±±Îªï¿½Î¿ï¿½
     
 	  FP32  flag;
 	
-    FP32  altitude;     //º£°Î¸ß¶È
-    uint8_t altitudeunit;       //º£°Îµ¥Î»
+    FP32  altitude;     //ï¿½ï¿½ï¿½Î¸ß¶ï¿½
+    uint8_t altitudeunit;       //ï¿½ï¿½ï¿½Îµï¿½Î»
 
-    uint8_t  FixMode;     //GPS×´Ì¬£¬0=Î´¶¨Î»£¬1=·Ç²î·Ö¶¨Î»£¬2=²î·Ö¶¨Î»£¬3=ÎÞÐ§PPS£¬6=ÕýÔÚ¹ÀËã
-    uint8_t GSA_mode1;//¶¨Î»Ä£Ê½£¬A=×Ô¶¯ÊÖ¶¯2D/3D£¬M=ÊÖ¶¯2D/3D 
-    uint8_t GSA_mode2;//¶¨Î»ÀàÐÍ£¬1=Î´¶¨Î»£¬2=2D¶¨Î»£¬3=3D¶¨Î» 
+    uint8_t  FixMode;     //GPS×´Ì¬ï¿½ï¿½0=Î´ï¿½ï¿½Î»ï¿½ï¿½1=ï¿½Ç²ï¿½Ö¶ï¿½Î»ï¿½ï¿½2=ï¿½ï¿½Ö¶ï¿½Î»ï¿½ï¿½3=ï¿½ï¿½Ð§PPSï¿½ï¿½6=ï¿½ï¿½ï¿½Ú¹ï¿½ï¿½ï¿½
+    uint8_t GSA_mode1;//ï¿½ï¿½Î»Ä£Ê½ï¿½ï¿½A=ï¿½Ô¶ï¿½ï¿½Ö¶ï¿½2D/3Dï¿½ï¿½M=ï¿½Ö¶ï¿½2D/3D 
+    uint8_t GSA_mode2;//ï¿½ï¿½Î»ï¿½ï¿½ï¿½Í£ï¿½1=Î´ï¿½ï¿½Î»ï¿½ï¿½2=2Dï¿½ï¿½Î»ï¿½ï¿½3=3Dï¿½ï¿½Î» 
 
-    FP32 PDOP;          //×ÛºÏÎ»ÖÃ¾«¶ÈÒò×Ó
-    FP32 HDOP;          //Ë®Æ½¾«¶ÈÒò×Ó
-    FP32 VDOP;          //´¹Ö±¾«¶ÈÒò×Ó 
-    uint32_t  ageOfDiff;//²î·ÖÊ±¼ä£¨´Ó×î½üÒ»´Î½ÓÊÕµ½²î·ÖÐÅºÅ¿ªÊ¼µÄÃëÊý£¬Èç¹û²»ÊÇ²î·Ö¶¨Î»½«Îª¿Õ£© 
-    uint16_t  diffStationID;//²î·ÖÕ¾IDºÅ0000 - 1023£¨Ç°µ¼Î»Êý²»×ãÔò²¹0£¬Èç¹û²»ÊÇ²î·Ö¶¨Î»½«Îª¿Õ£©
+    FP32 PDOP;          //ï¿½Ûºï¿½Î»ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    FP32 HDOP;          //Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    FP32 VDOP;          //ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
+    uint32_t  ageOfDiff;//ï¿½ï¿½ï¿½Ê±ï¿½ä£¨ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ÅºÅ¿ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç²ï¿½Ö¶ï¿½Î»ï¿½ï¿½Îªï¿½Õ£ï¿½ 
+    uint16_t  diffStationID;//ï¿½ï¿½ï¿½Õ¾IDï¿½ï¿½0000 - 1023ï¿½ï¿½Ç°ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç²ï¿½Ö¶ï¿½Î»ï¿½ï¿½Îªï¿½Õ£ï¿½
      
-    uint8_t usedsat[12];//ÕýÔÚÓÃÀ´½âËãµÄÎÀÐÇÐòºÅ
-    uint8_t  usedsatnum;  //ÕýÔÚÊ¹ÓÃµÄÎÀÐÇÊýÁ¿£¨00 - 12£©
-    uint8_t allsatnum;  //µ±Ç°¿É¼ûÎÀÐÇ×ÜÊý£¨00 - 12£©
+    uint8_t usedsat[12];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    uint8_t  usedsatnum;  //ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½00 - 12ï¿½ï¿½
+    uint8_t allsatnum;  //ï¿½ï¿½Ç°ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½00 - 12ï¿½ï¿½
    SatelliteInfo satinfo[38];
      }GPSINFO;
 

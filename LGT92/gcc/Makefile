@@ -110,26 +110,26 @@ ASRC := \
 OBJS := $(CSRC:%=$(BUILDDIR)/%.o) $(ASRC:%=$(BUILDDIR)/%.o)
 
 INCDIRS = \
-Drivers/BSP/STM32L0xx_Nucleo \
-Drivers/STM32L0xx_HAL_Driver/Inc \
-Drivers/CMSIS/Device/ST/STM32L0xx/Include \
-Drivers/CMSIS/Include \
-Drivers/BSP/Components/Common \
-Drivers/BSP/Components/sx1276 \
-Drivers/BSP/sx1276mb1las \
-Drivers/BSP/Components/flash_eraseprogram \
-Drivers/BSP/Components/gpio_exti \
-Drivers/BSP/Components/iwdg \
-Drivers/BSP/Components/filter \
-Drivers/BSP/Components/gps \
-Drivers/BSP/Components/mpu9250 \
-Drivers/BSP/Components/IIC \
-Drivers/BSP/Components/usart \
-Middlewares/Third_Party/Lora/Crypto \
-Middlewares/Third_Party/Lora/Mac \
-Middlewares/Third_Party/Lora/Phy \
-Middlewares/Third_Party/Lora/Utilities \
-Middlewares/Third_Party/Lora/Core
+        Drivers/BSP/Components/Common \
+        Drivers/BSP/Components/filter \
+        Drivers/BSP/Components/flash_eraseprogram \
+        Drivers/BSP/Components/gpio_exti \
+        Drivers/BSP/Components/gps \
+        Drivers/BSP/Components/IIC \
+        Drivers/BSP/Components/iwdg \
+        Drivers/BSP/Components/mpu9250 \
+        Drivers/BSP/Components/sx1276 \
+        Drivers/BSP/Components/usart \
+        Drivers/BSP/STM32L0xx_Nucleo \
+        Drivers/BSP/sx1276mb1las \
+        Drivers/CMSIS/Device/ST/STM32L0xx/Include \
+        Drivers/CMSIS/Include \
+        Drivers/STM32L0xx_HAL_Driver/Inc \
+        Middlewares/Third_Party/Lora/Core \
+        Middlewares/Third_Party/Lora/Crypto \
+        Middlewares/Third_Party/Lora/Mac \
+        Middlewares/Third_Party/Lora/Phy \
+        Middlewares/Third_Party/Lora/Utilities
 
 CSRCDIRS = \
         Drivers/CMSIS/Device/ST/STM32L0xx/Source/Templates \
