@@ -75,21 +75,21 @@ MIDDLEWARES_LORA_CRYPTO = \
         aes.c \
         cmac.c
 PROJECTS_END_NODE = \
+        at.c \
         bsp.c \
+        command.c \
         debug.c \
         hw_gpio.c \
         hw_rtc.c \
         hw_spi.c \
+        lora.c \
         main.c \
         stm32l0xx_hal_msp.c \
         stm32l0xx_hw.c \
         stm32l0xx_it.c \
-        vcom.c \
-        at.c \
-        command.c \
-        lora.c \
         tiny_sscanf.c \
-        tiny_vsnprintf.c
+        tiny_vsnprintf.c \
+        vcom.c
 PROJECTS_STARTUP = \
         startup_stm32l072xx.s
 
