@@ -202,8 +202,7 @@ static void HW_IoDeInit( void )
   if((lora_getState() != STATE_WAKE_JOIN))
 	{	
 		GPS_doinit();
-	}	
-	
+  }
 }
 
 

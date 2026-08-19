@@ -62,6 +62,7 @@
 #include "timeServer.h"
 #include "vcom.h"
 #include "version.h"
+
 extern uint8_t ic_version;
 
 /* Private typedef -----------------------------------------------------------*/
@@ -107,6 +108,7 @@ extern uint8_t ic_version;
  * User application data
  */
 static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
+
 bool rxpr_flags = 0;
 int exti_flag = 0;
 uint32_t COUNT;
