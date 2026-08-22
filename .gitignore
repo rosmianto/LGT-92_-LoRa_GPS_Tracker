@@ -20,6 +20,7 @@
 .vscode/compile_commands.json
 *.elf
 .DS_Store
+build/
 
 # Listing Files
 *.COD
