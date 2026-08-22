@@ -16,6 +16,7 @@
 #include "timeServer.h"
 #include "vcom.h"
 #include "version.h"
+#include <app_main.h>
 #include <led.h>
 
 /*
@@ -324,6 +325,8 @@ int main(void) {
   LORA_Init(&LoRaMainCallbacks, &LoRaParamInit);
 
   gps_Identify();
+
+  app_main();
 
   while (1) {
     /* Handle UART commands */

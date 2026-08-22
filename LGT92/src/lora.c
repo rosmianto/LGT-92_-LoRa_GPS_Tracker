@@ -1179,9 +1179,9 @@ void Store_Config(void)
 
 	s_config[config_count++]=(mode<<24)|(inmode<<16)|power_time;
 
-		s_config[config_count++]=set_sgm;
-	
-	s_config[config_count++]=Positioning_time;
+        s_config[config_count++] = set_sgm;
+
+        s_config[config_count++]=Positioning_time;
 	
 	s_config[config_count++]=LON;
 	
