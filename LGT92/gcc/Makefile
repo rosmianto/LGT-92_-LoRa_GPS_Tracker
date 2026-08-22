@@ -127,16 +127,16 @@ INCDIRS = \
         Drivers/CMSIS/Device/ST/STM32L0xx/Include \
         Drivers/CMSIS/Include \
         Drivers/STM32L0xx_HAL_Driver/Inc \
-        Middlewares/Third_Party/Lora/Core \
-        Middlewares/Third_Party/Lora/Crypto \
-        Middlewares/Third_Party/Lora/Mac \
-        Middlewares/Third_Party/Lora/Phy \
-        Middlewares/Third_Party/Lora/Utilities
+        Lib/LoRaWAN/Core \
+        Lib/LoRaWAN/Crypto \
+        Lib/LoRaWAN/Mac \
+        Lib/LoRaWAN/Phy \
+        Lib/LoRaWAN/Utilities
 
 CSRCDIRS = \
         Drivers/CMSIS/Device/ST/STM32L0xx/Source/Templates \
         Drivers/STM32L0xx_HAL_Driver/Src \
-        Middlewares/Third_Party/Lora/Mac/region \
+        Lib/LoRaWAN/Mac/region \
         $(INCDIRS)
 
 ASRCDIRS = \

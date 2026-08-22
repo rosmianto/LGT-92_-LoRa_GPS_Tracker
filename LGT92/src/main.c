@@ -33,45 +33,14 @@ extern uint8_t ic_version;
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
-/*!
- * Defines the application data transmission duty cycle. 5s, value in [ms].
- */
 #define Firmware 0x04
-/*!
- * LoRaWAN Adaptive Data Rate
- * @note Please note that when ADR is enabled the end-device should be static
- */
 #define LORAWAN_ADR_STATE LORAWAN_ADR_ON
-/*!
- * LoRaWAN Default data Rate Data Rate
- * @note Please note that LORAWAN_DEFAULT_DATA_RATE is used only when ADR is
- * disabled
- */
 #define LORAWAN_DEFAULT_DATA_RATE DR_0
-/*!
- * LoRaWAN application port is 0 to 255
- * @note do not use 256. It is reserved for certification
- */
 #define LORAWAN_APP_PORT 2
-/*!
- * Number of trials for the join request.
- */
 #define JOINREQ_NBTRIALS 200
-/*!
- * LoRaWAN default endNode class port
- */
 #define LORAWAN_DEFAULT_CLASS CLASS_A
-/*!
- * LoRaWAN default confirm state
- */
 #define LORAWAN_DEFAULT_CONFIRM_MSG_STATE LORAWAN_UNCONFIRMED_MSG
-/*!
- * User application data buffer size
- */
 #define LORAWAN_APP_DATA_BUFF_SIZE 256
-/*!
- * User application data
- */
 static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
 
 bool rxpr_flags = 0;
@@ -83,8 +52,8 @@ uint8_t atz_flags = 0;
 uint8_t payloadlens;
 bool is_time_to_IWDG_Refresh = 0;
 bool JoinReq_NbTrails_over = 0;
-bool unconfirmed_downlink_data_ans_status = 0,
-     confirmed_downlink_data_ans_status = 0;
+bool unconfirmed_downlink_data_ans_status = 0;
+bool confirmed_downlink_data_ans_status = 0;
 bool rejoin_status = 0;
 bool rejoin_keep_status = 0;
 bool MAC_COMMAND_ANS_status = 0;
@@ -101,23 +70,15 @@ extern uint8_t dwelltime;
 extern bool debug_flags;
 
 uint32_t Altitude = 0;
-
 uint32_t APP_TX_DUTYCYCLE = 300000;
-
 uint32_t Server_TX_DUTYCYCLE = 300000;
-
 uint32_t Alarm_TX_DUTYCYCLE = 60000;
-
 uint32_t Keep_TX_DUTYCYCLE = 21600000;
-
 uint32_t GPS_ALARM = 0;
-
 uint32_t GS = 0;
 
 extern uint16_t dr_power;
-
 extern uint32_t set_sgm;
-
 extern uint32_t LON;
 extern uint32_t MD;
 extern uint32_t MLON;
@@ -126,76 +87,43 @@ extern uint32_t Freq;
 extern uint8_t mpuint_flags;
 extern bool button_exitflag;
 extern bool moinint_exitflag;
-
 extern uint32_t se_mode;
 extern uint32_t fr_mode;
 
 uint32_t CHE = 0;
-
 int ALARM = 0;
-
 uint32_t FLAG = 0;
-
 uint8_t send_fail = 0;
-
 uint32_t a = 1;
-
 int basic_flag = 0;
-
 static uint32_t ServerSetTDC;
-
 uint32_t start_time = 0;
-
 uint32_t AlarmSetTDC;
-
 uint8_t flag_1 = 1;
-
 extern uint8_t LP;
-
 uint8_t alarm_flags = 0;
-
 uint8_t stop_flag = 0;
-
 uint8_t payloadlens = 0;
-
 uint8_t gps_setflags = 0;
-
 uint8_t position_flags = 0;
-
 float pdop_comp = 7.0;
-
 float pdop_fixed = 0.0;
-
 extern uint8_t Alarm_times;
-
 extern uint8_t Alarm_times1;
-
 extern uint32_t Positioning_time;
-
 extern uint8_t md_flags;
-
 extern float pdop_value;
-
 extern float pdop_gps;
-
 extern UART_HandleTypeDef uart1;
-
 extern bool rx2_flags;
 
 uint32_t Start_times = 0, End_times = 0, gps_time = 0;
-
 FP32 gps_latitude, gps_longitude;
-
 int32_t longitude;
-
 int32_t latitude;
-
 uint32_t SendData = 0;
-
 uint16_t TIMES = 10000;
-
 bool is_lora_joined = 0;
-
 bool motion_flags = 0;
 
 extern char DATABUFF[500];
@@ -604,6 +532,20 @@ static void Send(void) {
   } else {
     LP = 0;
   }
+
+  // Gyro_Data gyro;  // 3-axis Gyroscope data
+  // Accel_Data accel;
+  // Mag_Data mag;
+
+  // // Better approach
+  // MPU9250_wakeup();
+
+  // gyro = MPU9250_get_gyro_data();
+  // accel = MPU9250_get_accel_data();
+  // mag = MPU9250_get_mag_data();
+
+  // // Don't worry about NaN, AHRSUpdate() handles it
+  // AHRSUpdate(gyro, accel, mag, &roll, &pitch, &yaw);
 
   MPU_Write_Byte(MPU9250_ADDR, 0x6B, 0X00); // ����
   MPU_Init();

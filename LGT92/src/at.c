@@ -76,27 +76,18 @@ uint16_t power_time = 0;
 uint8_t dwelltime;
 
 extern uint32_t APP_TX_DUTYCYCLE;
-
 extern uint32_t Server_TX_DUTYCYCLE;
-
 extern uint32_t Alarm_TX_DUTYCYCLE;
-
 extern uint32_t Keep_TX_DUTYCYCLE;
-
 extern uint32_t start_time;
-
 extern uint8_t ic_version;
-
 extern uint16_t hardware_version;
-
 extern float pdop_value;
 
 uint8_t LP = 0;
-
 uint8_t se_mode = 0;
 uint8_t fr_mode = 0;
 uint32_t Positioning_time = 150;
-
 uint32_t set_sgm = 0;
 uint32_t s_timer = 1;
 uint8_t md_flags = 0;
