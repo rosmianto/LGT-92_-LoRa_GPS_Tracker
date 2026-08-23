@@ -44,8 +44,6 @@ add_subdirectory(Lib/lwgps-2.4.0)
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
-    Fusion
-    lwgps
 )
 
 # Add sources to executable
@@ -69,6 +67,7 @@ list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-
     # Add user defined libraries
+    Fusion
+    lwgps
 )

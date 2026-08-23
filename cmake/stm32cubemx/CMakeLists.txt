@@ -39,12 +39,15 @@ set(MX_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Lib/LoRaWAN/Phy
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Lib/LoRaWAN/Utilities
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Lib/LoRaWAN/Mac/region
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src
 )
 
 # STM32CubeMX generated application sources
 set(MX_Application_Src
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/drivers/IMUDriver_Dummy.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/subsystems/battery.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/subsystems/gps_manager.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/subsystems/IMU.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/subsystems/led.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/at.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/bsp.c
