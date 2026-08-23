@@ -21,6 +21,7 @@
 *.elf
 .DS_Store
 build/
+html/
 
 # Listing Files
 *.COD
