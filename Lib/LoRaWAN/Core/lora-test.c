@@ -69,6 +69,7 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 #include "lora.h"
 #include "timeServer.h"
 #include <component.h>
+#include <vcom.h>
 
  extern TimerEvent_t TxTimer;
 

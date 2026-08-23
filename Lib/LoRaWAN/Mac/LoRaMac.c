@@ -34,6 +34,7 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 #include "delay.h"
 #include "iwdg.h"
 #include <led.h>
+#include <utilities.h>
 
 bool jr_flag=0;
 uint8_t jr_nb=0;

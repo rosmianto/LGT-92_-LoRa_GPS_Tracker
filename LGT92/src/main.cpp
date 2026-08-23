@@ -194,7 +194,7 @@ static void OnReJoinTimerEvent(void);
 static void timing(void);
 
 #endif
-extern void printf_joinmessage(void);
+extern "C" void printf_joinmessage(void);
 
 bool sleep_status = 0; // AT+SLEEP
 int user_key_exti_flag = 0;

@@ -48,6 +48,7 @@
  // #include "hw.h"
 #include "iwdg.h"
 #include <stm32l0xx_hal.h>
+#include <vcom.h>
 
  /* Private typedef
   * -----------------------------------------------------------*/

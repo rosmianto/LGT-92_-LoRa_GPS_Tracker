@@ -49,6 +49,7 @@
 #include "flash_eraseprogram.h"
 #include "hw.h"
 #include <stm32l0xx_hal.h>
+#include <utilities.h>
 #include <vcom.h>
 
  /* Private macro
