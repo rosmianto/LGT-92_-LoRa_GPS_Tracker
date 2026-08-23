@@ -18,7 +18,6 @@
 #include "version.h"
 #include <Commissioning.h>
 #include <Region.h>
-#include <app_main.h>
 #include <debug.h>
 #include <hw_conf.h>
 #include <hw_msp.h>
@@ -330,8 +329,6 @@ int main(void) {
   LORA_Init(&LoRaMainCallbacks, &LoRaParamInit);
 
   gps_Identify();
-
-  app_main();
 
   while (1) {
     /* Handle UART commands */

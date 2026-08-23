@@ -55,7 +55,6 @@ set(MX_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/hw_spi.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/lora.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/subsystems/app_main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/stm32l0xx_hal_msp.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/stm32l0xx_hw.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/stm32l0xx_it.c
