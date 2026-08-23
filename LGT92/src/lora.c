@@ -543,21 +543,6 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   mibReq.Param.Class= CLASS_A;
   LoRaMacMibSetRequestConfirm( &mibReq );
 
-//	#if defined( REGION_EU868 )
-//	if(customize_config.freq1==0)
-//	{
-//	#if( USE_SEMTECH_DEFAULT_CHANNEL_LINEUP == 1 )
-//		LoRaMacChannelAdd( 3, ( ChannelParams_t )LC4 );
-//		LoRaMacChannelAdd( 4, ( ChannelParams_t )LC5 );
-//		LoRaMacChannelAdd( 5, ( ChannelParams_t )LC6 );
-//		LoRaMacChannelAdd( 6, ( ChannelParams_t )LC7 );
-//		LoRaMacChannelAdd( 7, ( ChannelParams_t )LC8 );
-//		LoRaMacChannelAdd( 8, ( ChannelParams_t )LC9 );
-//		LoRaMacChannelAdd( 9, ( ChannelParams_t )LC10 );
-//   }
-//#endif
-//	#endif	
-	
   lora_config.TxDatarate = LoRaParamInit->TxDatarate;
 	
 	  if(FLASH_read(0x8018F80)==0x00)	//page799

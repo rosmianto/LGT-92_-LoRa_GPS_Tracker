@@ -408,7 +408,7 @@ static void LORA_HasJoined(void) {
   led_blue_on();
   DelayMs(1000);
   led_red_off();
-  led_blue_off();
+  led_blue_off(); // LoRa Joined
 
   rejoin_keep_status = 0;
 
@@ -786,7 +786,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
           led_blue_on();
           DelayMs(1000);
         }
-        led_blue_off();
+        led_blue_off(); // Exit Alarm
         PRINTF("Exit Alarm\r\n");
       }
     }
@@ -888,12 +888,12 @@ static void LORA_RxData(lora_AppData_t *AppData) {
         led_blue = AppData->Buff[5] << 8 | AppData->Buff[6];
         if (led_blue != 0) {
           DelayMs(led_blue);
-          led_blue_off();
+          led_blue_off(); // Debug LED
           blue = 0;
         }
       } else {
         blue = 0;
-        led_blue_off();
+        led_blue_off(); // Debug LED
       }
       if (AppData->Buff[7] == 0x01) {
         BSP_powerLED_Init();
