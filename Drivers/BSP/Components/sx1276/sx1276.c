@@ -42,12 +42,16 @@
   */
   
 /* Includes ------------------------------------------------------------------*/
+#include "sx1276.h"
+#include "LoRaMac.h"
+#include "delay.h"
 #include "hw.h"
 #include "radio.h"
-#include "sx1276.h"
 #include "timeServer.h"
-#include "delay.h"
-#include "LoRaMac.h"
+#include <component.h>
+#include <stm32l0xx_hal.h>
+#include <stm32l0xx_hw_conf.h>
+#include <vcom.h>
 
 extern bool ser_ack;
 extern bool address_flags;

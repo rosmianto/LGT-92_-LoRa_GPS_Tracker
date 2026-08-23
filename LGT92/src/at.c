@@ -54,6 +54,7 @@
 #include "gpio_exti.h"
 #include "hw.h"
 #include "hw_msp.h"
+#include "hw_rtc.h"
 #include "lora.h"
 #include "mpu9250.h"
 #include "radio.h"

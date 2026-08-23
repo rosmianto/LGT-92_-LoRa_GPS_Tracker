@@ -43,57 +43,64 @@
   *
   ******************************************************************************
   */
-  
-#include "hw.h"
+
 #include "vcom.h"
-#include "timeServer.h"
-#include "delay.h"
 #include "bsp_usart2.h"
+#include "delay.h"
+#include "hw.h"
+#include "hw_conf.h"
+#include "timeServer.h"
+#include "trace.h"
+#include <stdint.h>
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Uart Handle */
-UART_HandleTypeDef UartHandle;
+ /* Private typedef
+  * -----------------------------------------------------------*/
+ /* Private define
+  * ------------------------------------------------------------*/
+ /* Private macro
+  * -------------------------------------------------------------*/
+ /* Private variables
+  * ---------------------------------------------------------*/
+ /* Uart Handle */
+ UART_HandleTypeDef UartHandle;
 
-uint8_t charRx;
+ uint8_t charRx;
 
-//uint8_t uartprintf_flag=0;
+ // uint8_t uartprintf_flag=0;
 
-static void (*TxCpltCallback) (void);
+ static void (*TxCpltCallback)(void);
 
-static void (*RxCpltCallback) (uint8_t *rxChar);
-/* Private function prototypes -----------------------------------------------*/
-/* Functions Definition ------------------------------------------------------*/
-void vcom_Init(  void (*TxCb)(void) )
-{
+ static void (*RxCpltCallback)(uint8_t *rxChar);
+ /* Private function prototypes
+  * -----------------------------------------------*/
+ /* Functions Definition
+  * ------------------------------------------------------*/
+ void vcom_Init(void (*TxCb)(void)) {
 
-  /*Record Tx complete for DMA*/
-  TxCpltCallback=TxCb;
-  /*## Configure the UART peripheral ######################################*/
-  /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
-  /* UART1 configured as follow:
-      - Word Length = 8 Bits
-      - Stop Bit = One Stop bit
-      - Parity = ODD parity
-      - BaudRate = 921600 baud
-      - Hardware flow control disabled (RTS and CTS signals) */
-  UartHandle.Instance        = USARTX;
-  
-  UartHandle.Init.BaudRate   = 9600;
-  UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
-  UartHandle.Init.StopBits   = UART_STOPBITS_1;
-  UartHandle.Init.Parity     = UART_PARITY_NONE;
-  UartHandle.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
-  UartHandle.Init.Mode       = UART_MODE_TX_RX;
+   /*Record Tx complete for DMA*/
+   TxCpltCallback = TxCb;
+   /*## Configure the UART peripheral ######################################*/
+   /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
+   /* UART1 configured as follow:
+       - Word Length = 8 Bits
+       - Stop Bit = One Stop bit
+       - Parity = ODD parity
+       - BaudRate = 921600 baud
+       - Hardware flow control disabled (RTS and CTS signals) */
+   UartHandle.Instance = USARTX;
 
-  if(HAL_UART_Init(&UartHandle) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler(); 
-  }
-}
+   UartHandle.Init.BaudRate = 9600;
+   UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
+   UartHandle.Init.StopBits = UART_STOPBITS_1;
+   UartHandle.Init.Parity = UART_PARITY_NONE;
+   UartHandle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+   UartHandle.Init.Mode = UART_MODE_TX_RX;
+
+   if (HAL_UART_Init(&UartHandle) != HAL_OK) {
+     /* Initialization Error */
+     Error_Handler();
+   }
+ }
 
 void vcom_Trace(  uint8_t *p_data, uint16_t size )
 {

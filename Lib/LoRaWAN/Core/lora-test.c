@@ -61,29 +61,30 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
+#include "lora-test.h"
 #include "LoRaMac.h"
 #include "LoRaMacTest.h"
-#include "lora.h"
-#include "lora-test.h"
-#include "timeServer.h"
 #include "delay.h"
+#include "hw.h"
+#include "lora.h"
+#include "timeServer.h"
+#include <component.h>
 
-extern TimerEvent_t TxTimer;
+ extern TimerEvent_t TxTimer;
 
-/* Private typedef -----------------------------------------------------------*/
-typedef struct ComplianceTest_s
-{
-    bool Running;
-    uint8_t State;
-    LoraConfirm_t IsTxConfirmed;
-    uint8_t DataBufferSize;
-    uint8_t DataBuffer[242];
-    uint16_t DownLinkCounter;
-    bool LinkCheck;
-    uint8_t DemodMargin;
-    uint8_t NbGateways;
-}ComplianceTest_t;
+ /* Private typedef
+  * -----------------------------------------------------------*/
+ typedef struct ComplianceTest_s {
+   bool Running;
+   uint8_t State;
+   LoraConfirm_t IsTxConfirmed;
+   uint8_t DataBufferSize;
+   uint8_t DataBuffer[242];
+   uint16_t DownLinkCounter;
+   bool LinkCheck;
+   uint8_t DemodMargin;
+   uint8_t NbGateways;
+ } ComplianceTest_t;
 
 /* Private define ------------------------------------------------------------*/
 #define TEST_TX_DUTYCYCLE 6000

@@ -45,34 +45,43 @@
   ******************************************************************************
   */
 
-/* Includes ------------------------------------------------------------------*/
-#include "hw.h"
+ /* Includes
+  * ------------------------------------------------------------------*/
 #include "delay.h"
+#include "hw.h"
 #include "timeServer.h"
-/* when fast wake up is enabled, the mcu wakes up in ~20us  * and 
- * does not wait for the VREFINT to be settled. THis is ok for 
- * most of the case except when adc must be used in this case before 
- *starting the adc, you must make sure VREFINT is settled*/
+#include <debug.h>
+#include <stm32l0xx_hal.h>
+
+ /* when fast wake up is enabled, the mcu wakes up in ~20us  * and
+  * does not wait for the VREFINT to be settled. THis is ok for
+  * most of the case except when adc must be used in this case before
+  *starting the adc, you must make sure VREFINT is settled*/
 #define ENABLE_FAST_WAKEUP
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
+ /* Private typedef
+  * -----------------------------------------------------------*/
+ /* Private define
+  * ------------------------------------------------------------*/
+ /* Private macro
+  * -------------------------------------------------------------*/
+ /* Private variables
+  * ---------------------------------------------------------*/
+ /* Private function prototypes
+  * -----------------------------------------------*/
+ /* Private functions
+  * ---------------------------------------------------------*/
 
-/**
+ /**
   * @brief This function configures the source of the time base.
   * @brief  don't enable systick
   * @param TickPriority: Tick interrupt priority.
   * @retval HAL status
   */
-HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
-{
+ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority) {
    /* Return function status */
   return HAL_OK;
-}
+ }
 
 /**
   * @brief This function provides delay (in ms)

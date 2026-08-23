@@ -84,7 +84,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <utilities.h>
+// #include <utilities.h>
+
+typedef uint32_t TimerTime_t;
 
 /*!
  * Check the Mac layer state every MAC_STATE_CHECK_TIMEOUT in ms

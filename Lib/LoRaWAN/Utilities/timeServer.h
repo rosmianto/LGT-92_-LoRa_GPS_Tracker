@@ -66,24 +66,29 @@ Maintainer: Miguel Luis and Gregory Cristian
  extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
-   
-#include "utilities.h"
+#include <stdbool.h>
+#include <stdint.h>
 
-/* Exported types ------------------------------------------------------------*/
+ typedef uint32_t TimerTime_t;
 
-/*!
- * \brief Timer object description
- */
-typedef struct TimerEvent_s
-{
-    uint32_t Timestamp;         //! Expiring timer value in ticks from TimerContext
-    uint32_t ReloadValue;       //! Reload Value when Timer is restarted
-    bool IsRunning;             //! Is the timer currently running
-    void ( *Callback )( void ); //! Timer IRQ callback function
-    struct TimerEvent_s *Next;  //! Pointer to the next Timer object.
-} TimerEvent_t;
+ /* Includes
+  * ------------------------------------------------------------------*/
 
+ // #include "utilities.h"
+
+ /* Exported types
+  * ------------------------------------------------------------*/
+
+ /*!
+  * \brief Timer object description
+  */
+ typedef struct TimerEvent_s {
+   uint32_t Timestamp;     //! Expiring timer value in ticks from TimerContext
+   uint32_t ReloadValue;   //! Reload Value when Timer is restarted
+   bool IsRunning;         //! Is the timer currently running
+   void (*Callback)(void); //! Timer IRQ callback function
+   struct TimerEvent_s *Next; //! Pointer to the next Timer object.
+ } TimerEvent_t;
 
 /* Exported constants --------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/

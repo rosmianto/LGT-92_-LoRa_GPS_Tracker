@@ -55,50 +55,54 @@ Maintainer: Miguel Luis and Gregory Cristian
  extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
+#include <stdbool.h>
+#include <stdint.h>
+#include <sx1276.h>
 
-#define BOARD_WAKEUP_TIME  0 // no TCXO
+ /* Includes
+  * ------------------------------------------------------------------*/
+ /* Exported types
+  * ------------------------------------------------------------*/
+ /* Exported constants
+  * --------------------------------------------------------*/
 
-#define RADIO_ANT_SWITCH_SET_TX                    1
-#define RADIO_ANT_SWITCH_SET_RX                    0
+#define BOARD_WAKEUP_TIME 0 // no TCXO
 
+#define RADIO_ANT_SWITCH_SET_TX 1
+#define RADIO_ANT_SWITCH_SET_RX 0
 
+#define RF_MID_BAND_THRESH 525000000
 
+ /* Exported functions -------------------------------------------------------
+  */
 
-#define RF_MID_BAND_THRESH                          525000000
+ /*!
+  * \brief Initializes the radio I/Os pins interface
+  */
+ void SX1276IoInit(void);
 
-/* Exported functions ------------------------------------------------------- */ 
+ /*!
+  * \brief De-initializes the radio I/Os pins interface.
+  *
+  * \remark Useful when going in MCU lowpower modes
+  */
+ void SX1276IoDeInit(void);
 
-/*!
- * \brief Initializes the radio I/Os pins interface
- */
-void SX1276IoInit( void );
+ /*!
+  * \brief Checks if the given RF frequency is supported by the hardware
+  *
+  * \param [IN] frequency RF frequency to be checked
+  * \retval isSupported [true: supported, false: unsupported]
+  */
+ bool SX1276CheckRfFrequency(uint32_t frequency);
 
-
-/*!
- * \brief De-initializes the radio I/Os pins interface. 
- *
- * \remark Useful when going in MCU lowpower modes
- */
-void SX1276IoDeInit( void );
-
-/*!
- * \brief Checks if the given RF frequency is supported by the hardware
- *
- * \param [IN] frequency RF frequency to be checked
- * \retval isSupported [true: supported, false: unsupported]
- */
-bool SX1276CheckRfFrequency( uint32_t frequency );
-
-/*!
- * Radio hardware and global parameters
- */
-extern SX1276_t SX1276;
+ /*!
+  * Radio hardware and global parameters
+  */
+ extern SX1276_t SX1276;
 
 #ifdef __cplusplus
-}
+ }
 #endif
 
 #endif /* __SX1276MB1XAS_H__*/

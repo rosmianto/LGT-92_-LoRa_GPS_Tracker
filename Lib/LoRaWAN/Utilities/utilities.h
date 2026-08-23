@@ -60,8 +60,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 #ifndef __UTILITIES_H__
 #define __UTILITIES_H__
 
-#include "hw_conf.h"
-
+// #include "hw_conf.h"
+#include <stm32l0xx.h>
 
 /* BACKUP_PRIMASK MUST be implemented at the begining of the funtion 
    that implement a critical section                        

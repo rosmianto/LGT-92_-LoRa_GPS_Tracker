@@ -1,16 +1,11 @@
-#ifndef __GPS_H_
-#define __GPS_H_
+#pragma once
 
-#include <string.h>
-#include <stdlib.h> 
-#include <math.h>  
-#include <stdio.h>  
-#include "stm32l072xx.h"
-#include "stm32l0xx_hal.h"
-#include "stm32l0xx_nucleo.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "bsp_usart2.h"
-#include <ctype.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifndef NULL
 #define NULL    ((void *)0)
@@ -26,16 +21,15 @@
 #define GPS_POWER_ON()  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET)		
 #define GPS_POWER_OFF()  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET)
 
-typedef unsigned char  INT8U; // �޷���8λ���ͱ��� // 
-typedef signed char    INT8S; // �з���8λ���ͱ��� // 
-typedef unsigned short INT16U; // �޷���16λ���ͱ��� // 
-typedef signed short   INT16S; // �з���16λ���ͱ��� // 
-typedef unsigned int   INT32U; // �޷���32λ���ͱ��� // 
-typedef signed int     INT32S; // �з���32λ���ͱ��� // 
-typedef float          FP32; // �����ȸ�����(32λ����) // 
-typedef double         FP64; // ˫���ȸ�����(64λ����) //  
-//#define   BOOL     bool
- 
+typedef unsigned char INT8U;  // �޷���8λ���ͱ��� //
+typedef signed char INT8S;    // �з���8λ���ͱ��� //
+typedef unsigned short INT16U; // �޷���16λ���ͱ��� //
+typedef signed short INT16S;   // �з���16λ���ͱ��� //
+typedef unsigned int INT32U;   // �޷���32λ���ͱ��� //
+typedef signed int INT32S;     // �з���32λ���ͱ��� //
+typedef float FP32;            // �����ȸ�����(32λ����) //
+typedef double FP64;           // ˫���ȸ�����(64λ����) //
+
 typedef	struct 
 	{ 
 		int satid;      //������� 
@@ -78,48 +72,26 @@ typedef  struct{
    SatelliteInfo satinfo[38];
      }GPSINFO;
 
+     extern GPSINFO gps;
 
+     void GPS_init(void);
+     uint8_t GPS_parse(char *buf);
+     void GPS_usart(uint8_t buffer);
+     uint8_t GPS_INFO_update(void);
+     bool GPS_Run(void);
+     void GPS_Stop(void);
+     void GPS_FirmwareUpdate(void);
+     void GPS_DegreeToDMS(FP32 deg, int *d, int *m, FP32 *s);
+     void GPS_INPUT(void);
+     void POWER_ON(void);
+     void POWER_OFF(void);
+     void GPS_doinit(void);
+     bool GPS_IsRunning(void);
+     void send_setting(void);
+     void PMTK353(void);
+     void PMTK886(void);
+     void copytxdata(uint8_t data1[], char *data2);
 
-
-extern  GPSINFO  gps; 
-
-  
-extern void GPS_init(void);
-extern  uint8_t   GPS_parse(char *buf); 
-extern void  GPS_usart(uint8_t buffer);  
-extern  uint8_t GPS_INFO_update(void);
-extern _Bool GPS_Run(void);
-extern void GPS_Stop(void); 
-extern void GPS_FirmwareUpdate(void);
-extern void GPS_DegreeToDMS(FP32 deg,int *d,int *m,FP32 *s)   ;
-extern void GPS_INPUT(void);
-extern void POWER_ON(void);
-extern void POWER_OFF(void); 
-extern void GPS_doinit(void);
-//	BOOL OpenDevice(TCHAR *strPort,int nBaudRate); 
-//	void CloseDevice(); 
-extern  _Bool GPS_IsRunning(void); 
-void send_setting(void);
-void PMTK353(void);
-void PMTK886(void);
-void copytxdata(uint8_t data1[],char *data2);
-/*	BOOL Run(); 
-	void Stop(); 
-	
- 
-	BOOL IsLocationValid(); 
-	FP32 GetTimestamp(); 
-	FP32 GetLongitude(); 
-	FP32 GetLatitude(); 
-	FP32 GetHeight(); 
-	char GetHeightUnit(); 
-	FP32 GetVelocity(); 
-	FP32 GetDirection(); 
-	int GetSatNum(); 
-	FP32 GetError(); 
- 
-  */
-
-
-
-#endif   //__GPS_H_
+#ifdef __cplusplus
+     }
+#endif

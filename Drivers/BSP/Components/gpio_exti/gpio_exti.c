@@ -45,13 +45,13 @@
   */
   
   /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
+ // #include "hw.h"
 #include "gpio_exti.h"
+#include "hw_rtc.h"
 
-
-/**
+ /**
   * @brief  System Power Configuration
-  *         The system Power is configured as follow : 
+  *         The system Power is configured as follow :
   *            + Regulator in LP mode
   *            + VREFINT OFF, with fast wakeup enabled
   *            + MSI as SysClk after Wake Up
@@ -60,22 +60,20 @@
   * @param  None
   * @retval None
   */
-void SystemPower_Config(void)
-{
+ void SystemPower_Config(void) {
 
-  /* Enable Power Control clock */
-  __HAL_RCC_PWR_CLK_ENABLE();
+   /* Enable Power Control clock */
+   __HAL_RCC_PWR_CLK_ENABLE();
 
-  /* Enable Ultra low power mode */
-  HAL_PWREx_EnableUltraLowPower();
-  
-  /* Enable the fast wake up from Ultra low power mode */
-  HAL_PWREx_EnableFastWakeUp();
+   /* Enable Ultra low power mode */
+   HAL_PWREx_EnableUltraLowPower();
 
-  /* Select MSI as system clock source after Wake Up from Stop mode */
-  __HAL_RCC_WAKEUPSTOP_CLK_CONFIG(RCC_STOP_WAKEUPCLOCK_HSI);
-  
-}
+   /* Enable the fast wake up from Ultra low power mode */
+   HAL_PWREx_EnableFastWakeUp();
+
+   /* Select MSI as system clock source after Wake Up from Stop mode */
+   __HAL_RCC_WAKEUPSTOP_CLK_CONFIG(RCC_STOP_WAKEUPCLOCK_HSI);
+ }
 /**
   * @brief  Configures EXTI lines 4 to 15 (connected to PC.13 pin) in interrupt mode
   * @param  None

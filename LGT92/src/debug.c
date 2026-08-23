@@ -46,7 +46,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
+#include <debug.h>
 
 /**
   * @brief Initializes the debug

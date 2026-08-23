@@ -65,26 +65,35 @@ Maintainer: Miguel Luis and Gregory Cristian
 #ifdef __cplusplus
  extern "C" {
 #endif
-/* Includes ------------------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
 
-/* Exported constants --------------------------------------------------------*/
-/* External variables --------------------------------------------------------*/
-/* Exported macros -----------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */ 
-/**
- * @brief  
- *
- * @note
- * @retval None
- */
-void iwdg_init(void);
-uint32_t GetLSIFrequency(void);
-void TIMER_IRQHandler(void);
-void IWDG_Refresh(void);
-	 
+#include <stdint.h>
+
+ /* Includes
+  * ------------------------------------------------------------------*/
+ /* Exported types
+  * ------------------------------------------------------------*/
+
+ /* Exported constants
+  * --------------------------------------------------------*/
+ /* External variables
+  * --------------------------------------------------------*/
+ /* Exported macros
+  * -----------------------------------------------------------*/
+ /* Exported functions -------------------------------------------------------
+  */
+ /**
+  * @brief
+  *
+  * @note
+  * @retval None
+  */
+ void iwdg_init(void);
+ uint32_t GetLSIFrequency(void);
+ void TIMER_IRQHandler(void);
+ void IWDG_Refresh(void);
+
 #ifdef __cplusplus
-}
+ }
 #endif
 
 #endif 

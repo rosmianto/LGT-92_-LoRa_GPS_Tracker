@@ -66,6 +66,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "iwdg.h"
 #include "lora.h"
 #include "vcom.h"
+#include <stm32l0xx_hal.h>
 
 bool button_exitflag=0;
 bool moinint_exitflag=0;
@@ -73,7 +74,7 @@ extern uint32_t MD ;
 extern uint32_t GPS_ALARM;
 extern bool is_lora_joined;
 extern uint8_t stop_flag;
-extern  UART_HandleTypeDef uart1;
+extern UART_HandleTypeDef uart1;
 extern uint32_t LoRaMacState;
 extern int user_key_exti_flag;
 /** @addtogroup STM32L1xx_HAL_Examples

@@ -65,35 +65,36 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 #ifdef __cplusplus
  extern "C" {
 #endif
-   
-/* Includes ------------------------------------------------------------------*/
-#include "Commissioning.h"
+
 #include "LoRaMac.h"
-#include "region/Region.h"
+#include <stdbool.h>
 
-/* Exported constants --------------------------------------------------------*/
-   /*!
- * LoRaWAN confirmed messages
- */
+ /* Includes
+  * ------------------------------------------------------------------*/
 
-#define LORAWAN_ADR_ON                              1
-#define LORAWAN_ADR_OFF                             0
-/* Exported types ------------------------------------------------------------*/
+ /* Exported constants
+  * --------------------------------------------------------*/
+ /*!
+  * LoRaWAN confirmed messages
+  */
 
+#define LORAWAN_ADR_ON 1
+#define LORAWAN_ADR_OFF 0
+ /* Exported types
+  * ------------------------------------------------------------*/
 
-/*!
- * Application Data structure
- */
-typedef struct
-{
-  /*point to the LoRa App data buffer*/
-  uint8_t* Buff;
-  /*LoRa App data buffer size*/
-  uint8_t BuffSize;
-  /*Port on which the LoRa App is data is sent/ received*/
-  uint8_t Port;
-  
-} lora_AppData_t;
+ /*!
+  * Application Data structure
+  */
+ typedef struct {
+   /*point to the LoRa App data buffer*/
+   uint8_t *Buff;
+   /*LoRa App data buffer size*/
+   uint8_t BuffSize;
+   /*Port on which the LoRa App is data is sent/ received*/
+   uint8_t Port;
+
+ } lora_AppData_t;
 
 typedef enum 
 {

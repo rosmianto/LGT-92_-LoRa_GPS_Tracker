@@ -63,22 +63,20 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 #include "hw.h"
 #include "timeServer.h"
 //#include "low_power.h"
+#include "utilities.h"
 
-
-/*!
- * safely execute call back
- */
-#define exec_cb( _callback_ )     \
-  do {                          \
-      if( _callback_ == NULL )    \
-      {                           \
-        while(1);                 \
-      }                           \
-      else                        \
-      {                           \
-        _callback_( );               \
-      }                           \
-  } while(0);                   
+ /*!
+  * safely execute call back
+  */
+#define exec_cb(_callback_)                                                   \
+   do {                                                                        \
+     if (_callback_ == NULL) {                                                 \
+       while (1)                                                               \
+         ;                                                                     \
+     } else {                                                                  \
+       _callback_();                                                           \
+     }                                                                         \
+   } while (0);                   
 
 
 

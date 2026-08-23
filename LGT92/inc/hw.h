@@ -66,34 +66,27 @@ Maintainer: Miguel Luis and Gregory Cristian
  extern "C" {
 #endif
 /* Includes ------------------------------------------------------------------*/
-#include <math.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include "hw_conf.h"
-#include "hw_gpio.h"
-#include "hw_spi.h"
-#include "hw_rtc.h"
-#include "hw_msp.h"
-#include "debug.h"
-#include "trace.h"
-	 
-	 typedef enum
-{
-  HW_UNLOCKED = 0x00U,
-  HW_LOCKED   = 0x01U
-} HW_LockTypeDef;
+ // #include <math.h>
+ // #include <stdbool.h>
+ // #include <stdint.h>
+ // #include "hw_conf.h"
+ // #include "hw_gpio.h"
+ // #include "hw_spi.h"
+ // #include "hw_rtc.h"
+ // #include "hw_msp.h"
+ // #include "debug.h"
+ // #include "trace.h"
 
-#define HW_LOCK(__HANDLE__)               \
-  do {                                    \
-    if ((__HANDLE__)->Lock == HW_LOCKED)  \
-    {                                     \
-      return;                             \
-    }                                     \
-    else                                  \
-    {                                     \
-      (__HANDLE__)->Lock = HW_LOCKED;     \
-    }                                     \
-  } while (0)
+ typedef enum { HW_UNLOCKED = 0x00U, HW_LOCKED = 0x01U } HW_LockTypeDef;
+
+#define HW_LOCK(__HANDLE__)                                                   \
+   do {                                                                        \
+     if ((__HANDLE__)->Lock == HW_LOCKED) {                                    \
+       return;                                                                 \
+     } else {                                                                  \
+       (__HANDLE__)->Lock = HW_LOCKED;                                         \
+     }                                                                         \
+   } while (0)
 
 #define HW_UNLOCK(__HANDLE__)             \
   do {                                    \

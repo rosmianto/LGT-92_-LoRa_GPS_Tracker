@@ -2,13 +2,13 @@
 #include "IIC.h"
 #include "at.h"
 #include "bsp.h"
-#include "bsp_usart2.h"
+// #include "bsp_usart2.h"
 #include "command.h"
 #include "delay.h"
 #include "flash_eraseprogram.h"
 #include "gpio_exti.h"
 #include "gps.h"
-#include "hw.h"
+#include "hw_rtc.h"
 #include "iwdg.h"
 #include "lora.h"
 #include "low_power_manager.h"
@@ -16,8 +16,16 @@
 #include "timeServer.h"
 #include "vcom.h"
 #include "version.h"
+#include <Commissioning.h>
+#include <Region.h>
 #include <app_main.h>
+#include <debug.h>
+#include <hw_conf.h>
+#include <hw_msp.h>
 #include <led.h>
+#include <math.h>
+
+// #include <stm32l0xx_hal.h>
 
 /*
   ic_version variable is used in:
@@ -50,7 +58,6 @@ uint32_t COUNT;
 uint8_t TDC_flag = 0;
 uint8_t join_flag = 0;
 uint8_t atz_flags = 0;
-uint8_t payloadlens;
 bool is_time_to_IWDG_Refresh = 0;
 bool JoinReq_NbTrails_over = 0;
 bool unconfirmed_downlink_data_ans_status = 0;
@@ -115,7 +122,6 @@ extern uint32_t Positioning_time;
 extern uint8_t md_flags;
 extern float pdop_value;
 extern float pdop_gps;
-extern UART_HandleTypeDef uart1;
 extern bool rx2_flags;
 
 uint32_t Start_times = 0, End_times = 0, gps_time = 0;
@@ -201,7 +207,6 @@ extern TimerEvent_t AckTimeoutTimer;
 extern TimerEvent_t RxWindowTimer1;
 extern TimerEvent_t RxWindowTimer2;
 
-TimerEvent_t downlinkLedTimer;
 TimerEvent_t downlinkLedTimer;
 TimerEvent_t NetworkJoinedLedTimer;
 TimerEvent_t PressButtonTimesLedTimer;

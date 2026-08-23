@@ -45,55 +45,62 @@
   */
   
   /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
+ // #include "hw.h"
 #include "iwdg.h"
+#include <stm32l0xx_hal.h>
 
+ /* Private typedef
+  * -----------------------------------------------------------*/
+ /* Private define
+  * ------------------------------------------------------------*/
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
+ /* Private macro
+  * -------------------------------------------------------------*/
+ /* Private variables
+  * ---------------------------------------------------------*/
+ /* Private function prototypes
+  * -----------------------------------------------*/
+ /* Exported functions
+  * ---------------------------------------------------------*/
 
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Exported functions ---------------------------------------------------------*/
+ /* Private variables
+  * ---------------------------------------------------------*/
+ static IWDG_HandleTypeDef IwdgHandle;
+ static TIM_HandleTypeDef Input_Handle;
+ uint16_t tmpCC4[2] = {0, 0};
+ __IO uint32_t uwLsiFreq = 0;
+ __IO uint32_t uwCaptureNumber = 0;
 
-/* Private variables ---------------------------------------------------------*/
-static IWDG_HandleTypeDef   IwdgHandle;
-static TIM_HandleTypeDef           Input_Handle;
-uint16_t tmpCC4[2] = {0, 0};
-__IO uint32_t uwLsiFreq = 0;
-__IO uint32_t uwCaptureNumber = 0;
+ void iwdg_init(void) {
+   /*##-1- Check if the system has resumed from IWDG reset
+    * ####################*/
+   if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) != RESET) {
+     //	 PRINTF("successful\r");
+   }
 
-void iwdg_init(void)
-{
-		  /*##-1- Check if the system has resumed from IWDG reset ####################*/
-  if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) != RESET)
-  {
-//	 PRINTF("successful\r");
-  }
-	
-	/* Clear reset flags in any cases */
-  __HAL_RCC_CLEAR_RESET_FLAGS();
+   /* Clear reset flags in any cases */
+   __HAL_RCC_CLEAR_RESET_FLAGS();
 
-  /*##-2- Get the LSI frequency: TIM21 is used to measure the LSI frequency ###*/
-  uwLsiFreq = GetLSIFrequency();
-  PRINTF("LSI=%d\r",uwLsiFreq);
-  /*##-3- Configure & Start the IWDG peripheral #########################################*/
-  /* Set counter reload value to obtain 25 sec. IWDG TimeOut.
-     IWDG counter clock Frequency = uwLsiFreq
-     Set Prescaler to 256 (IWDG_PRESCALER_256)
-     Timeout Period = (Reload Counter Value * 256) / uwLsiFreq
-     So Set Reload Counter Value = (25 * uwLsiFreq) / 256 */
-  IwdgHandle.Instance = IWDG;
-  IwdgHandle.Init.Prescaler = IWDG_PRESCALER_256;
-  IwdgHandle.Init.Reload = 4095;
-  IwdgHandle.Init.Window = IWDG_WINDOW_DISABLE;
+   /*##-2- Get the LSI frequency: TIM21 is used to measure the LSI frequency
+    * ###*/
+   uwLsiFreq = GetLSIFrequency();
+   PRINTF("LSI=%d\r", uwLsiFreq);
+   /*##-3- Configure & Start the IWDG peripheral
+    * #########################################*/
+   /* Set counter reload value to obtain 25 sec. IWDG TimeOut.
+      IWDG counter clock Frequency = uwLsiFreq
+      Set Prescaler to 256 (IWDG_PRESCALER_256)
+      Timeout Period = (Reload Counter Value * 256) / uwLsiFreq
+      So Set Reload Counter Value = (25 * uwLsiFreq) / 256 */
+   IwdgHandle.Instance = IWDG;
+   IwdgHandle.Init.Prescaler = IWDG_PRESCALER_256;
+   IwdgHandle.Init.Reload = 4095;
+   IwdgHandle.Init.Window = IWDG_WINDOW_DISABLE;
 
-  if(HAL_IWDG_Init(&IwdgHandle) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
+   if (HAL_IWDG_Init(&IwdgHandle) != HAL_OK) {
+     /* Initialization Error */
+     Error_Handler();
+   }
 }
 
 /**

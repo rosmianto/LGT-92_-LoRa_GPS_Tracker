@@ -53,6 +53,9 @@ Maintainer: Miguel Luis and Gregory Cristian
 
 #include "sx1276Regs-Fsk.h"
 #include "sx1276Regs-LoRa.h"
+#include <radio.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 /*!
  * Radio wake-up time from sleep

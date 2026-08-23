@@ -46,7 +46,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "lora.h"
-#include "LoRaMac.h"
+#include "Commissioning.h"
 #include "bsp.h"
 #include "delay.h"
 #include "flash_eraseprogram.h"
@@ -55,11 +55,14 @@
 #include "lora-test.h"
 #include "low_power_manager.h"
 #include "mpu9250.h"
+#include "region/Region.h"
 #include "stdlib.h"
 #include "timeServer.h"
 #include "tiny_sscanf.h"
 #include "version.h"
 #include <led.h>
+#include <stm32l0xx_hal.h>
+#include <utilities.h>
 
 #if defined( REGION_AS923 )
 #define Firm_FQ 0x0001

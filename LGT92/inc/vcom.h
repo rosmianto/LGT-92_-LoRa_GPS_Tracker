@@ -52,8 +52,8 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw_conf.h"
-#include <stdint.h>
+// #include "hw_conf.h"
+// #include <stdint.h>
 #include "trace.h"
 
 	

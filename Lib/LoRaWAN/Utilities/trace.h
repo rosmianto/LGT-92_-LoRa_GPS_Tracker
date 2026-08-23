@@ -51,8 +51,8 @@
 extern "C"
 {
 #endif
-
 #include "utilities_conf.h"
+#include <stdint.h>
 
 /* Exported types ------------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/

@@ -50,11 +50,12 @@ Maintainer: Miguel Luis and Gregory Cristian
   
 /* Includes ------------------------------------------------------------------*/
 
+#include "sx1276mb1las.h"
 #include "hw.h"
 #include "radio.h"
 #include "sx1276.h"
-#include "sx1276mb1las.h"
-
+#include <stm32l0xx_hal.h>
+#include <stm32l0xx_hw_conf.h>
 
 #define IRQ_HIGH_PRIORITY  0
 

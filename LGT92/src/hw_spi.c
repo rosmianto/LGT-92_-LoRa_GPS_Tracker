@@ -59,9 +59,11 @@ Maintainer: Miguel Luis and Gregory Cristian
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
+// #include "hw.h"
+#include "hw_spi.h"
+#include "hw_gpio.h"
 #include "utilities.h"
-
+#include <stm32l0xx_hw_conf.h>
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/

@@ -46,8 +46,10 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
 #include "low_power_manager.h"
+#include "hw.h"
+#include <stm32l0xx_hal.h>
+#include <utilities.h>
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/

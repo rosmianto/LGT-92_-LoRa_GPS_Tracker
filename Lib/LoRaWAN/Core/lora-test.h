@@ -51,7 +51,11 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-   
+
+#include <LoRaMac.h>
+#include <stdbool.h>
+#include <stdint.h>
+
  /* Includes ------------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
    

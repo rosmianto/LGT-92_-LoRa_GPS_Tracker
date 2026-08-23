@@ -18,8 +18,8 @@
   */ 
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
 #include "IIC.h"
+#include "hw_gpio.h"
 
 #define GPIO_PORT_IIC	 GPIOA		
 #define IIC_SCL_PIN		 GPIO_PIN_9		
@@ -79,14 +79,14 @@ void IIC_Delay(void)
 {
 //	uint8_t i;
 
-	/*¡¡
-	 	ÏÂÃæµÄÊ±¼äÊÇÍ¨¹ý°²¸»À³AX-ProÂß¼­·ÖÎöÒÇ²âÊÔµÃµ½µÄ¡£
-		CPUÖ÷Æµ72MHzÊ±£¬ÔÚÄÚ²¿FlashÔËÐÐ, MDK¹¤³Ì²»ÓÅ»¯
-		Ñ­»·´ÎÊýÎª10Ê±£¬SCLÆµÂÊ = 205KHz 
-		Ñ­»·´ÎÊýÎª7Ê±£¬SCLÆµÂÊ = 347KHz£¬ SCL¸ßµçÆ½Ê±¼ä1.5us£¬SCLµÍµçÆ½Ê±¼ä2.87us 
-	 	Ñ­»·´ÎÊýÎª5Ê±£¬SCLÆµÂÊ = 421KHz£¬ SCL¸ßµçÆ½Ê±¼ä1.25us£¬SCLµÍµçÆ½Ê±¼ä2.375us 
+	/*ï¿½ï¿½
+	 	ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½AX-Proï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç²ï¿½ï¿½ÔµÃµï¿½ï¿½Ä¡ï¿½
+		CPUï¿½ï¿½Æµ72MHzÊ±ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½Flashï¿½ï¿½ï¿½ï¿½, MDKï¿½ï¿½ï¿½Ì²ï¿½ï¿½Å»ï¿½
+		Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª10Ê±ï¿½ï¿½SCLÆµï¿½ï¿½ = 205KHz 
+		Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª7Ê±ï¿½ï¿½SCLÆµï¿½ï¿½ = 347KHzï¿½ï¿½ SCLï¿½ßµï¿½Æ½Ê±ï¿½ï¿½1.5usï¿½ï¿½SCLï¿½Íµï¿½Æ½Ê±ï¿½ï¿½2.87us 
+	 	Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª5Ê±ï¿½ï¿½SCLÆµï¿½ï¿½ = 421KHzï¿½ï¿½ SCLï¿½ßµï¿½Æ½Ê±ï¿½ï¿½1.25usï¿½ï¿½SCLï¿½Íµï¿½Æ½Ê±ï¿½ï¿½2.375us 
         
-    IAR¹¤³Ì±àÒëÐ§ÂÊ¸ß£¬²»ÄÜÉèÖÃÎª7
+    IARï¿½ï¿½ï¿½Ì±ï¿½ï¿½ï¿½Ð§ï¿½Ê¸ß£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª7
 	*/
   volatile int i = 7;
     while (i)
@@ -95,7 +95,7 @@ void IIC_Delay(void)
 }
 void IIC_Start(void)
 {
-	SDA_OUT();	/* µ±SCL¸ßµçÆ½Ê±£¬SDA³öÏÖÒ»¸öÏÂÌøÑØ±íÊ¾IIC×ÜÏßÆô¶¯ÐÅºÅ */
+	SDA_OUT();	/* ï¿½ï¿½SCLï¿½ßµï¿½Æ½Ê±ï¿½ï¿½SDAï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø±ï¿½Ê¾IICï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½ */
 	IIC_SDA_1;
 	IIC_SCL_1;
 	IIC_Delay();
@@ -106,7 +106,7 @@ void IIC_Start(void)
 }	
 void IIC_Stop(void)
 {
-	SDA_OUT();/* µ±SCL¸ßµçÆ½Ê±£¬SDA³öÏÖÒ»¸öÉÏÌøÑØ±íÊ¾IIC×ÜÏßÍ£Ö¹ÐÅºÅ */
+	SDA_OUT();/* ï¿½ï¿½SCLï¿½ßµï¿½Æ½Ê±ï¿½ï¿½SDAï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø±ï¿½Ê¾IICï¿½ï¿½ï¿½ï¿½Í£Ö¹ï¿½Åºï¿½ */
 	IIC_SCL_0;
 	IIC_SDA_0;
 	IIC_Delay();
@@ -118,11 +118,11 @@ uint8_t IIC_WaitAck(void)//0:ACK 1:no ACK
 {
 	uint8_t ucErrTime=0;
   SDA_IN();
-	IIC_SDA_1;	/* CPUÊÍ·ÅSDA×ÜÏß */
+	IIC_SDA_1;	/* CPUï¿½Í·ï¿½SDAï¿½ï¿½ï¿½ï¿½ */
 	IIC_Delay();
-	IIC_SCL_1;	/* CPUÇý¶¯SCL = 1, ´ËÊ±Æ÷¼þ»á·µ»ØACKÓ¦´ð */
+	IIC_SCL_1;	/* CPUï¿½ï¿½ï¿½ï¿½SCL = 1, ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½á·µï¿½ï¿½ACKÓ¦ï¿½ï¿½ */
 	IIC_Delay();
-	while (IIC_SDA_READ())	/* CPU¶ÁÈ¡SDA¿ÚÏß×´Ì¬ */
+	while (IIC_SDA_READ())	/* CPUï¿½ï¿½È¡SDAï¿½ï¿½ï¿½ï¿½×´Ì¬ */
 	{
 			ucErrTime++;
 		if(ucErrTime>250)
@@ -155,8 +155,8 @@ void IIC_SendByte(uint8_t Byte)
 		IIC_SCL_1;
 		IIC_Delay();	
 		IIC_SCL_0;
-		IIC_SDA_1; // ÊÍ·Å×ÜÏß
-		Byte <<= 1;	/* ×óÒÆÒ»¸öbit */
+		IIC_SDA_1; // ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½
+		Byte <<= 1;	/* ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½bit */
 		IIC_Delay();
 	}
 }
@@ -181,9 +181,9 @@ uint8_t IIC_ReadByte(unsigned char ack)
 	}
 	
 	  if (!ack)
-        IIC_NAck();//·¢ËÍnACK
+        IIC_NAck();//ï¿½ï¿½ï¿½ï¿½nACK
     else
-        IIC_Ack(); //·¢ËÍACK  
+        IIC_Ack(); //ï¿½ï¿½ï¿½ï¿½ACK  
 	return value;
 }	
 

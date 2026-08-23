@@ -59,7 +59,8 @@ Maintainer: Miguel Luis and Gregory Cristian
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
+#include "hw_gpio.h"
+#include "hw_msp.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/

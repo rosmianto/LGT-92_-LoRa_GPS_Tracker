@@ -2,6 +2,18 @@
 #include "at.h"
 #include "delay.h"
 #include "vcom.h"
+
+#include "stm32l072xx.h"
+#include "stm32l0xx_hal.h"
+#include "stm32l0xx_nucleo.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "bsp_usart2.h"
+#include <ctype.h>
+
 #define SEMICOLON ','
 #define ASTERISK '*'
 
@@ -363,10 +375,8 @@ uint8_t GPS_parse(char *buf) {
       int d, m, mm;
       sscanf(word, "%3d%2d.%4d", &d, &m, &mm);
       gps.longitude = (float)d + (float)m / 60.0 + (float)mm / 600000.0;
-      //            PRINTF("%s: %.6f��\n\r",gps.longitude);
     }
 
-    // ���������־
     word = split(left, SEMICOLON, &left);
     //        AT_PRINTF("GNRMC6:%s\n\r",word);
     if (word != NULL) {

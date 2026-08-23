@@ -65,6 +65,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "radio.h"
 #include "vcom.h"
 #include <battery.h>
+#include <hw_msp.h>
+#include <utilities.h>
 
 /*!
  *  \brief Unique Devices IDs register set ( STM32L0xxx )

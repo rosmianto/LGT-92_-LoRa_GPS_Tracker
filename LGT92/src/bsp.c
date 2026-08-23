@@ -47,11 +47,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "bsp.h"
 #include "delay.h"
-#include "hw.h"
+#include "hw_gpio.h"
 #include "lora.h"
+#include "stm32l0xx_hw_conf.h"
 #include "timeServer.h"
 #include <battery.h>
 #include <stdlib.h>
+// #include <stm32l0xx_hal_gpio.h>
 #include <string.h>
 
 /* Private typedef -----------------------------------------------------------*/

@@ -59,8 +59,11 @@ Maintainer: Miguel Luis and Gregory Cristian
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
+// #include "hw.h"
+#include "hw_rtc.h"
+#include "debug.h"
 #include "low_power_manager.h"
+#include <stdbool.h>
 
 //uint8_t flagss=0,flagsss=0;
 //uint16_t  daysss=0;

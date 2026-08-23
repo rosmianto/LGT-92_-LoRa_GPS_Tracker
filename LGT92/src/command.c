@@ -47,9 +47,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
 #include "at.h"
-#include "hw.h"
+// #include "hw.h"
 #include "command.h"
 #include "lora.h"
+#include <stm32l0xx.h>
+#include <string.h>
+#include <vcom.h>
 
 /* comment the following to have help message */
 /* #define NO_HELP */
