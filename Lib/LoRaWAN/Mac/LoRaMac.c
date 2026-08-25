@@ -2270,6 +2270,15 @@ LoRaMacStatus_t SendFrameOnChannel(uint8_t channel) {
   }
 #endif
   PRINTF("***** UpLinkCounter= %d *****\n\r", UpLinkCounter);
+  // TODO: Weird decision to bypass the callback and directly
+  // set the LED state here.
+  // Upon inspection the intent was to:
+  // * blink BLUE once on join request
+  // * blink BLUE twice when sending an actual uplink
+  // So this code is actually the first blink. The second blink
+  // is handled in main.cpp (which is another weird decision).
+  // So to refactor this part, I need to find out if we can hook
+  // a callback to joinrequest event.
   if (LON == 1) {
     if (send_fail == 0) {
       if (GPS_ALARM == 0) {

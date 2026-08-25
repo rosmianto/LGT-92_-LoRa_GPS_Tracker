@@ -2,7 +2,6 @@
 #include "IIC.h"
 #include "at.h"
 #include "bsp.h"
-// #include "bsp_usart2.h"
 #include "command.h"
 #include "delay.h"
 #include "flash_eraseprogram.h"
