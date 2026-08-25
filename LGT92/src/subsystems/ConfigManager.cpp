@@ -4,10 +4,12 @@
 ConfigManager::ConfigManager(ConfigStorageInterface &stg) : _stg(stg) {
     _factory = {
         .data = {
-            .configVersion = CONFIG_VERSION,
-            .fwVersionMajor = FW_VERSION_MAJOR,
-            .fwVersionMinor = FW_VERSION_MINOR,
-            .fwVersionRevision = FW_VERSION_REVISION
+            .configVersion      = CONFIG_VERSION,
+            .fwVersionMajor     = FW_VERSION_MAJOR,
+            .fwVersionMinor     = FW_VERSION_MINOR,
+            .fwVersionRevision  = FW_VERSION_REVISION,
+            .gpsModel           = GPSModel::UBLOX_MAX7,
+            .hwVersion          = 167
         }
     };
 

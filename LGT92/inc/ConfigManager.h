@@ -14,7 +14,7 @@ public:
     ConfigData cfg;
 
 private:
-    ConfigData _factory;
+    ConfigData _factory;  // The default factory settings
     ConfigStorageInterface &_stg;
     uint32_t calculateCRC32(const uint8_t *data, int len);
 };

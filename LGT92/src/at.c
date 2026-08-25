@@ -387,6 +387,7 @@ ATEerror_t at_hardware_ic_set(const char *param) {
   }
 
   ic_version = ic;
+  // TODO: Why would we need to monitor hardware version?
   hardware_version = hardware;
 
   EEPROM_Store_Config();

@@ -126,7 +126,7 @@ static uint32_t s_hard[1];    // store hardware version
 
 uint8_t mpuint_flags = 0;
 uint8_t ic_version = 2;
-uint16_t hardware_version = 167;
+uint16_t hardware_version = 167;  // TODO: This actually serves no purpose on firmware behavior
 uint8_t joinrx2_dr;
 float pdop_value;
 
@@ -1304,27 +1304,30 @@ void EEPROM_Read_Config(void) {
 //   return versi;
 // }
 
-void new_firmware_update(void) {
-  uint32_t update_flags[1];
-  uint16_t be_fre, be_ver;
-  uint32_t start_address = 0, r_config[1];
-  start_address = EEPROM_USER_Firmware_FLAGS;
-  r_config[0] = *(__IO uint32_t *)start_address;
-  be_fre = r_config[0] >> 16;
-  be_ver = r_config[0] & 0xFFFF;
-  fire_frequcy = Firm_FQ;
-  fire_version = string_touint();
+// void new_firmware_update(void) {
+//   // TODO: So the intent here was to wipe out the existing configs
+//   // whenever we detect firmware version change or LoRaWAN region change.
+//   // Either way they're not valid reasons to wipe configs.
+//   uint32_t update_flags[1];
+//   uint16_t be_fre, be_ver;
+//   uint32_t start_address = 0, r_config[1];
+//   start_address = EEPROM_USER_Firmware_FLAGS;
+//   r_config[0] = *(__IO uint32_t *)start_address;
+//   be_fre = r_config[0] >> 16;
+//   be_ver = r_config[0] & 0xFFFF;
+//   fire_frequcy = Firm_FQ;
+//   fire_version = string_touint();
 
-  if ((be_fre != fire_frequcy) || (be_ver != fire_version)) // FDR
-  {
-    update_flags[0] = (fire_frequcy << 16) | fire_version;
-    EEPROM_program(EEPROM_USER_Firmware_FLAGS, update_flags,
-                   1);      // store hardversion
-    FLASH_erase(0x8018F80); // page 799
-    FLASH_erase(FLASH_USER_START_ADDR_CONFIG);
-    NVIC_SystemReset();
-  }
-}
+//   if ((be_fre != fire_frequcy) || (be_ver != fire_version)) // FDR
+//   {
+//     update_flags[0] = (fire_frequcy << 16) | fire_version;
+//     EEPROM_program(EEPROM_USER_Firmware_FLAGS, update_flags,
+//                    1);      // store hardversion
+//     FLASH_erase(0x8018F80); // page 799
+//     FLASH_erase(FLASH_USER_START_ADDR_CONFIG);
+//     NVIC_SystemReset();
+//   }
+// }
 
 State_t lora_getState(void) { return State; }
 
@@ -1334,18 +1337,12 @@ SGM_t LORA_SGM(void) { return SGM; }
 
 void lora_state_INT(void) {
   int in1 = 0;
-  //	DelayMs(3000);
   in1 = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
   if (in1 == 1) {
-    //		user_key_exti_flag=1;
     PPRINTF("Enter\n\r");
-    //		dr_power = 1;
-    //		GPS_ALARM =1;
-    //		GS = 1;
-    //		GPS_POWER_OFF();
-    //		State = STATE_GPS_SEND;
   }
 }
+
 void MPU9250_INT(void) {
   int in2 = 0;
   in2 = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12);
@@ -1361,23 +1358,16 @@ void MPU9250_INT(void) {
     }
   }
 }
-void lora_state_Led(void) { State = STATE_LED; }
 
-void lora_state_Wake_Join(void) { State = STATE_WAKE_JOIN; }
-
+void lora_state_Led(void)        { State = STATE_LED;        }
+void lora_state_Wake_Join(void)  { State = STATE_WAKE_JOIN;  }
 void lora_state_LoRa_Alarm(void) { State = STATE_LORA_ALARM; }
-
-void lora_state_GPS_Alarm(void) { State = STATE_GPS_ALARM; }
-
-void lora_state_GPS_Send(void) { State = STATE_GPS_SEND; }
-void gps_state_on(void) { GPSState = STATE_GPS_ON; }
-
-void gps_state_no(void) { GPSState = STATE_GPS_NO; }
-
-void gps_state_off(void) { GPSState = STATE_GPS_OFF; }
-void LOG_GPS(void) { State = STATE_GPS_LOG; }
-
-void LORA_GPS(void) { SGM = STATE_SEND_GPS; }
-
-void LORA_GPS_MPU(void) { SGM = STATE_SEND_GPS_MPU; }
+void lora_state_GPS_Alarm(void)  { State = STATE_GPS_ALARM;  }
+void lora_state_GPS_Send(void)   { State = STATE_GPS_SEND;   }
+void gps_state_on(void)          { GPSState = STATE_GPS_ON;  }
+void gps_state_no(void)          { GPSState = STATE_GPS_NO;  }
+void gps_state_off(void)         { GPSState = STATE_GPS_OFF; }
+void LOG_GPS(void)               { State = STATE_GPS_LOG;    }
+void LORA_GPS(void)              { SGM = STATE_SEND_GPS;     }
+void LORA_GPS_MPU(void)          { SGM = STATE_SEND_GPS_MPU; }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

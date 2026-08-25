@@ -833,13 +833,7 @@ void CMD_Process(void)
 /* Process all commands */
   if (IsCharReceived==SET)
   {
-    //ENTER_CRITICAL
     IsCharReceived=RESET;
-    //EXIT CRITICAL
-#if 0 /* echo On    */
-  PRINTF("%c", command[i]);
-#endif
-
     if (command[i] == AT_ERROR_RX_CHAR)
     {
       i = 0;

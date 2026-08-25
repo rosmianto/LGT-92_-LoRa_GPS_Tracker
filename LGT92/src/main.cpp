@@ -1531,6 +1531,7 @@ void user_key_event(void) {
   }
 }
 
+// TODO: We want to identify different GPS modules at runtime
 void gps_Identify() {
   char *ublox_buff = "u-blox";
   char *l76K_buff = "IC=AT6558R";
