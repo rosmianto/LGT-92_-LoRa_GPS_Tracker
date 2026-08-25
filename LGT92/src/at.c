@@ -1108,7 +1108,7 @@ ATEerror_t at_RPL_get(const char *param) {
 }
 
 ATEerror_t at_version_get(const char *param) {
-  AT_PRINTF(AT_VERSION_STRING " ");
+  AT_PRINTF(firmwareVersion);
   region_printf();
 
   return AT_OK;

@@ -26,10 +26,17 @@
 
 // Include drivers
 #include <drivers/IMUDriver_Dummy.h>
+#include <drivers/ConfigStorage_Dummy.h>
+
+// Include subsystems
+#include <ConfigManager.h>
 
 IMUDriver_Dummy imuDummy;
+ConfigStorage_Dummy stgDummy;
 
 IMU imu(imuDummy);
+ConfigManager cfgMgr(stgDummy);
+
 /*
   ic_version variable is used in:
   at.c   -> as get/set value for GPS type (hardware version)
@@ -245,6 +252,7 @@ static LoRaParam_t LoRaParamInit = {LORAWAN_ADR_STATE,
  * @retval None
  */
 int main(void) {
+
   /* STM32 HAL library initialization*/
   HAL_Init();
 
@@ -285,7 +293,11 @@ int main(void) {
   /* Configure the Lora Stack*/
   LORA_Init(&LoRaMainCallbacks, &LoRaParamInit);
 
+  // C++ starts here
   imu.init();
+
+  cfgMgr.init();
+  cfgMgr.loadConfig();
 
   gps_Identify();
 

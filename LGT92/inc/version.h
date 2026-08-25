@@ -65,15 +65,29 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 #ifdef __cplusplus
  extern "C" {
 #endif
-   
+
+#include <stdbool.h>
+#include <stdint.h>
+
 /* Includes ------------------------------------------------------------------*/
 #include "lora_mac_version.h"
 /* Exported constants --------------------------------------------------------*/
 #define TEST_VERSION (uint32_t) 0x00000000  /*1 lsb is always 0 in releases   */
 #define LRWAN_VERSION  (uint32_t) 0x00001140  /*3 next hex is i_cube release*/
 #define VERSION   (uint32_t) ( LORA_MAC_VERSION | LRWAN_VERSION | TEST_VERSION )
-#define AT_VERSION_STRING	"v1.6.7"
 #define AT_LoRaWan_VERSION_STRING	"DR-LWS-005"
+
+// Upgraded versioning approach
+#define FW_VERSION_MAJOR      1
+#define FW_VERSION_MINOR      6
+#define FW_VERSION_REVISION   7
+
+#define STRINGIFY(x) #x
+#define TOSTR(x) STRINGIFY(x)
+
+#define firmwareVersion "v" TOSTR(FW_VERSION_MAJOR) "." TOSTR(FW_VERSION_MINOR) "." TOSTR(FW_VERSION_REVISION)
+
+bool isFwVersionNewer(uint8_t major, uint8_t minor, uint8_t revision);
 
 /* Exported types ------------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/

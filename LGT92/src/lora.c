@@ -88,6 +88,9 @@
 #define Firm_FQ 0x000b
 #endif
 
+int16_t _lastKnownSNR  = 0;
+uint8_t _lastKnownRSSI = 0;
+
 uint16_t fire_version = 0;
 uint16_t fire_frequcy = 0;
 uint8_t mode;
@@ -233,8 +236,6 @@ static lora_configuration_t lora_config = {
     .AppKey = LORAWAN_APPLICATION_KEY,
     .NwkSKey = LORAWAN_NWKSKEY,
     .AppSKey = LORAWAN_APPSKEY,
-    .Rssi = 0,
-    .Snr = 0,
     .ReqAck = LORAWAN_UNCONFIRMED_MSG,
     .McpsConfirm = NULL,
     .TxDatarate = 0};
@@ -380,8 +381,8 @@ static void McpsIndication(McpsIndication_t *mcpsIndication) {
       AppData.Port = mcpsIndication->Port;
       AppData.BuffSize = mcpsIndication->BufferSize;
       AppData.Buff = mcpsIndication->Buffer;
-      lora_config.Rssi = mcpsIndication->Rssi;
-      lora_config.Snr = mcpsIndication->Snr;
+      _lastKnownRSSI = mcpsIndication->Rssi;
+      _lastKnownSNR= mcpsIndication->Snr;
       LoRaMainCallbacks->LORA_RxData(&AppData);
       break;
     }
@@ -451,7 +452,7 @@ void LORA_Init(LoRaMainCallback_t *callbacks, LoRaParam_t *LoRaParam) {
   PRINTF("\n\rLoRa ST Module\n\r");
 #endif
 
-  PRINTF("Image Version: " AT_VERSION_STRING "\n\r");
+  PRINTF("Image Version: " firmwareVersion "\n\r");
   PRINTF("LoRaWan Stack: " AT_LoRaWan_VERSION_STRING "\n\r");
   PRINTF("Frequency Band: ");
   region_printf();
@@ -832,7 +833,7 @@ void lora_config_reqack_set(LoraConfirm_t reqack) {
 
 LoraConfirm_t lora_config_reqack_get(void) { return lora_config.ReqAck; }
 
-int8_t lora_config_snr_get(void) { return lora_config.Snr; }
+int8_t lora_config_snr_get(void) { return _lastKnownSNR; }
 
 void lora_config_application_port_set(int8_t application_port) {
   lora_config.application_port = application_port;
@@ -842,7 +843,7 @@ int8_t lora_config_application_port_get(void) {
   return lora_config.application_port;
 }
 
-int16_t lora_config_rssi_get(void) { return lora_config.Rssi; }
+int16_t lora_config_rssi_get(void) { return _lastKnownRSSI; }
 
 void lora_config_tx_datarate_set(int8_t TxDataRate) {
   lora_config.TxDatarate = TxDataRate;
@@ -1286,22 +1287,22 @@ void EEPROM_Read_Config(void) {
   hardware_version = r_config[0] & 0xFFFF;
 }
 
-uint16_t string_touint(void) {
-  char *p;
-  uint8_t chanum = 0;
-  uint16_t versi;
-  char version[8] = "";
-  p = AT_VERSION_STRING;
+// uint16_t string_touint(void) {
+//   char *p;
+//   uint8_t chanum = 0;
+//   uint16_t versi;
+//   char version[8] = "";
+//   p = AT_VERSION_STRING;
 
-  while (*p++ != '\0') {
-    if (*p >= '0' && *p <= '9') {
-      version[chanum++] = *p;
-    }
-  }
-  versi = atoi(version);
+//   while (*p++ != '\0') {
+//     if (*p >= '0' && *p <= '9') {
+//       version[chanum++] = *p;
+//     }
+//   }
+//   versi = atoi(version);
 
-  return versi;
-}
+//   return versi;
+// }
 
 void new_firmware_update(void) {
   uint32_t update_flags[1];
