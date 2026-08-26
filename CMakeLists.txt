@@ -40,6 +40,7 @@ add_subdirectory(cmake/stm32cubemx)
 # Add Libraries
 add_subdirectory(Lib/Fusion-1.3.2)
 add_subdirectory(Lib/lwgps-2.4.0)
+add_subdirectory(Lib/CTRE-3.11.0)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -70,4 +71,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     # Add user defined libraries
     Fusion
     lwgps
+    ctre
 )

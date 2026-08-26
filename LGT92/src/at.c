@@ -1546,6 +1546,8 @@ ATEerror_t at_MOD_get(const char *param) {
   return AT_OK;
 }
 
+// TODO: This is bad decision, any PDOP config will be overriden
+// by gps_identify(). Bruh, this shows design immaturity IMO.
 ATEerror_t at_PDOP_set(const char *param) {
   uint16_t gapvalue_a;
   uint8_t gapvalue_b;
