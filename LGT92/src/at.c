@@ -245,7 +245,6 @@ ATEerror_t at_reset(const char *param) {
 ATEerror_t at_DEBUG_run(const char *param) {
   debug_flags = 1;
   PPRINTF("Enter Debug mode\r\n");
-  debug_flags = 1;
 
   return AT_OK;
 }

@@ -14,7 +14,7 @@ std::string_view ATParser::parseCommand(std::string_view input) {
     // use CTRE library to extract AT base command, 
     // AT command types like '?' or '=' or '=?',
     // as well as the AT params.
-    auto [match, _cmd, _op, _params] = ctre::match<"^AT(\\+[A-Z0-9]+)?(=\\?|\\?|=)?(.*)\\r\\n$">(input);
+    auto [match, _cmd, _op, _params] = ctre::match<"^AT(\\+[A-Z0-9]+(=\\?|\\?|=))?(.*)$">(input);
 
     if (!match) {
         return "ERROR\r\n";
@@ -75,7 +75,6 @@ std::string_view ATParser::parseCommand(std::string_view input) {
         case "+PORT"_hash:
         case "+RECV"_hash:
         case "+RECVB"_hash:
-        case "Z"_hash:
         case "+RJTDC"_hash:
         case "+RPL"_hash:
         case "+RSSI"_hash:
@@ -92,6 +91,7 @@ std::string_view ATParser::parseCommand(std::string_view input) {
         case "+TDC"_hash:
         case "+TXP"_hash:
         case "+VER"_hash:
+        case "Z"_hash:
 
         default:
             _parserOutput += "ERROR\r\n";

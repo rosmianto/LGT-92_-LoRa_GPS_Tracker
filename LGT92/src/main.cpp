@@ -85,7 +85,6 @@ extern uint16_t power_time;
 extern bool rx2_flags;
 extern uint32_t LoRaMacState;
 extern uint8_t dwelltime;
-extern bool debug_flags;
 
 uint32_t Altitude = 0;
 uint32_t APP_TX_DUTYCYCLE = 300000;
