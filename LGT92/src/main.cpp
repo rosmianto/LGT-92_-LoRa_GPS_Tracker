@@ -30,12 +30,14 @@
 
 // Include subsystems
 #include <ConfigManager.h>
+#include <ATParser.h>
 
 IMUDriver_Dummy imuDummy;
 ConfigStorage_Dummy stgDummy;
 
 IMU imu(imuDummy);
 ConfigManager cfgMgr(stgDummy);
+ATParser atParser;
 
 /*
   ic_version variable is used in:
@@ -303,6 +305,12 @@ int main(void) {
   while (1) {
     /* Handle UART commands */
     CMD_Process();
+
+    std::string_view line = "AT"; // For example.
+    auto response = atParser.parseCommand(line);
+
+    // Serial.write(response);
+    
 
     if (atz_flags == 1) {
       DelayMs(500);
