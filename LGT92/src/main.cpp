@@ -23,6 +23,7 @@
 #include <hw_msp.h>
 #include <led.h>
 #include <math.h>
+#include <Temporary.h>
 
 // Include drivers
 #include <drivers/ConfigStorage_Dummy.h>
@@ -99,7 +100,6 @@ uint32_t GS = 0;
 extern uint16_t dr_power;
 extern uint32_t set_sgm;
 extern uint32_t LON;
-extern uint32_t MD;
 extern uint32_t MLON;
 extern uint32_t Threshold;
 extern uint32_t Freq;
@@ -342,7 +342,7 @@ int main(void) {
     // in the main loop, not stm32l0xx_it.c
     if (__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_12) != RESET) {
       if (is_lora_joined == 1) {
-        if (MD != 0) {
+        if (motionDetectMode != DISABLED) {
           if ((LoRaMacState & 0x00000001) != 0x00000001) {
             if ((stop_flag == 1) && (GPS_ALARM == 0)) {
               moinint_exitflag = 1;
@@ -559,7 +559,7 @@ static void Send(void) {
 
   printf_uplink();
 
-  FLAG = (int)(MD << 6 | LON << 5 | Firmware) & 0xFF;
+  FLAG = (int)(motionDetectMode << 6 | LON << 5 | Firmware) & 0xFF;
   if (lora_getGPSState() == STATE_GPS_OFF) {
     AppData.Buff[i++] = 0x00;
     AppData.Buff[i++] = 0x00;
@@ -703,17 +703,17 @@ static void LORA_RxData(lora_AppData_t *AppData) {
   }
   case 0xa5: {
     if (AppData->BuffSize == 2) {
-      MD = AppData->Buff[1];
-      PRINTF("MD: %02x\n\r", MD);
+      motionDetectMode = static_cast<MotionDetectionMode>(AppData->Buff[1]);
+      PRINTF("motionDetectMode: %02x\n\r", motionDetectMode);
       if (AppData->Buff[1] != 0x00) {
         start_time = HW_RTC_GetTimerValue();
       }
     } else if (AppData->BuffSize == 4) {
       if (AppData->Buff[1] == 0x03) {
-        MD = AppData->Buff[1];
+        motionDetectMode = static_cast<MotionDetectionMode>(AppData->Buff[1]);
         Threshold = AppData->Buff[2];
         Freq = AppData->Buff[3];
-        PRINTF("Set MD: %02x,%02x,%02x\n\r", MD, Threshold, Freq);
+        PRINTF("Set motionDetectMode: %02x,%02x,%02x\n\r", motionDetectMode, Threshold, Freq);
       }
       if (AppData->Buff[1] != 0x00) {
         start_time = HW_RTC_GetTimerValue();
@@ -1021,7 +1021,7 @@ static void LoraStartTx(TxEventType_t EventType) {
 
 static void timing(void) {
   uint32_t temp_time = 0;
-  if (MD != 0) {
+  if (motionDetectMode != DISABLED) {
     if ((motion_flags == 0) && (ALARM == 0)) {
       temp_time = HW_RTC_GetTimerValue();
       //			PPRINTF("temp_time is %d\r\n",temp_time);
@@ -1260,7 +1260,7 @@ void lora_send(void) {
       TimerStart(&time_TxTimer);
       TimerStart(&IWDGRefreshTimer);
       LPM_SetOffMode(LPM_APPLI_Id, LPM_Disable);
-      if (MD == 0) {
+      if (motionDetectMode == DISABLED) {
         MPU_Write_Byte(MPU9250_ADDR, 0x6B, 0X40); // MPU sleep
       } else {
         MPU_INT_Init();
@@ -1391,7 +1391,7 @@ void send_data(void) {
   TimerStart(&IWDGRefreshTimer);
   LPM_SetOffMode(LPM_APPLI_Id, LPM_Disable);
   PPRINTF("Update Interval: %d ms\n\r", APP_TX_DUTYCYCLE);
-  if (MD == 0) {
+  if (motionDetectMode == DISABLED) {
     MPU_Write_Byte(MPU9250_ADDR, 0x6B, 0X40); // MPU sleep
   } else {
     MPU_INT_Init();

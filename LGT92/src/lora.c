@@ -63,6 +63,7 @@
 #include <led.h>
 #include <stm32l0xx_hal.h>
 #include <utilities.h>
+#include <Temporary.h>
 
 #if defined(REGION_AS923)
 #define Firm_FQ 0x0001
@@ -159,7 +160,6 @@ extern uint8_t Alarm_times;
 extern uint8_t Alarm_times1;
 
 extern uint32_t LON;
-extern uint32_t MD;
 extern uint32_t MLON;
 extern uint32_t Threshold;
 extern uint32_t Freq;
@@ -563,7 +563,7 @@ void fdr_config(void) {
   pdop_value = 3.0;
   gps.flag = 1;
   LON = 1;
-  MD = 1;
+  motionDetectMode = ON_MOVE;
   set_sgm = 1;
   s_timer = 1;
   REJOIN_TX_DUTYCYCLE = 20; // min
@@ -1073,7 +1073,7 @@ void Store_Config(void) {
 
   s_config[config_count++] = LON;
 
-  s_config[config_count++] = MD;
+  s_config[config_count++] = motionDetectMode;
 
   s_config[config_count++] = MLON;
 
@@ -1245,7 +1245,7 @@ void Read_Config(void) {
 
   LON = r_config[17];
 
-  MD = r_config[18];
+  motionDetectMode = r_config[18];
 
   MLON = r_config[19];
 

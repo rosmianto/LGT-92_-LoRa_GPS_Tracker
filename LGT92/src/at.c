@@ -66,6 +66,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <Temporary.h>
 
 bool debug_flags = 0;
 uint8_t symbtime1_value = 0; // RX1windowtimeout
@@ -93,7 +94,7 @@ uint32_t set_sgm = 0;
 uint32_t s_timer = 1;
 uint8_t md_flags = 0;
 uint32_t LON = 1;
-uint32_t MD = 1;
+MotionDetectionMode motionDetectMode = ON_MOVE;
 uint32_t MLON = 0;
 uint32_t Threshold = 0;
 uint32_t Freq = 0;
@@ -1369,7 +1370,7 @@ ATEerror_t at_md_set(const char *param) {
     start_time = HW_RTC_GetTimerValue();
   }
 
-  MD = md;
+  motionDetectMode = md;
   Threshold = threshold;
   Freq = freq;
   md_flags = 1;
@@ -1378,10 +1379,10 @@ ATEerror_t at_md_set(const char *param) {
 }
 
 ATEerror_t at_md_get(const char *param) {
-  if (MD == 3) {
-    AT_PRINTF("%d,%d,%d\r\n", MD, Threshold, Freq);
+  if (motionDetectMode == USER_DEFINED) {
+    AT_PRINTF("%d,%d,%d\r\n", motionDetectMode, Threshold, Freq);
   } else {
-    AT_PRINTF("%d\r\n", MD);
+    AT_PRINTF("%d\r\n", motionDetectMode);
   }
   return AT_OK;
 }
