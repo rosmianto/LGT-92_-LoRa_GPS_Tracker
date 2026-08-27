@@ -200,9 +200,19 @@ void SysTick_Handler(void)
   HAL_IncTick();
 }
 
+// TODO: I don't know why this function is in this file.
+// Probably copy-paste engineering.
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	HW_GPIO_IrqHandler( GPIO_Pin );
+  if (GPIO_Pin == GPIO_PIN_12) {  // MPU9250 interrupt pin
+    moinint_exitflag = 1;
+  }
+  else if (GPIO_Pin == GPIO_PIN_14) {  // Button interrupt pin
+    button_exitflag = 1;
+  }
+  else {
+    HW_GPIO_IrqHandler( GPIO_Pin );
+  }
 }
 
 /******************************************************************************/
@@ -259,53 +269,16 @@ void EXTI2_3_IRQHandler( void )
 void EXTI4_15_IRQHandler( void )
 {
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_4 );
-  
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_5 );
-
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_6 );
-  
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_7 );
-
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_8 );
-
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_9 );
-  
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_10 );
-  
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_11 );
-
- if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_12) != RESET) 
-  { 
-		if(is_lora_joined==1)
-		{
-		  if(MD!=0)
-			{
-				if( ( LoRaMacState & 0x00000001 ) != 0x00000001 )
-		  	{	
-					if((stop_flag==1)&&(GPS_ALARM == 0))
-					{
-						moinint_exitflag=1;
-					}
-			  }
-			}
-		}
-	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_12);
-   HAL_GPIO_EXTI_Callback(GPIO_PIN_12);
-  }	
-
+  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_12 );
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_13 );
-
- if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_14) != RESET) 
-  { 
-		 if(is_lora_joined==1)
-		{
-			button_exitflag=1;
-		}
-		user_key_exti_flag=1;
-	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);
-   HAL_GPIO_EXTI_Callback(GPIO_PIN_14);
-  }
-
+  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_15 );
 }
 

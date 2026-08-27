@@ -29,6 +29,7 @@
 */
 
 GPSINFO gps;
+
 char lasttime[20];
 _Bool isrunning;
 uint32_t isFirmwareUpdate = 0;
@@ -37,12 +38,14 @@ uint8_t gpspower_flag = 0;
 float pdop_gps;
 char *txdata353;
 char *txdata886;
+
 extern UART_HandleTypeDef uart1;
 extern uint8_t gps_setflags;
 extern uint8_t se_mode;
 extern uint8_t fr_mode;
 extern uint8_t ic_version;
 extern uint32_t loggps;
+
 _Bool GPS_Run(void) {
   if (isrunning)
     return 0;
@@ -830,6 +833,7 @@ void GPS_INPUT(void) {
     AT_PRINTF("PDOP:%.1f\n\r", pdop_gps);
   }
 
+  // TODO: What's really the point here? Better comment-out everything. 
   switch (gps.FixMode) {
   case 0:
     //					AT_PRINTF("GPS״̬:δ��λ   \n\r");

@@ -3275,3 +3275,11 @@ void LoRaMacTestSetDutyCycleOn(bool enable) {
 }
 
 void LoRaMacTestSetChannel(uint8_t channel) { Channel = channel; }
+
+bool isLoRaMacBusy() {
+  if ((LoRaMacState & LORAMAC_TX_RUNNING) == LORAMAC_TX_RUNNING) {
+    return LORAMAC_STATUS_BUSY;
+  }
+
+  return LORAMAC_STATUS_OK;
+}

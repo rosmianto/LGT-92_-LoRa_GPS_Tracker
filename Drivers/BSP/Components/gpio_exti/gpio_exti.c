@@ -102,15 +102,4 @@ void EXTI4_15_IRQHandler_Config(void)
   HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 }
-/**
-  * @brief GPIO EXTI callback
-  * @param None
-  * @retval None
-  */
-//void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-//{
-//  /* Clear Wake Up Flag */
-////	send();
-//  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
-//}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

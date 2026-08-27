@@ -1968,6 +1968,8 @@ LoRaMacStatus_t LoRaMacMlmeRequest( MlmeReq_t *mlmeRequest );
  */
 LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t *mcpsRequest );
 
+bool isLoRaMacBusy(); // Simple function to prevent extern LoRaMacState
+
 /*! \} defgroup LORAMAC */
 
 #endif // __LORAMAC_H__

@@ -25,12 +25,12 @@
 #include <math.h>
 
 // Include drivers
-#include <drivers/IMUDriver_Dummy.h>
 #include <drivers/ConfigStorage_Dummy.h>
+#include <drivers/IMUDriver_Dummy.h>
 
 // Include subsystems
-#include <ConfigManager.h>
 #include <ATParser.h>
+#include <ConfigManager.h>
 
 IMUDriver_Dummy imuDummy;
 ConfigStorage_Dummy stgDummy;
@@ -127,6 +127,7 @@ uint8_t gps_setflags = 0;
 uint8_t position_flags = 0;
 float pdop_comp = 7.0;
 float pdop_fixed = 0.0;
+
 extern uint8_t Alarm_times;
 extern uint8_t Alarm_times1;
 extern uint32_t Positioning_time;
@@ -157,6 +158,14 @@ void gps_Identify();
 
 float loraPayloadRoll = 0.0;
 float loraPayloadPitch = 0.0;
+
+/* TODO: Add struct to represent System state:
+
+   * Debug Mode (used to print out timestamp in various location)
+   * FSM State (Sending, Init, waiting GPS, Idle) -> Need to properly design the
+   state transitions
+   *
+*/
 
 /*!
  * User application data structure
@@ -310,7 +319,6 @@ int main(void) {
     auto response = atParser.parseCommand(line);
 
     // Serial.write(response);
-    
 
     if (atz_flags == 1) {
       DelayMs(500);
@@ -328,6 +336,33 @@ int main(void) {
       MPU_INT_Init();
       md_flags = 0;
     }
+
+#if 0
+    // TODO: Code remnant. The logic below should be handled
+    // in the main loop, not stm32l0xx_it.c
+    if (__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_12) != RESET) {
+      if (is_lora_joined == 1) {
+        if (MD != 0) {
+          if ((LoRaMacState & 0x00000001) != 0x00000001) {
+            if ((stop_flag == 1) && (GPS_ALARM == 0)) {
+              moinint_exitflag = 1;
+            }
+          }
+        }
+      }
+      __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_12);
+      HAL_GPIO_EXTI_Callback(GPIO_PIN_12);
+    }
+
+    if (__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_14) != RESET) {
+      if (is_lora_joined == 1) {
+        button_exitflag = 1;
+      }
+      user_key_exti_flag = 1;
+      __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);
+      HAL_GPIO_EXTI_Callback(GPIO_PIN_14);
+    }
+#endif
 
     send_exti();
 
@@ -417,8 +452,6 @@ static void LORA_HasJoined(void) {
 static void printf_uplink(void) {
   if (gps_latitude > 0 && gps_longitude > 0) {
     gps_state_on();
-    //	 PRINTF("%s: %.6f\n\r",(gps.latNS == 'N')?"South":"North",gps_latitude);
-    //	 PRINTF("%s: %.6f\n\r ",(gps.lgtEW == 'E')?"East":"West",gps_longitude);
 
     if (gps.latNS != 'N') {
       latitude = gps_latitude * 1000000;
@@ -1546,15 +1579,12 @@ void gps_Identify() {
   if (strstr(DATABUFF, ublox_buff) != NULL) {
     ic_version = 2;
     pdop_value = 7.00;
-    //   AT_PRINTF("gps module:%s\n\r","ublox-MAX7");
   } else if (strstr(DATABUFF, l76K_buff) != NULL) {
     ic_version = 4;
     pdop_value = 3.00;
-    //		AT_PRINTF("gps module:%s\n\r","L76K");
   } else if (strstr(DATABUFF, l76L_buff) != NULL) {
     ic_version = 1;
     pdop_value = 3.00;
-    //		AT_PRINTF("gps module:%s\n\r","L76L");
   }
 
   else {

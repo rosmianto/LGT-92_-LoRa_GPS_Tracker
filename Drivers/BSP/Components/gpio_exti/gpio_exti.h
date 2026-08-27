@@ -83,12 +83,6 @@ void SystemPower_Config(void);
   * @retval None
   */
 void EXTI4_15_IRQHandler_Config(void);
-/**
-  * @brief GPIO EXTI callback
-  * @param None
-  * @retval None
-  */
-//void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 
 #ifdef __cplusplus
 }
