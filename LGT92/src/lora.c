@@ -1274,11 +1274,13 @@ void Read_Config(void) {
   LP = r_config[27] & 0xFF;
 }
 
+// TODO: Move this feature to ConfigStorage_EEPROM.cpp
 void EEPROM_Store_Config(void) {
   s_hard[0] = (ic_version << 16) | hardware_version;
   EEPROM_program(EEPROM_IC_HARDWEAR, s_hard, 1); // store hardversion
 }
 
+// TODO: Move this feature to ConfigStorage_EEPROM.cpp
 void EEPROM_Read_Config(void) {
   uint32_t start_address = 0, r_config[1];
   start_address = EEPROM_IC_HARDWEAR;
@@ -1286,48 +1288,6 @@ void EEPROM_Read_Config(void) {
   ic_version = r_config[0] >> 16;
   hardware_version = r_config[0] & 0xFFFF;
 }
-
-// uint16_t string_touint(void) {
-//   char *p;
-//   uint8_t chanum = 0;
-//   uint16_t versi;
-//   char version[8] = "";
-//   p = AT_VERSION_STRING;
-
-//   while (*p++ != '\0') {
-//     if (*p >= '0' && *p <= '9') {
-//       version[chanum++] = *p;
-//     }
-//   }
-//   versi = atoi(version);
-
-//   return versi;
-// }
-
-// void new_firmware_update(void) {
-//   // TODO: So the intent here was to wipe out the existing configs
-//   // whenever we detect firmware version change or LoRaWAN region change.
-//   // Either way they're not valid reasons to wipe configs.
-//   uint32_t update_flags[1];
-//   uint16_t be_fre, be_ver;
-//   uint32_t start_address = 0, r_config[1];
-//   start_address = EEPROM_USER_Firmware_FLAGS;
-//   r_config[0] = *(__IO uint32_t *)start_address;
-//   be_fre = r_config[0] >> 16;
-//   be_ver = r_config[0] & 0xFFFF;
-//   fire_frequcy = Firm_FQ;
-//   fire_version = string_touint();
-
-//   if ((be_fre != fire_frequcy) || (be_ver != fire_version)) // FDR
-//   {
-//     update_flags[0] = (fire_frequcy << 16) | fire_version;
-//     EEPROM_program(EEPROM_USER_Firmware_FLAGS, update_flags,
-//                    1);      // store hardversion
-//     FLASH_erase(0x8018F80); // page 799
-//     FLASH_erase(FLASH_USER_START_ADDR_CONFIG);
-//     NVIC_SystemReset();
-//   }
-// }
 
 State_t lora_getState(void) { return State; }
 

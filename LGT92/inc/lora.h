@@ -463,8 +463,7 @@ void Read_Config(void);
 void key_printf(void);
 void EEPROM_Store_Config(void);
 void EEPROM_Read_Config(void);
-uint16_t string_touint(void);
-void new_firmware_update(void);
+// uint16_t string_touint(void);
 
 uint32_t customize_freq1_get(void);
 

@@ -20,6 +20,10 @@ std::string_view ATParser::parseCommand(std::string_view input) {
         return "ERROR\r\n";
     }
 
+    // std::string_view cmd    = "";
+    // std::string_view op     = "";
+    // std::string_view params = "";
+
     std::string_view cmd    = _cmd.to_view();
     std::string_view op     = _op.to_view();
     std::string_view params = _params.to_view();

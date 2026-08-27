@@ -295,9 +295,7 @@ int main(void) {
 
   StartIWDGRefresh(TX_ON_EVENT);
 
-  new_firmware_update();
-
-  /*Disbale Stand-by mode*/
+  /*Disable Stand-by mode*/
   LPM_SetOffMode(LPM_APPLI_Id, LPM_Disable);
 
   /* Configure the Lora Stack*/
@@ -306,6 +304,8 @@ int main(void) {
   // C++ starts here
   imu.init();
 
+  // TODO: Ensure config is loaded and validated
+  // with standard CRC32.
   cfgMgr.init();
   cfgMgr.loadConfig();
 

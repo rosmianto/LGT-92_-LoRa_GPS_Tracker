@@ -51,3 +51,8 @@ bool ConfigManager::storeConfig() {
 
     return _stg.write(cfg);
 }
+
+uint32_t ConfigManager::calculateCRC32(const uint8_t *data, int len) {
+    // TODO: Enable CRC hardware, and call CRC HAL.
+    return 0x00000000;
+}
