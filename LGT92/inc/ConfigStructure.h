@@ -6,20 +6,20 @@
 #define PACKED __attribute__((packed))
 #define CONFIG_VERSION    1
 
-enum class GPSModel : uint8_t {
-    L70RL       = 0,
-    L76L        = 1,
-    UBLOX_MAX7  = 2,
-    UBLOX_MAX8  = 3,
-    L76K        = 4
-};
+// enum class GPSModel : uint8_t {
+//     L70RL       = 0,
+//     L76L        = 1,
+//     UBLOX_MAX7  = 2,
+//     UBLOX_MAX8  = 3,
+//     L76K        = 4
+// };
 
 struct PACKED ConfigStructure {
     uint8_t configVersion;
     uint8_t fwVersionMajor;
     uint8_t fwVersionMinor;
     uint8_t fwVersionRevision;
-    GPSModel gpsModel;
+    // GPSModel gpsModel;
     uint16_t hwVersion;
 
 };

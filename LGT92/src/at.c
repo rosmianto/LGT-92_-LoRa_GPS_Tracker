@@ -82,13 +82,13 @@ extern uint32_t Server_TX_DUTYCYCLE;
 extern uint32_t Alarm_TX_DUTYCYCLE;
 extern uint32_t Keep_TX_DUTYCYCLE;
 extern uint32_t start_time;
-extern uint8_t ic_version;
+GPSModel gpsModel = GPS_UBLOX_MAX7;
+GPSSearchMode searchMode = SEARCHMODE_DEFAULT;
+GPSNavMode navMode = NAVMODE_DEFAULT;
 extern uint16_t hardware_version;
 extern float pdop_value;
 
 uint8_t LP = 0;
-uint8_t se_mode = 0;
-uint8_t fr_mode = 0;
 uint32_t Positioning_time = 150;
 uint32_t set_sgm = 0;
 uint32_t s_timer = 1;
@@ -354,21 +354,21 @@ ATEerror_t at_AppSKey_set(const char *param) {
 }
 
 ATEerror_t at_hardware_ic_get(const char *param) {
-  if ((hardware_version == 0) && (ic_version == 0)) {
+  if ((hardware_version == 0) && (gpsModel == GPS_L70RL)) {
     PPRINTF("L70-RL\r\n");
-  } else if (ic_version == 0) {
+  } else if (gpsModel == GPS_L70RL) {
     PPRINTF("v%d.%d.%d,L70-RL\r\n", hardware_version / 100,
             (hardware_version / 10) % 10, hardware_version % 10);
-  } else if (ic_version == 1) {
+  } else if (gpsModel == GPS_L76L) {
     PPRINTF("v%d.%d.%d,L76-L\r\n", hardware_version / 100,
             (hardware_version / 10) % 10, hardware_version % 10);
-  } else if (ic_version == 2) {
+  } else if (gpsModel == GPS_UBLOX_MAX7) {
     PPRINTF("v%d.%d.%d,ublox-MAX7\r\n", hardware_version / 100,
             (hardware_version / 10) % 10, hardware_version % 10);
-  } else if (ic_version == 3) {
+  } else if (gpsModel == GPS_UBLOX_MAX8) {
     PPRINTF("v%d.%d.%d,ublox-MAX8\r\n", hardware_version / 100,
             (hardware_version / 10) % 10, hardware_version % 10);
-  } else if (ic_version == 4) {
+  } else if (gpsModel == GPS_L76K) {
     PPRINTF("v%d.%d.%d,L76K\r\n", hardware_version / 100,
             (hardware_version / 10) % 10, hardware_version % 10);
   }
@@ -376,17 +376,17 @@ ATEerror_t at_hardware_ic_get(const char *param) {
 }
 
 ATEerror_t at_hardware_ic_set(const char *param) {
-  uint8_t ic;
+  uint8_t model;
   uint16_t hardware;
-  if (tiny_sscanf(param, "%d,%d", &hardware, &ic) != 2) {
+  if (tiny_sscanf(param, "%d,%d", &hardware, &model) != 2) {
     return AT_PARAM_ERROR;
   }
 
-  if ((hardware < 150) || (ic > 9)) {
+  if ((hardware < 150) || (model > 9)) {
     return AT_PARAM_ERROR;
   }
 
-  ic_version = ic;
+  gpsModel = model;
   // TODO: Why would we need to monitor hardware version?
   hardware_version = hardware;
 
@@ -1586,43 +1586,43 @@ ATEerror_t at_BAT_get(const char *param) {
 }
 
 ATEerror_t at_NMEA353_set(const char *param) {
-  uint8_t se_mode1;
+  uint8_t mode;
 
-  if (tiny_sscanf(param, "%d", &se_mode1) != 1) {
+  if (tiny_sscanf(param, "%d", &mode) != 1) {
     return AT_PARAM_ERROR;
   }
 
-  if ((ic_version != 1) || (se_mode1 > 4)) {
+  if ((gpsModel != GPS_L76L) || (mode > 4)) {
     return AT_PARAM_ERROR;
   }
 
-  se_mode = se_mode1;
+  searchMode = mode;
 
   return AT_OK;
 }
 
 ATEerror_t at_NMEA353_get(const char *param) {
-  PPRINTF("%d\r\n", se_mode);
+  PPRINTF("%d\r\n", searchMode);
 
   return AT_OK;
 }
 
 ATEerror_t at_NMEA886_set(const char *param) {
-  uint8_t fr_mode1;
+  uint8_t mode;
 
-  if (tiny_sscanf(param, "%d", &fr_mode1) != 1)
+  if (tiny_sscanf(param, "%d", &mode) != 1)
 
   {
     return AT_PARAM_ERROR;
   }
 
-  fr_mode = fr_mode1;
+  navMode = mode;
 
   return AT_OK;
 }
 
 ATEerror_t at_NMEA886_get(const char *param) {
-  PPRINTF("%d\r\n", fr_mode);
+  PPRINTF("%d\r\n", navMode);
 
   return AT_OK;
 }

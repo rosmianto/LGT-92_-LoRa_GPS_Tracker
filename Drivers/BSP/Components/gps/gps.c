@@ -17,6 +17,8 @@
 #define SEMICOLON ','
 #define ASTERISK '*'
 
+#include <Temporary.h>
+
 /*
     TODO:
     This module has way more responsibilities than it should:
@@ -41,9 +43,6 @@ char *txdata886;
 
 extern UART_HandleTypeDef uart1;
 extern uint8_t gps_setflags;
-extern uint8_t se_mode;
-extern uint8_t fr_mode;
-extern uint8_t ic_version;
 extern uint32_t loggps;
 
 _Bool GPS_Run(void) {
@@ -860,7 +859,7 @@ void GPS_INPUT(void) {
 void POWER_ON() {
   GPS_init();
   GPS_POWER_ON();
-  if ((ic_version <= 1) && ((se_mode != 0) || (fr_mode != 0))) {
+  if ((gpsModel <= GPS_L76L) && ((searchMode != SEARCHMODE_DEFAULT) || (navMode != NAVMODE_DEFAULT))) {
     if (gps_setflags == 0) {
       send_setting();
       gpspower_flag++;
@@ -877,14 +876,14 @@ void send_setting(void) {
   uint8_t txdata1[25];
   uint8_t txdata2[17];
 
-  if ((ic_version == 1) && (se_mode != 0)) {
+  if ((gpsModel == GPS_L76L) && (searchMode != SEARCHMODE_DEFAULT)) {
     PMTK353();
     copytxdata(txdata1, txdata353);
     HAL_UART_Transmit(&uart1, txdata1, 25, 0xFFFF); // Set search mode
     DelayMs(50);
   }
 
-  if (fr_mode != 0) {
+  if (navMode != NAVMODE_DEFAULT) {
     PMTK886();
     copytxdata(txdata2, txdata886);
     HAL_UART_Transmit(&uart1, txdata2, 17, 0xFFFF); // Set fr mode
@@ -893,27 +892,27 @@ void send_setting(void) {
 }
 
 void PMTK353(void) {
-  if (se_mode == 1) {
+  if (searchMode == SEARCHMODE_GPS_GLONASS) {
     txdata353 = "$PMTK353,1,1,0,0,0*2B\r\n";
-  } else if (se_mode == 2) {
+  } else if (searchMode == SEARCHMODE_GPS_BEIDOU) {
     txdata353 = "$PMTK353,1,0,0,0,1*2B\r\n";
-  } else if (se_mode == 3) {
+  } else if (searchMode == SEARCHMODE_GPS_GALILEO) {
     txdata353 = "$PMTK353,1,0,1,0,0*2B\r\n";
-  } else if (se_mode == 4) {
+  } else if (searchMode == SEARCHMODE_GPS_GLONASS_GALILEO) {
     txdata353 = "$PMTK353,1,1,1,0,0*2A\r\n";
   }
 }
 
 void PMTK886(void) {
-  if (fr_mode == 1) {
+  if (navMode == NAVMODE_DEFAULT) {
     txdata886 = "$PMTK886,0*28\r\n";
-  } else if (fr_mode == 2) {
+  } else if (navMode == NAVMODE_FITNESS) {
     txdata886 = "$PMTK886,1*29\r\n";
-  } else if (fr_mode == 3) {
+  } else if (navMode == NAVMODE_AVIATION) {
     txdata886 = "$PMTK886,2*2A\r\n";
-  } else if (fr_mode == 4) {
+  } else if (navMode == NAVMODE_BALLOON) {
     txdata886 = "$PMTK886,3*2B\r\n";
-  } else if (fr_mode == 5) {
+  } else if (navMode == NAVMODE_STATIONARY) {
     txdata886 = "$PMTK886,4*2C\r\n";
   }
 }

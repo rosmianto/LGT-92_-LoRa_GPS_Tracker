@@ -40,18 +40,6 @@ IMU imu(imuDummy);
 ConfigManager cfgMgr(stgDummy);
 ATParser atParser;
 
-/*
-  ic_version variable is used in:
-  at.c   -> as get/set value for GPS type (hardware version)
-  lora.c -> to be stored in EEPROM as config
-  main.c -> to change payload content and setting GPS PDOP value
-  gps.c  -> to determine search mode and navigation mode upon waking up
-
-  Somehow it used as a dynamic identifier for GPS module installed.
-  And used to set PDOP value
-*/
-extern uint8_t ic_version;
-
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
@@ -106,8 +94,6 @@ extern uint32_t Freq;
 extern uint8_t mpuint_flags;
 extern bool button_exitflag;
 extern bool moinint_exitflag;
-extern uint32_t se_mode;
-extern uint32_t fr_mode;
 
 uint32_t CHE = 0;
 int ALARM = 0;
@@ -737,14 +723,14 @@ static void LORA_RxData(lora_AppData_t *AppData) {
   }
   case 0xab: {
     if (AppData->BuffSize == 2) {
-      fr_mode = AppData->Buff[1];
+      navMode = static_cast<GPSNavMode>(AppData->Buff[1]);
     }
     Store_Config();
     break;
   }
   case 0xac: {
     if (AppData->BuffSize == 2) {
-      se_mode = AppData->Buff[1];
+      searchMode = static_cast<GPSSearchMode>(AppData->Buff[1]);
     }
     Store_Config();
 
@@ -1151,7 +1137,7 @@ void lora_send(void) {
     if (gps.GSA_mode2 == 3) {
       if (gps.latitude > 0 && gps.longitude > 0) {
         if (((pdop_value >= pdop_gps) && (pdop_gps != 0.0)) ||
-            (ic_version == 2)) {
+            (gpsModel == GPS_UBLOX_MAX7)) {
           gps_latitude = gps.latitude;
           gps_longitude = gps.longitude;
           pdop_fixed = pdop_gps;
@@ -1577,18 +1563,17 @@ void gps_Identify() {
   char *l76K_buff = "IC=AT6558R";
   char *l76L_buff = "MTKGPS*08";
   if (strstr(DATABUFF, ublox_buff) != NULL) {
-    ic_version = 2;
+    gpsModel = GPS_UBLOX_MAX7;
     pdop_value = 7.00;
   } else if (strstr(DATABUFF, l76K_buff) != NULL) {
-    ic_version = 4;
+    gpsModel = GPS_L76K;
     pdop_value = 3.00;
   } else if (strstr(DATABUFF, l76L_buff) != NULL) {
-    ic_version = 1;
+    gpsModel = GPS_L76L;
     pdop_value = 3.00;
   }
-
   else {
-    ic_version = 0;
+    gpsModel = GPS_L70RL;
     pdop_value = 3.00;
   }
   Store_Config();

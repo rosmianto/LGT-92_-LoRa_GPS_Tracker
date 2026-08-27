@@ -126,13 +126,10 @@ static uint32_t s_key[32];    // store key
 static uint32_t s_hard[1];    // store hardware version
 
 uint8_t mpuint_flags = 0;
-uint8_t ic_version = 2;
 uint16_t hardware_version = 167;  // TODO: This actually serves no purpose on firmware behavior
 uint8_t joinrx2_dr;
 float pdop_value;
 
-extern uint8_t se_mode;
-extern uint8_t fr_mode;
 extern uint8_t symbtime1_value;
 extern uint8_t flag1;
 
@@ -1090,7 +1087,7 @@ void Store_Config(void) {
 
   s_config[config_count++] = pdop_value * 100;
 
-  s_config[config_count++] = (fr_mode << 8) | (se_mode);
+  s_config[config_count++] = (navMode << 8) | (searchMode);
 
   s_config[config_count++] = LP;
 
@@ -1267,16 +1264,16 @@ void Read_Config(void) {
 
   pdop_value = (float)r_config[25] / 100;
 
-  fr_mode = (r_config[25] >> 8) & 0xFF;
+  navMode = (r_config[25] >> 8) & 0xFF;
 
-  se_mode = r_config[26] & 0xFF;
+  searchMode = r_config[26] & 0xFF;
 
   LP = r_config[27] & 0xFF;
 }
 
 // TODO: Move this feature to ConfigStorage_EEPROM.cpp
 void EEPROM_Store_Config(void) {
-  s_hard[0] = (ic_version << 16) | hardware_version;
+  s_hard[0] = (gpsModel << 16) | hardware_version;
   EEPROM_program(EEPROM_IC_HARDWEAR, s_hard, 1); // store hardversion
 }
 
@@ -1285,7 +1282,7 @@ void EEPROM_Read_Config(void) {
   uint32_t start_address = 0, r_config[1];
   start_address = EEPROM_IC_HARDWEAR;
   r_config[0] = *(__IO uint32_t *)start_address;
-  ic_version = r_config[0] >> 16;
+  gpsModel = r_config[0] >> 16;
   hardware_version = r_config[0] & 0xFFFF;
 }
 
