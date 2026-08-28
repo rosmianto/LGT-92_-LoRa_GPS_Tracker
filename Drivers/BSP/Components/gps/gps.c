@@ -99,18 +99,11 @@ int my_atoi(const char *str) {
   return signal * result;
 }
 
-FP32 my_strtod(const char *s, char **endptr)
-
-{
-
+FP32 my_strtod(const char *s, char **endptr) {
   const char *p = s;
-
   FP32 value = 0.L;
-
   int sign = 0;
-
   FP32 factor;
-
   unsigned int expo;
 
   while (isspace(*p)) // ����ǰ��Ŀո�
@@ -170,33 +163,20 @@ FP32 my_strtod(const char *s, char **endptr)
       break;
 
     case '0':
-
     case '1':
-
     case '2':
-
     case '3':
-
     case '4':
-
     case '5':
-
     case '6':
-
     case '7':
-
     case '8':
-
     case '9':
-
       break;
 
     default:
-
       value = 0.L;
-
       p = s;
-
       goto done;
     }
 
@@ -832,7 +812,7 @@ void GPS_INPUT(void) {
     AT_PRINTF("PDOP:%.1f\n\r", pdop_gps);
   }
 
-  // TODO: What's really the point here? Better comment-out everything. 
+  // TODO: What's really the point here? Better comment-out everything.
   switch (gps.FixMode) {
   case 0:
     //					AT_PRINTF("GPS״̬:δ��λ   \n\r");
@@ -859,7 +839,8 @@ void GPS_INPUT(void) {
 void POWER_ON() {
   GPS_init();
   GPS_POWER_ON();
-  if ((gpsModel <= GPS_L76L) && ((searchMode != SEARCHMODE_DEFAULT) || (navMode != NAVMODE_DEFAULT))) {
+  if ((gpsModel <= GPS_L76L) &&
+      ((searchMode != SEARCHMODE_DEFAULT) || (navMode != NAVMODE_DEFAULT))) {
     if (gps_setflags == 0) {
       send_setting();
       gpspower_flag++;
@@ -870,6 +851,7 @@ void POWER_ON() {
     }
   }
 }
+
 void POWER_OFF() { GPS_POWER_OFF(); }
 
 void send_setting(void) {

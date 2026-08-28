@@ -94,8 +94,6 @@ uint8_t _lastKnownRSSI = 0;
 
 uint16_t fire_version = 0;
 uint16_t fire_frequcy = 0;
-uint8_t mode;
-uint8_t inmode;
 uint8_t joinrx2_dr;
 bool rx2_flags = 0;
 bool fdr_flags = 0;
@@ -116,7 +114,6 @@ extern bool JoinReq_NbTrails_over;
 extern bool unconfirmed_downlink_data_ans_status,
     confirmed_downlink_data_ans_status;
 
-extern uint16_t power_time;
 
 static uint8_t config_count = 0;
 static uint8_t key_count = 0;
@@ -161,7 +158,6 @@ extern uint32_t MLON;
 extern uint32_t Threshold;
 extern uint32_t Freq;
 extern uint32_t GS;
-extern uint8_t rx_flags;
 extern uint8_t LP;
 extern int user_key_exti_flag;
 uint16_t dr_power = 0;
@@ -1062,33 +1058,21 @@ void Store_Config(void) {
   s_config[config_count++] =
       (symbtime1_value << 24) | (flag1 << 16) | (symbtime2_value << 8) | flag2;
 
-  s_config[config_count++] = (mode << 24) | (inmode << 16) | power_time;
-
+  s_config[config_count++] = 0;
   s_config[config_count++] = set_sgm;
-
   s_config[config_count++] = Positioning_time;
-
   s_config[config_count++] = LON;
-
   s_config[config_count++] = motionDetectMode;
-
   s_config[config_count++] = MLON;
-
   s_config[config_count++] = Threshold;
-
   s_config[config_count++] = Freq;
-
   s_config[config_count++] = Alarm_TX_DUTYCYCLE;
-
   s_config[config_count++] = Keep_TX_DUTYCYCLE;
-
   s_config[config_count++] =
       (symbtime1_value << 24) | (flag1 << 16) | (symbtime2_value << 8) | flag2;
 
   s_config[config_count++] = pdop_value * 100;
-
   s_config[config_count++] = (navMode << 8) | (searchMode);
-
   s_config[config_count++] = LP;
 
   FLASH_erase(FLASH_USER_START_ADDR_CONFIG); // Page800
@@ -1208,67 +1192,34 @@ void Read_Config(void) {
   mib.Param.NetID = r_config[8];
   LoRaMacMibSetRequestConfirm(&mib);
 
-  Server_TX_DUTYCYCLE = r_config[9];
-
-  dwelltime = (r_config[10] >> 8) & 0xFF;
-
+  Server_TX_DUTYCYCLE          = r_config[9];
+  dwelltime                    = (r_config[10] >> 8) & 0xFF;
   lora_config.application_port = r_config[10] & 0xFF;
-
-  customize_config.freq1 = r_config[11];
-
-  REJOIN_TX_DUTYCYCLE = (r_config[12] >> 16) & 0xFFFF;
-
-  response_level = (r_config[12] >> 8) & 0xFF;
-
+  customize_config.freq1       = r_config[11];
+  REJOIN_TX_DUTYCYCLE          = (r_config[12] >> 16) & 0xFFFF;
+  response_level               = (r_config[12] >> 8) & 0xFF;
   customize_config.set8channel = r_config[12] & 0xFF;
-
-  symbtime1_value = (r_config[13] >> 24) & 0xFF;
-
-  flag1 = (r_config[13] >> 16) & 0xFF;
-
-  symbtime2_value = (r_config[13] >> 8) & 0xFF;
-
-  flag2 = r_config[13] & 0xFF;
-
-  mode = (r_config[14] >> 24) & 0xFF;
-
-  inmode = (r_config[14] >> 16) & 0xFF;
-
-  power_time = (r_config[14]) & 0xFFFF;
-
-  set_sgm = r_config[15];
-
-  Positioning_time = r_config[16];
-
-  LON = r_config[17];
-
-  motionDetectMode = r_config[18];
-
-  MLON = r_config[19];
-
-  Threshold = r_config[20];
-
-  Freq = r_config[21];
-
-  Alarm_TX_DUTYCYCLE = r_config[22];
-
-  Keep_TX_DUTYCYCLE = r_config[23];
-
-  symbtime1_value = (r_config[24] >> 24) & 0xFF;
-
-  flag1 = (r_config[24] >> 16) & 0xFF;
-
-  symbtime2_value = (r_config[24] >> 8) & 0xFF;
-
-  flag2 = r_config[24] & 0xFF;
-
-  pdop_value = (float)r_config[25] / 100;
-
-  navMode = (r_config[25] >> 8) & 0xFF;
-
-  searchMode = r_config[26] & 0xFF;
-
-  LP = r_config[27] & 0xFF;
+  symbtime1_value              = (r_config[13] >> 24) & 0xFF;
+  flag1                        = (r_config[13] >> 16) & 0xFF;
+  symbtime2_value              = (r_config[13] >> 8) & 0xFF;
+  flag2                        = r_config[13] & 0xFF;
+  set_sgm                      = r_config[15];
+  Positioning_time             = r_config[16];
+  LON                          = r_config[17];
+  motionDetectMode             = r_config[18];
+  MLON                         = r_config[19];
+  Threshold                    = r_config[20];
+  Freq                         = r_config[21];
+  Alarm_TX_DUTYCYCLE           = r_config[22];
+  Keep_TX_DUTYCYCLE            = r_config[23];
+  symbtime1_value              = (r_config[24] >> 24) & 0xFF;
+  flag1                        = (r_config[24] >> 16) & 0xFF;
+  symbtime2_value              = (r_config[24] >> 8) & 0xFF;
+  flag2                        = r_config[24] & 0xFF;
+  pdop_value                   = (float)r_config[25] / 100;
+  navMode                      = (r_config[25] >> 8) & 0xFF;
+  searchMode                   = r_config[26] & 0xFF;
+  LP                           = r_config[27] & 0xFF;
 }
 
 // TODO: Move this feature to ConfigStorage_EEPROM.cpp

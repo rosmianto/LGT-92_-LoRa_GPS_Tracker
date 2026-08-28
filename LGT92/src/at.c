@@ -74,7 +74,6 @@ uint8_t flag1 = 0;
 
 uint8_t symbtime2_value = 0; // RX2windowtimeout
 uint8_t flag2 = 0;
-uint16_t power_time = 0;
 uint8_t dwelltime;
 
 extern uint32_t APP_TX_DUTYCYCLE;
@@ -107,10 +106,7 @@ uint32_t loggps = 0;
  * @brief Max size of the data that can be received
  */
 #define MAX_RECEIVED_DATA 255
-extern uint32_t LoRaMacState;
 extern uint32_t APP_TX_DUTYCYCLE;
-extern uint8_t mode;
-extern uint8_t inmode;
 extern bool fdr_flags;
 extern uint16_t REJOIN_TX_DUTYCYCLE;
 extern uint8_t response_level;
@@ -1158,7 +1154,7 @@ ATEerror_t at_CFG_run(const char *param) {
   mac_status = LoRaMacMibGetRequestConfirm(&mibReq);
 
   if (mibReq.Param.IsNetworkJoined == 1) {
-    if ((LoRaMacState & 0x00000001) == 0x00000001) {
+    if (isLoRaMacBusy() == true) {
       return AT_BUSY_ERROR;
     }
   }
@@ -1525,13 +1521,13 @@ ATEerror_t at_symbtimeout2LSB_set(const char *param) {
   return AT_OK;
 }
 
+// TODO: Dead functions, clean this up
 ATEerror_t at_MOD_set(const char *param) {
   int workmode;
   if (tiny_sscanf(param, "%d", &workmode) != 1) {
     return AT_PARAM_ERROR;
   }
   if ((workmode >= 1) && (workmode <= 6)) {
-    mode = workmode;
     PPRINTF("Attention:Take effect after ATZ\r\n");
   } else {
     PPRINTF("Mode of range is 1 to 6\r\n");
@@ -1541,8 +1537,8 @@ ATEerror_t at_MOD_set(const char *param) {
   return AT_OK;
 }
 
+// TODO: Dead functions, clean this up
 ATEerror_t at_MOD_get(const char *param) {
-  print_d(mode);
   return AT_OK;
 }
 
@@ -1586,17 +1582,17 @@ ATEerror_t at_BAT_get(const char *param) {
 }
 
 ATEerror_t at_NMEA353_set(const char *param) {
-  uint8_t mode;
+  uint8_t nmea353_mode;
 
-  if (tiny_sscanf(param, "%d", &mode) != 1) {
+  if (tiny_sscanf(param, "%d", &nmea353_mode) != 1) {
     return AT_PARAM_ERROR;
   }
 
-  if ((gpsModel != GPS_L76L) || (mode > 4)) {
+  if ((gpsModel != GPS_L76L) || (nmea353_mode > 4)) {
     return AT_PARAM_ERROR;
   }
 
-  searchMode = mode;
+  searchMode = nmea353_mode;
 
   return AT_OK;
 }
@@ -1608,15 +1604,15 @@ ATEerror_t at_NMEA353_get(const char *param) {
 }
 
 ATEerror_t at_NMEA886_set(const char *param) {
-  uint8_t mode;
+  uint8_t nmea886_mode;
 
-  if (tiny_sscanf(param, "%d", &mode) != 1)
+  if (tiny_sscanf(param, "%d", &nmea886_mode) != 1)
 
   {
     return AT_PARAM_ERROR;
   }
 
-  navMode = mode;
+  navMode = nmea886_mode;
 
   return AT_OK;
 }
