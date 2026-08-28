@@ -110,10 +110,6 @@ extern uint32_t rx1_de, rx2_de;
 extern uint16_t REJOIN_TX_DUTYCYCLE;
 extern uint8_t response_level;
 extern bool rejoin_status;
-extern bool JoinReq_NbTrails_over;
-extern bool unconfirmed_downlink_data_ans_status,
-    confirmed_downlink_data_ans_status;
-
 
 static uint8_t config_count = 0;
 static uint8_t key_count = 0;
@@ -319,8 +315,6 @@ static void McpsIndication(McpsIndication_t *mcpsIndication) {
   lora_AppData_t AppData;
 
   rejoin_status = 0;
-  unconfirmed_downlink_data_ans_status = 0;
-  confirmed_downlink_data_ans_status = 0;
 
   if (mcpsIndication->Status != LORAMAC_EVENT_INFO_STATUS_OK) {
     return;
@@ -365,10 +359,8 @@ static void McpsIndication(McpsIndication_t *mcpsIndication) {
 
       if (mcpsIndication->McpsIndication == MCPS_UNCONFIRMED &&
           response_level == 1) {
-        unconfirmed_downlink_data_ans_status = 1;
       } else if (mcpsIndication->McpsIndication == MCPS_CONFIRMED &&
                  ((response_level == 2) || (response_level == 4))) {
-        confirmed_downlink_data_ans_status = 1;
       }
 
       AppData.Port = mcpsIndication->Port;
@@ -396,7 +388,6 @@ static void MlmeConfirm(MlmeConfirm_t *mlmeConfirm) {
       LoRaMainCallbacks->LORA_HasJoined();
     } else {
       // Join was not successful. Try to join again
-      JoinReq_NbTrails_over = 1;
     }
     break;
   }

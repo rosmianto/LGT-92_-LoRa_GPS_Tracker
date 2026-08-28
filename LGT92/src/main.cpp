@@ -55,22 +55,16 @@ ATParser atParser;
 static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
 
 bool rxpr_flags = 0;
-int exti_flag = 0;
-uint32_t COUNT;
 uint8_t TDC_flag = 0;
 uint8_t join_flag = 0;
 uint8_t restartRequested = 0;
 bool is_time_to_IWDG_Refresh = 0;
-bool JoinReq_NbTrails_over = 0;
-bool unconfirmed_downlink_data_ans_status = 0;
-bool confirmed_downlink_data_ans_status = 0;
 bool rejoin_status = 0;
 bool rejoin_keep_status = 0;
 bool MAC_COMMAND_ANS_status = 0;
 uint8_t response_level = 0;
 uint16_t REJOIN_TX_DUTYCYCLE = 20; // min
 
-void send_exti(void);
 extern bool rx2_flags;
 extern uint8_t dwelltime;
 
@@ -1484,11 +1478,6 @@ void user_key_event(void) {
     switch (user_key_duration) {
     case 1: {
       user_key_duration = 0;
-
-      //				if(sleep_status==0)
-      //				{
-      //				  Send();
-      //				}
       break;
     }
     case 2: // sleep
