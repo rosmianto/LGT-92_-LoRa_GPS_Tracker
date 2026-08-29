@@ -221,6 +221,8 @@ typedef struct sLoRaMainCallback {
 
 } LoRaMainCallback_t;
 
+void restore_factory_config(void);
+
 /* External variables --------------------------------------------------------*/
 /* Exported macros -----------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
@@ -231,7 +233,6 @@ typedef struct sLoRaMainCallback {
  * @retval none
  */
 void LORA_Init(LoRaMainCallback_t *callbacks, LoRaParam_t *LoRaParam);
-void fdr_config(void);
 /**
  * @brief run Lora classA state Machine
  * @param [IN] none

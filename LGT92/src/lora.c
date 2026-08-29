@@ -500,13 +500,15 @@ void LORA_Init(LoRaMainCallback_t *callbacks, LoRaParam_t *LoRaParam) {
 
   lora_config.TxDatarate = LoRaParamInit->TxDatarate;
 
+  // TODO: This should be moved to main.cpp
+  // It has no business here, especially in LoRa init.
   if (FLASH_read(0x8018F80) == 0x00) // page799
   {
-    fdr_config();
+    restore_factory_config();
     FLASH_program_on_addr(0x8018F80, 0x11);
     PRINTF("Please set the parameters or reset Device to apply change\n\r");
   } else if (FLASH_read(0x8018F80) == 0x12) {
-    fdr_config();
+    restore_factory_config();
     FLASH_erase(0x8018F80); // page 799
     FLASH_program_on_addr(0x8018F80, 0x11);
     NVIC_SystemReset();
@@ -516,7 +518,7 @@ void LORA_Init(LoRaMainCallback_t *callbacks, LoRaParam_t *LoRaParam) {
   }
 }
 
-void fdr_config(void) {
+void restore_factory_config(void) {
   lora_config.duty_cycle = LORA_DISABLE;
   lora_config.application_port = 2;
   //	#if defined ( REGION_US915 ) || defined ( REGION_AU915 )
@@ -530,15 +532,6 @@ void fdr_config(void) {
 #if defined(REGION_AS923) || defined(REGION_AU915)
   dwelltime = 1;
 #endif
-
-  //	#if defined( REGION_EU868 )
-  //		  mibReq.Type = MIB_RX2_DEFAULT_CHANNEL;
-  //			mibReq.Param.Rx2DefaultChannel = ( Rx2ChannelParams_t ){
-  //869525000, DR_3 }; 			LoRaMacMibSetRequestConfirm( &mibReq );
-
-  //			mibReq.Type = MIB_RX2_CHANNEL;
-  //			mibReq.Param.Rx2Channel = ( Rx2ChannelParams_t ){
-  //869525000, DR_3 }; 			LoRaMacMibSetRequestConfirm( &mibReq ); 	#endif
 
   Server_TX_DUTYCYCLE = 300000;
   Alarm_TX_DUTYCYCLE = 60000;
@@ -592,21 +585,8 @@ void region_printf(void) {
 }
 
 void key_printf(void) {
-  //  PPRINTF("If ABP enabled\n\r");
   PPRINTF("DevEui= %02X %02X %02X %02X %02X %02X %02X %02X\n\r",
           HEX8(lora_config.DevEui));
-  //  PPRINTF("DevAdd=  %08X\n\r", lora_config.DevAddr) ;
-  //  PPRINTF("NwkSKey= %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X
-  //  %02X %02X %02X %02X %02X\n\r", HEX16(lora_config.NwkSKey));
-  //  PPRINTF("AppSKey= %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X
-  //  %02X %02X %02X %02X %02X\n\r", HEX16(lora_config.AppSKey));
-  //
-  //  PPRINTF("If OTAA enabled\n\r");
-  //  PPRINTF("DevEui= %02X %02X %02X %02X %02X %02X %02X %02X\n\r",
-  //  HEX8(lora_config.DevEui)); PPRINTF("AppEui= %02X %02X %02X %02X %02X %02X
-  //  %02X %02X\n\r", HEX8(lora_config.AppEui)); PPRINTF("AppKey= %02X %02X %02X
-  //  %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n\r",
-  //  HEX16(lora_config.AppKey));
 }
 
 void LORA_Join(void) {
@@ -929,6 +909,7 @@ void read_data(uint8_t size, uint8_t *data1, uint32_t data3, uint32_t data4,
     break;
   }
 }
+
 void Store_key(void) {
   store_data(8, lora_config.DevEui, 0);
   store_data(1, 0, lora_config.DevAddr);
