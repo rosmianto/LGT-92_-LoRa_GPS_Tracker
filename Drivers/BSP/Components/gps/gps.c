@@ -811,29 +811,6 @@ void GPS_INPUT(void) {
     AT_PRINTF("Mode:%2d\n\r", gps.GSA_mode2);
     AT_PRINTF("PDOP:%.1f\n\r", pdop_gps);
   }
-
-  // TODO: What's really the point here? Better comment-out everything.
-  switch (gps.FixMode) {
-  case 0:
-    //					AT_PRINTF("GPS״̬:δ��λ   \n\r");
-    break;
-  case 1:
-    //					AT_PRINTF("GPS״̬:%dD SPS  \n\r
-    //",gps.GSA_mode2);
-    break;
-  case 2:
-    //					AT_PRINTF("GPS״̬:%dD DGPS
-    //\n\r",gps.GSA_mode2);
-    break;
-  case 6:
-    //					AT_PRINTF("GPS״̬:������    \n\r");
-    break;
-  default:
-    break;
-  }
-  if (gps.GSA_mode2 == 2 || gps.GSA_mode2 == 3) {
-    gps.flag = 0;
-  }
 }
 
 void POWER_ON() {

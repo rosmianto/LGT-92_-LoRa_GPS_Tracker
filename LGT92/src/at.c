@@ -76,7 +76,6 @@ uint8_t symbtime2_value = 0; // RX2windowtimeout
 uint8_t flag2 = 0;
 uint8_t dwelltime;
 
-extern uint32_t APP_TX_DUTYCYCLE;
 extern uint32_t Server_TX_DUTYCYCLE;
 extern uint32_t Alarm_TX_DUTYCYCLE;
 extern uint32_t Keep_TX_DUTYCYCLE;
@@ -106,7 +105,6 @@ uint32_t loggps = 0;
  * @brief Max size of the data that can be received
  */
 #define MAX_RECEIVED_DATA 255
-extern uint32_t APP_TX_DUTYCYCLE;
 extern bool fdr_flags;
 extern uint16_t REJOIN_TX_DUTYCYCLE;
 extern uint8_t response_level;

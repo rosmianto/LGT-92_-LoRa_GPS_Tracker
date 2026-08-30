@@ -51,7 +51,6 @@ short gyrooldx, gyrooldy, gyrooldz;
 
 extern uint32_t Threshold;
 extern uint32_t Freq;
-extern uint32_t Server_TX_DUTYCYCLE;
 
 uint8_t TF[2] = {0x9F, 0x07};
 

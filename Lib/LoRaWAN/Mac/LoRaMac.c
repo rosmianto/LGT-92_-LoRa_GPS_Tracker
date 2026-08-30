@@ -53,14 +53,12 @@ extern uint8_t symbtime2_value;
 extern uint8_t flag2;
 extern bool debug_flags;
 extern bool rejoin_status;
-extern bool MAC_COMMAND_ANS_status;
 extern bool rejoin_keep_status;
 extern uint16_t REJOIN_TX_DUTYCYCLE;
 
 extern uint8_t send_fail;
 extern uint32_t LON;
 extern uint32_t GPS_ALARM;
-extern uint32_t GS;
 extern uint8_t TXpower;
 extern int8_t TXdr;
 extern uint8_t nbreq;
@@ -1672,7 +1670,6 @@ static void ProcessMacCommands(uint8_t *payload, uint8_t macIndex,
     // Decode Frame MAC commands
     switch (payload[macIndex++]) {
     case SRV_MAC_LINK_CHECK_ANS:
-      MAC_COMMAND_ANS_status = 1;
       MlmeConfirm.Status = LORAMAC_EVENT_INFO_STATUS_OK;
       MlmeConfirm.DemodMargin = payload[macIndex++];
       MlmeConfirm.NbGateways = payload[macIndex++];
@@ -1702,7 +1699,6 @@ static void ProcessMacCommands(uint8_t *payload, uint8_t macIndex,
                                   &linkAdrNbBytesParsed);
 
         if ((status & 0x07) == 0x07) {
-          MAC_COMMAND_ANS_status = 1;
           LoRaMacParams.ChannelsDatarate = linkAdrDatarate;
           LoRaMacParams.ChannelsTxPower = linkAdrTxPower;
           LoRaMacParams.ChannelsNbRep = linkAdrNbRep;
@@ -1757,7 +1753,6 @@ static void ProcessMacCommands(uint8_t *payload, uint8_t macIndex,
       break;
     }
     case SRV_MAC_DUTY_CYCLE_REQ:
-      MAC_COMMAND_ANS_status = 1;
       MaxDCycle = payload[macIndex++];
       AggregatedDCycle = 1 << MaxDCycle;
       AddMacCommand(MOTE_MAC_DUTY_CYCLE_ANS, 0, 0);
@@ -1779,7 +1774,6 @@ static void ProcessMacCommands(uint8_t *payload, uint8_t macIndex,
       status = RegionRxParamSetupReq(LoRaMacRegion, &rxParamSetupReq);
 
       if ((status & 0x07) == 0x07) {
-        MAC_COMMAND_ANS_status = 1;
         LoRaMacParams.Rx2Channel.Datarate = rxParamSetupReq.Datarate;
         LoRaMacParams.Rx2Channel.Frequency = rxParamSetupReq.Frequency;
         LoRaMacParams.Rx1DrOffset = rxParamSetupReq.DrOffset;
@@ -1787,7 +1781,6 @@ static void ProcessMacCommands(uint8_t *payload, uint8_t macIndex,
       AddMacCommand(MOTE_MAC_RX_PARAM_SETUP_ANS, status, 0);
     } break;
     case SRV_MAC_DEV_STATUS_REQ: {
-      MAC_COMMAND_ANS_status = 1;
       uint8_t batteryLevel = 0xFE;
       if ((LoRaMacCallbacks != NULL) &&
           (LoRaMacCallbacks->GetBatteryLevel != NULL)) {
@@ -1797,7 +1790,6 @@ static void ProcessMacCommands(uint8_t *payload, uint8_t macIndex,
       break;
     }
     case SRV_MAC_NEW_CHANNEL_REQ: {
-      MAC_COMMAND_ANS_status = 1;
       NewChannelReqParams_t newChannelReq;
       ChannelParams_t chParam;
       status = 0x03;
@@ -1817,7 +1809,6 @@ static void ProcessMacCommands(uint8_t *payload, uint8_t macIndex,
       AddMacCommand(MOTE_MAC_NEW_CHANNEL_ANS, status, 0);
     } break;
     case SRV_MAC_RX_TIMING_SETUP_REQ: {
-      MAC_COMMAND_ANS_status = 1;
       uint8_t delay = payload[macIndex++] & 0x0F;
 
       if (delay == 0) {
@@ -1844,7 +1835,6 @@ static void ProcessMacCommands(uint8_t *payload, uint8_t macIndex,
 
       // Check the status for correctness
       if (RegionTxParamSetupReq(LoRaMacRegion, &txParamSetupReq) != -1) {
-        MAC_COMMAND_ANS_status = 1;
         // Accept command
         LoRaMacParams.UplinkDwellTime = txParamSetupReq.UplinkDwellTime;
         LoRaMacParams.DownlinkDwellTime = txParamSetupReq.DownlinkDwellTime;
@@ -1854,7 +1844,6 @@ static void ProcessMacCommands(uint8_t *payload, uint8_t macIndex,
       }
     } break;
     case SRV_MAC_DL_CHANNEL_REQ: {
-      MAC_COMMAND_ANS_status = 1;
       DlChannelReqParams_t dlChannelReq;
       status = 0x03;
 

@@ -15,16 +15,16 @@
 #include "timeServer.h"
 #include "vcom.h"
 #include "version.h"
+#include <Button.h>
 #include <Commissioning.h>
 #include <IMU.h>
 #include <Region.h>
+#include <Temporary.h>
 #include <debug.h>
 #include <hw_conf.h>
 #include <hw_msp.h>
 #include <led.h>
 #include <math.h>
-#include <Temporary.h>
-#include <Button.h>
 
 // Include drivers
 #include <drivers/ConfigStorage_Dummy.h>
@@ -56,14 +56,13 @@ Button btn;
 
 static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
 
-bool rxpr_flags = 0;
+bool printResponse = 0;
 uint8_t TDC_flag = 0;
 uint8_t join_flag = 0;
 uint8_t restartRequested = 0;
 bool is_time_to_IWDG_Refresh = 0;
 bool rejoin_status = 0;
 bool rejoin_keep_status = 0;
-bool MAC_COMMAND_ANS_status = 0;
 uint8_t response_level = 0;
 uint16_t REJOIN_TX_DUTYCYCLE = 20; // min
 
@@ -77,7 +76,8 @@ uint32_t Keep_TX_DUTYCYCLE = 21600000;
 uint32_t GPS_ALARM = 0;
 uint32_t GS = 0;
 
-extern uint16_t dr_power;
+uint16_t dr_power = 0;
+
 extern uint32_t set_sgm;
 extern uint32_t LON;
 extern uint32_t MLON;
@@ -87,7 +87,6 @@ extern uint8_t mpuint_flags;
 extern bool button_exitflag;
 extern bool moinint_exitflag;
 
-uint32_t CHE = 0;
 int ALARM = 0;
 uint32_t FLAG = 0;
 uint8_t send_fail = 0;
@@ -95,14 +94,10 @@ uint32_t a = 1;
 int basic_flag = 0;
 static uint32_t ServerSetTDC;
 uint32_t start_time = 0;
-uint32_t AlarmSetTDC;
-uint8_t flag_1 = 1;
 extern uint8_t LP;
-uint8_t alarm_flags = 0;
 uint8_t stop_flag = 0;
 uint8_t payloadlens = 0;
 uint8_t gps_setflags = 0;
-uint8_t position_flags = 0;
 float pdop_comp = 7.0;
 float pdop_fixed = 0.0;
 
@@ -127,7 +122,6 @@ extern char DATABUFF[500];
 uint32_t led_red = 0, led_blue = 0, led_greed = 0;
 bool red = 0, blue = 0, greed = 0;
 
-void lora_send_fsm(void);
 void send_data(void);
 void send_exti(void);
 void send_moin(void);
@@ -234,6 +228,7 @@ static LoRaParam_t LoRaParamInit = {LORAWAN_ADR_STATE,
 /* Private functions ---------------------------------------------------------*/
 
 void handleButtonEvent(ButtonEvent ev);
+void handleCommandDownlink(uint8_t cmd, const uint8_t *data, uint8_t len);
 
 /**
  * @brief  Main program
@@ -306,7 +301,7 @@ int main(void) {
       AppData.Port = 2;
       LORA_send(&AppData, LORAWAN_UNCONFIRMED_MSG);
       restartRequested++;
-    } else if ((restartRequested == 2) && !isLoRaMacBusy() ) {
+    } else if ((restartRequested == 2) && !isLoRaMacBusy()) {
       NVIC_SystemReset();
     }
 
@@ -374,12 +369,8 @@ int main(void) {
 
     handleButtonEvent(userPress);
 
-
     // TODO: Eradicate this
     // user_key_event();
-
-
-
 
     DISABLE_IRQ();
     /*
@@ -429,7 +420,6 @@ static void LORA_HasJoined(void) {
   time(TX_ON_TIMER);
   lora_state_GPS_Send();
 
-  gps.flag = 1;
   is_lora_joined = 1;
 
 #if defined(AT_Data_Send) /*LoRa ST Module*/
@@ -604,7 +594,6 @@ static void Send(void) {
     AppData.Buff[i++] = (int)(gps.altitude * 100);
   }
 
-  gps.flag = 1;
   gps_setflags = 0;
   press_button_times = 0;
   AppData.BuffSize = i;
@@ -617,341 +606,9 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
   set_at_receive(AppData->Port, AppData->Buff, AppData->BuffSize);
 
-  switch (AppData->Buff[0] & 0xff) {
-  case 0x01: {
-    if (AppData->BuffSize == 4) //---->AT+TDC
-    {
-      ServerSetTDC = (AppData->Buff[1] << 16 | AppData->Buff[2] << 8 |
-                      AppData->Buff[3]); // S
+  uint8_t cmd = AppData->Buff[0] & 0xff;
 
-      if (ServerSetTDC < 6) {
-        Server_TX_DUTYCYCLE = 6000;
-      } else {
-        TDC_flag = 1;
-        Server_TX_DUTYCYCLE = ServerSetTDC * 1000;
-      }
-      rxpr_flags = 1;
-    }
-    break;
-  }
-
-  case 0x04: {
-    if (AppData->BuffSize == 2) {
-      if (AppData->Buff[1] == 0xFF) //---->ATZ
-      {
-        restartRequested = 1;
-        rxpr_flags = 1;
-      } else if (AppData->Buff[1] == 0xFE) //---->AT+FDR
-      {
-        FLASH_erase(0x8018F80); // page 799
-        FLASH_program_on_addr(0x8018F80, 0x12);
-        FLASH_erase(FLASH_USER_START_ADDR_CONFIG); // Page800
-        restartRequested = 1;
-        rxpr_flags = 1;
-      }
-    }
-    break;
-  }
-
-  case 0x05: {
-    if (AppData->BuffSize == 2) {
-      if (AppData->Buff[1] == 0x01) //---->AT+CFM=1
-      {
-        lora_config_reqack_set(LORAWAN_CONFIRMED_MSG);
-        Store_Config();
-        rxpr_flags = 1;
-      } else if (AppData->Buff[1] == 0x00) //---->AT+CFM=0
-      {
-        lora_config_reqack_set(LORAWAN_UNCONFIRMED_MSG);
-        Store_Config();
-        rxpr_flags = 1;
-      }
-    }
-    break;
-  }
-
-  case 2: {
-    if (AppData->BuffSize == 2) {
-      if (AppData->Buff[1] == 0x01) {
-        start_time = HW_RTC_GetTimerValue();
-        Alarm_times = 60;
-        Alarm_times1 = 60;
-        GPS_ALARM = 0;
-        ALARM = 0;
-        if (LON == 1) {
-          BSP_sensor_Init();
-          led_blue_on();
-          DelayMs(1000);
-        }
-        led_blue_off(); // Exit Alarm
-        PRINTF("Exit Alarm\r\n");
-      }
-    }
-    break;
-  }
-  case 0xa5: {
-    if (AppData->BuffSize == 2) {
-      motionDetectMode = static_cast<MotionDetectionMode>(AppData->Buff[1]);
-      PRINTF("motionDetectMode: %02x\n\r", motionDetectMode);
-      if (AppData->Buff[1] != 0x00) {
-        start_time = HW_RTC_GetTimerValue();
-      }
-    } else if (AppData->BuffSize == 4) {
-      if (AppData->Buff[1] == 0x03) {
-        motionDetectMode = static_cast<MotionDetectionMode>(AppData->Buff[1]);
-        Threshold = AppData->Buff[2];
-        Freq = AppData->Buff[3];
-        PRINTF("Set motionDetectMode: %02x,%02x,%02x\n\r", motionDetectMode, Threshold, Freq);
-      }
-      if (AppData->Buff[1] != 0x00) {
-        start_time = HW_RTC_GetTimerValue();
-      }
-    }
-    md_flags = 1;
-    Store_Config();
-    break;
-  }
-  case 0xaa: {
-    if (AppData->BuffSize == 3) {
-      Positioning_time = (AppData->Buff[1] << 8 | AppData->Buff[2]);
-      if (Positioning_time == 1203) {
-        LP = 2;
-      } else {
-        LP = 0;
-      }
-    }
-    Store_Config();
-    break;
-  }
-  case 0xab: {
-    if (AppData->BuffSize == 2) {
-      navMode = static_cast<GPSNavMode>(AppData->Buff[1]);
-    }
-    Store_Config();
-    break;
-  }
-  case 0xac: {
-    if (AppData->BuffSize == 2) {
-      searchMode = static_cast<GPSSearchMode>(AppData->Buff[1]);
-    }
-    Store_Config();
-
-    break;
-  }
-  case 0xad: {
-    if (AppData->BuffSize == 3) {
-      pdop_value = (AppData->Buff[1] << 8 | AppData->Buff[2]) / 10.0;
-    }
-    Store_Config();
-
-    break;
-  }
-  case 0xae: {
-    if (AppData->BuffSize == 2) {
-      LON = AppData->Buff[1];
-    }
-    Store_Config();
-
-    break;
-  }
-  case 0xaf: {
-    if (AppData->BuffSize == 2) {
-      MLON = AppData->Buff[1];
-    }
-    Store_Config();
-
-    break;
-  }
-  case 0xa8: {
-    if (AppData->BuffSize == 10) {
-      if (AppData->Buff[1] == 0x01) {
-        BSP_powerLED_Init();
-        led_red_on();
-        red = 1;
-        led_red = AppData->Buff[2] << 8 | AppData->Buff[3];
-        if (led_red != 0) {
-          DelayMs(led_red);
-          led_red_off();
-          red = 0;
-        }
-      } else {
-        red = 0;
-        led_red_off();
-      }
-      if (AppData->Buff[4] == 0x01) {
-        BSP_powerLED_Init();
-        led_blue_on();
-        blue = 1;
-        led_blue = AppData->Buff[5] << 8 | AppData->Buff[6];
-        if (led_blue != 0) {
-          DelayMs(led_blue);
-          led_blue_off(); // Debug LED
-          blue = 0;
-        }
-      } else {
-        blue = 0;
-        led_blue_off(); // Debug LED
-      }
-      if (AppData->Buff[7] == 0x01) {
-        BSP_powerLED_Init();
-        led_green_on();
-        greed = 1;
-        led_greed = AppData->Buff[8] << 8 | AppData->Buff[9];
-        if (led_blue != 0) {
-          DelayMs(led_greed);
-          led_green_off();
-          greed = 0;
-        }
-      } else {
-        greed = 0;
-        led_green_off();
-      }
-    }
-    Store_Config();
-
-    break;
-  }
-  case 0xb0: {
-    if (AppData->BuffSize == 2) {
-      set_sgm = AppData->Buff[1];
-    }
-    Store_Config();
-
-    break;
-  }
-  case 0xb1: {
-    ServerSetTDC = (AppData->Buff[1] << 16 | AppData->Buff[2] << 8 |
-                    AppData->Buff[3]); // S
-    if (ServerSetTDC < 6) {
-      PRINTF("ACE setting must be more than 10S\n\r");
-      Alarm_TX_DUTYCYCLE = 10000;
-    } else {
-      TDC_flag = 1;
-      Alarm_TX_DUTYCYCLE = ServerSetTDC * 1000;
-      PRINTF("Set ACE: %d ms\n\r", Alarm_TX_DUTYCYCLE);
-    }
-    Store_Config();
-
-    break;
-  }
-  case 0xa9: {
-    if (AppData->BuffSize == 4) {
-      ServerSetTDC = (AppData->Buff[1] << 16 | AppData->Buff[2] << 8 |
-                      AppData->Buff[3]); // S
-
-      if (ServerSetTDC < 360) {
-        PRINTF("KAT setting must be more than 6m\n\r");
-        Keep_TX_DUTYCYCLE = 360000;
-      } else {
-        Keep_TX_DUTYCYCLE = ServerSetTDC * 1000;
-        PRINTF("Set KAT: %d ms\n\r", Keep_TX_DUTYCYCLE);
-      }
-      Store_Config();
-    }
-    break;
-  }
-  case 0x20: {
-    if (AppData->BuffSize == 2) {
-      if ((AppData->Buff[1] == 0x00) || (AppData->Buff[1] == 0x01)) {
-        if (AppData->Buff[1] == 0x01) //---->AT+NJM=1
-        {
-          lora_config_otaa_set(LORA_ENABLE);
-        } else //---->AT+NJM=0
-        {
-          lora_config_otaa_set(LORA_DISABLE);
-        }
-        Store_Config();
-        restartRequested = 1;
-        rxpr_flags = 1;
-      }
-    }
-    break;
-  }
-
-  case 0x21: {
-    if ((AppData->BuffSize == 2) && (AppData->Buff[1] <= 4)) {
-      response_level = (AppData->Buff[1]); // 0~4
-                                           // //---->AT++RPL
-      Store_Config();
-      rxpr_flags = 1;
-    }
-    break;
-  }
-
-  case 0x22: {
-    MibRequestConfirm_t mib;
-    if ((AppData->BuffSize == 2) && (AppData->Buff[1] == 0x01)) //---->AT+ADR=1
-    {
-      mib.Type = MIB_ADR;
-      mib.Param.AdrEnable = AppData->Buff[1];
-      LoRaMacMibSetRequestConfirm(&mib);
-      Store_Config();
-      rxpr_flags = 1;
-    } else if ((AppData->BuffSize == 4) &&
-               (AppData->Buff[1] == 0x00)) //---->AT+ADR=0
-    {
-      mib.Type = MIB_ADR;
-      mib.Param.AdrEnable = AppData->Buff[1];
-      LoRaMacMibSetRequestConfirm(&mib);
-      if (AppData->Buff[2] != 0xff) //---->AT+DR
-      {
-        mib.Type = MIB_CHANNELS_DATARATE;
-        mib.Param.ChannelsDatarate = AppData->Buff[2];
-        LoRaMacMibSetRequestConfirm(&mib);
-      }
-      if (AppData->Buff[3] != 0xff) //---->AT+TXP
-      {
-        mib.Type = MIB_CHANNELS_TX_POWER;
-        mib.Param.ChannelsTxPower = AppData->Buff[3];
-        LoRaMacMibSetRequestConfirm(&mib);
-      }
-      Store_Config();
-      rxpr_flags = 1;
-    }
-    break;
-  }
-
-  case 0x23: {
-    if (AppData->BuffSize == 2) {
-      lora_config_application_port_set(AppData->Buff[1]); //---->AT+PORT
-      Store_Config();
-      rxpr_flags = 1;
-    }
-    break;
-  }
-
-  case 0x24: {
-#if defined(REGION_US915) || defined(REGION_AU915) || defined(REGION_CN470)
-    if (AppData->BuffSize == 2) {
-      if (AppData->Buff[1] <= 0x0C) {
-        customize_set8channel_set(AppData->Buff[1]); //---->AT+CHE
-        Store_Config();
-        rxpr_flags = 1;
-      }
-    }
-#endif
-    break;
-  }
-
-  case 0x25: {
-#if defined(REGION_AS923) || defined(REGION_AU915)
-    if (AppData->BuffSize == 2) {
-      if ((AppData->Buff[1] == 0x00) ||
-          (AppData->Buff[1] == 0x01)) //---->AT+DWELLT
-      {
-        dwelltime = AppData->Buff[1];
-        Store_Config();
-        restartRequested = 1;
-        rxpr_flags = 1;
-      }
-    }
-#endif
-    break;
-  }
-
-  default:
-    break;
-  }
+  handleCommandDownlink(cmd, AppData->Buff, AppData->BuffSize);
 
   if (TDC_flag == 1) {
     Store_Config();
@@ -964,7 +621,7 @@ static void LORA_RxData(lora_AppData_t *AppData) {
 
   AT_PRINTF("\r\n");
   AT_PRINTF("Receive data\n\r");
-  if ((AppData->BuffSize <= 8) && (rxpr_flags == 1)) {
+  if ((AppData->BuffSize <= 8) && (printResponse == 1)) {
     AT_PRINTF("%d:", AppData->Port);
     for (int i = 0; i < AppData->BuffSize; i++) {
       AT_PRINTF("%02x ", AppData->Buff[i]);
@@ -974,13 +631,12 @@ static void LORA_RxData(lora_AppData_t *AppData) {
     AT_PRINTF("BuffSize:%d,Run AT+RECVB=? to see detail\r\n",
               AppData->BuffSize);
   }
-  rxpr_flags = 0;
+  printResponse = 0;
 }
 
 #if defined(LoRa_Sensor_Node)
 static void OnTxTimerEvent(void) {
 
-  gps.flag = 1;
   gps.latitude = 0;
   gps.longitude = 0;
 
@@ -1001,7 +657,6 @@ static void LoraStartTx(TxEventType_t EventType) {
     TimerSetValue(&TxTimer, APP_TX_DUTYCYCLE);
     OnTxTimerEvent();
     lora_state_GPS_Send();
-    gps.flag = 1;
     gps.latitude = 0;
     gps.longitude = 0;
   }
@@ -1117,13 +772,9 @@ static void LORA_ConfirmClass(DeviceClass_t Class) {
 void lora_send(void) {
   switch (lora_getState()) {
   case STATE_LED: {
-    gps.flag = 1;
     stop_flag = 1;
     if (Positioning_time != 0) {
-      //				if(GPS_ALARM == 0)
-      //				{
       GPS_POWER_OFF();
-      //				}
       LPM_SetOffMode(LPM_APPLI_Id, LPM_Disable);
     }
     break;
@@ -1253,9 +904,6 @@ void lora_send(void) {
       } else {
         MPU_INT_Init();
       }
-      //			PPRINTF("Update Interval: %d
-      // ms\n\r",APP_TX_DUTYCYCLE);
-      //        PPRINTF("LP == 1\n\r");
       lora_state_Led();
       a = 1;
       DISABLE_IRQ();
@@ -1294,7 +942,7 @@ void lora_send(void) {
       }
     }
 
-    if ((position_flags == 0) &&
+    if (
         (((Positioning_time != 0) && (End_times >= Positioning_time)) ||
          ((Positioning_time == 0) && (End_times >= 150)))) {
       send_fail = 1;
@@ -1352,7 +1000,6 @@ void lora_send(void) {
       TimerStart(&IWDGRefreshTimer);
       send_fail = 0;
     }
-    position_flags = 0;
     break;
   }
   default: {
@@ -1385,7 +1032,6 @@ void send_data(void) {
     MPU_INT_Init();
   }
   lora_state_Led();
-  gps.flag = 1;
   End_times = 0;
   gps_time = 0;
   gps.GSA_mode2 = 0;
@@ -1568,8 +1214,7 @@ void gps_Identify() {
   } else if (strstr(DATABUFF, l76L_buff) != NULL) {
     gpsModel = GPS_L76L;
     pdop_value = 3.00;
-  }
-  else {
+  } else {
     gpsModel = GPS_L70RL;
     pdop_value = 3.00;
   }
@@ -1622,17 +1267,352 @@ int _write(int file, char *ptr, int len) { return len; }
 void handleButtonEvent(ButtonEvent ev) {
   if (ev == ButtonEvent::Click_long) {
     // Send LoRaWAN payload
-  }
-  else if (ev == ButtonEvent::Click_2times) {
+  } else if (ev == ButtonEvent::Click_2times) {
     // Enter Deep Sleep Mode
-  }
-  else if (ev == ButtonEvent::Click_3times) {
+  } else if (ev == ButtonEvent::Click_3times) {
     // System Wake / Rejoin Network
-  }
-  else if (ev == ButtonEvent::Click_4times) {
+  } else if (ev == ButtonEvent::Click_4times) {
     // GPS Test Mode (always on?)
-  }
-  else if (ev == ButtonEvent::Click_5times) {
+  } else if (ev == ButtonEvent::Click_5times) {
     // Exit Panic Mode
+  }
+}
+
+void handleCommandDownlink(uint8_t cmd, const uint8_t *data, uint8_t len) {
+  switch (cmd) {
+  case 0x01: {
+    if (len == 4) //---->AT+TDC
+    {
+      ServerSetTDC = (data[1] << 16 | data[2] << 8 |
+                      data[3]); // S
+
+      if (ServerSetTDC < 6) {
+        Server_TX_DUTYCYCLE = 6000;
+      } else {
+        TDC_flag = 1;
+        Server_TX_DUTYCYCLE = ServerSetTDC * 1000;
+      }
+      printResponse = 1;
+    }
+    break;
+  }
+
+  case 0x04: {
+    if (len == 2) {
+      if (data[1] == 0xFF) //---->ATZ
+      {
+        restartRequested = 1;
+        printResponse = 1;
+      } else if (data[1] == 0xFE) //---->AT+FDR
+      {
+        FLASH_erase(0x8018F80); // page 799
+        FLASH_program_on_addr(0x8018F80, 0x12);
+        FLASH_erase(FLASH_USER_START_ADDR_CONFIG); // Page800
+        restartRequested = 1;
+        printResponse = 1;
+      }
+    }
+    break;
+  }
+
+  case 0x05: {
+    if (len == 2) {
+      if (data[1] == 0x01) //---->AT+CFM=1
+      {
+        lora_config_reqack_set(LORAWAN_CONFIRMED_MSG);
+        Store_Config();
+        printResponse = 1;
+      } else if (data[1] == 0x00) //---->AT+CFM=0
+      {
+        lora_config_reqack_set(LORAWAN_UNCONFIRMED_MSG);
+        Store_Config();
+        printResponse = 1;
+      }
+    }
+    break;
+  }
+
+  case 2: {
+    if (len == 2) {
+      if (data[1] == 0x01) {
+        start_time = HW_RTC_GetTimerValue();
+        Alarm_times = 60;
+        Alarm_times1 = 60;
+        GPS_ALARM = 0;
+        ALARM = 0;
+        if (LON == 1) {
+          BSP_sensor_Init();
+          led_blue_on();
+          DelayMs(1000);
+        }
+        led_blue_off(); // Exit Alarm
+        PRINTF("Exit Alarm\r\n");
+      }
+    }
+    break;
+  }
+  case 0xa5: {
+    if (len == 2) {
+      motionDetectMode = static_cast<MotionDetectionMode>(data[1]);
+      PRINTF("motionDetectMode: %02x\n\r", motionDetectMode);
+      if (data[1] != 0x00) {
+        start_time = HW_RTC_GetTimerValue();
+      }
+    } else if (len == 4) {
+      if (data[1] == 0x03) {
+        motionDetectMode = static_cast<MotionDetectionMode>(data[1]);
+        Threshold = data[2];
+        Freq = data[3];
+        PRINTF("Set motionDetectMode: %02x,%02x,%02x\n\r", motionDetectMode,
+               Threshold, Freq);
+      }
+      if (data[1] != 0x00) {
+        start_time = HW_RTC_GetTimerValue();
+      }
+    }
+    md_flags = 1;
+    Store_Config();
+    break;
+  }
+  case 0xaa: {
+    if (len == 3) {
+      Positioning_time = (data[1] << 8 | data[2]);
+      if (Positioning_time == 1203) {
+        LP = 2;
+      } else {
+        LP = 0;
+      }
+    }
+    Store_Config();
+    break;
+  }
+  case 0xab: {
+    if (len == 2) {
+      navMode = static_cast<GPSNavMode>(data[1]);
+    }
+    Store_Config();
+    break;
+  }
+  case 0xac: {
+    if (len == 2) {
+      searchMode = static_cast<GPSSearchMode>(data[1]);
+    }
+    Store_Config();
+
+    break;
+  }
+  case 0xad: {
+    if (len == 3) {
+      pdop_value = (data[1] << 8 | data[2]) / 10.0;
+    }
+    Store_Config();
+
+    break;
+  }
+  case 0xae: {
+    if (len == 2) {
+      LON = data[1];
+    }
+    Store_Config();
+
+    break;
+  }
+  case 0xaf: {
+    if (len == 2) {
+      MLON = data[1];
+    }
+    Store_Config();
+
+    break;
+  }
+  case 0xa8: {
+    if (len == 10) {
+      if (data[1] == 0x01) {
+        BSP_powerLED_Init();
+        led_red_on();
+        red = 1;
+        led_red = data[2] << 8 | data[3];
+        if (led_red != 0) {
+          DelayMs(led_red);
+          led_red_off();
+          red = 0;
+        }
+      } else {
+        red = 0;
+        led_red_off();
+      }
+      if (data[4] == 0x01) {
+        BSP_powerLED_Init();
+        led_blue_on();
+        blue = 1;
+        led_blue = data[5] << 8 | data[6];
+        if (led_blue != 0) {
+          DelayMs(led_blue);
+          led_blue_off(); // Debug LED
+          blue = 0;
+        }
+      } else {
+        blue = 0;
+        led_blue_off(); // Debug LED
+      }
+      if (data[7] == 0x01) {
+        BSP_powerLED_Init();
+        led_green_on();
+        greed = 1;
+        led_greed = data[8] << 8 | data[9];
+        if (led_blue != 0) {
+          DelayMs(led_greed);
+          led_green_off();
+          greed = 0;
+        }
+      } else {
+        greed = 0;
+        led_green_off();
+      }
+    }
+    Store_Config();
+
+    break;
+  }
+  case 0xb0: {
+    if (len == 2) {
+      set_sgm = data[1];
+    }
+    Store_Config();
+
+    break;
+  }
+  case 0xb1: {
+    ServerSetTDC = (data[1] << 16 | data[2] << 8 |
+                    data[3]); // S
+    if (ServerSetTDC < 6) {
+      PRINTF("ACE setting must be more than 10S\n\r");
+      Alarm_TX_DUTYCYCLE = 10000;
+    } else {
+      TDC_flag = 1;
+      Alarm_TX_DUTYCYCLE = ServerSetTDC * 1000;
+      PRINTF("Set ACE: %d ms\n\r", Alarm_TX_DUTYCYCLE);
+    }
+    Store_Config();
+
+    break;
+  }
+  case 0xa9: {
+    if (len == 4) {
+      ServerSetTDC = (data[1] << 16 | data[2] << 8 |
+                      data[3]); // S
+
+      if (ServerSetTDC < 360) {
+        PRINTF("KAT setting must be more than 6m\n\r");
+        Keep_TX_DUTYCYCLE = 360000;
+      } else {
+        Keep_TX_DUTYCYCLE = ServerSetTDC * 1000;
+        PRINTF("Set KAT: %d ms\n\r", Keep_TX_DUTYCYCLE);
+      }
+      Store_Config();
+    }
+    break;
+  }
+  case 0x20: {
+    if (len == 2) {
+      if ((data[1] == 0x00) || (data[1] == 0x01)) {
+        if (data[1] == 0x01) //---->AT+NJM=1
+        {
+          lora_config_otaa_set(LORA_ENABLE);
+        } else //---->AT+NJM=0
+        {
+          lora_config_otaa_set(LORA_DISABLE);
+        }
+        Store_Config();
+        restartRequested = 1;
+        printResponse = 1;
+      }
+    }
+    break;
+  }
+
+  case 0x21: {
+    if ((len == 2) && (data[1] <= 4)) {
+      response_level = (data[1]); // 0~4
+                                           // //---->AT++RPL
+      Store_Config();
+      printResponse = 1;
+    }
+    break;
+  }
+
+  case 0x22: {
+    MibRequestConfirm_t mib;
+    if ((len == 2) && (data[1] == 0x01)) //---->AT+ADR=1
+    {
+      mib.Type = MIB_ADR;
+      mib.Param.AdrEnable = data[1];
+      LoRaMacMibSetRequestConfirm(&mib);
+      Store_Config();
+      printResponse = 1;
+    } else if ((len == 4) &&
+               (data[1] == 0x00)) //---->AT+ADR=0
+    {
+      mib.Type = MIB_ADR;
+      mib.Param.AdrEnable = data[1];
+      LoRaMacMibSetRequestConfirm(&mib);
+      if (data[2] != 0xff) //---->AT+DR
+      {
+        mib.Type = MIB_CHANNELS_DATARATE;
+        mib.Param.ChannelsDatarate = data[2];
+        LoRaMacMibSetRequestConfirm(&mib);
+      }
+      if (data[3] != 0xff) //---->AT+TXP
+      {
+        mib.Type = MIB_CHANNELS_TX_POWER;
+        mib.Param.ChannelsTxPower = data[3];
+        LoRaMacMibSetRequestConfirm(&mib);
+      }
+      Store_Config();
+      printResponse = 1;
+    }
+    break;
+  }
+
+  case 0x23: {
+    if (len == 2) {
+      lora_config_application_port_set(data[1]); //---->AT+PORT
+      Store_Config();
+      printResponse = 1;
+    }
+    break;
+  }
+
+  case 0x24: {
+#if defined(REGION_US915) || defined(REGION_AU915) || defined(REGION_CN470)
+    if (len == 2) {
+      if (data[1] <= 0x0C) {
+        customize_set8channel_set(data[1]); //---->AT+CHE
+        Store_Config();
+        printResponse = 1;
+      }
+    }
+#endif
+    break;
+  }
+
+  case 0x25: {
+#if defined(REGION_AS923) || defined(REGION_AU915)
+    if (len == 2) {
+      if ((data[1] == 0x00) ||
+          (data[1] == 0x01)) //---->AT+DWELLT
+      {
+        dwelltime = data[1];
+        Store_Config();
+        restartRequested = 1;
+        printResponse = 1;
+      }
+    }
+#endif
+    break;
+  }
+
+  default:
+    break;
   }
 }

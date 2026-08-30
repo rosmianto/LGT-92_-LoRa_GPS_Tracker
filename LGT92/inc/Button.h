@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO: Detect Button press event within 5s window
 enum class ButtonEvent {
     Click_long,
     Click_1time,

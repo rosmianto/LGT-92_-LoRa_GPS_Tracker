@@ -129,15 +129,11 @@ extern uint8_t flag1;
 extern uint8_t symbtime2_value;
 extern uint8_t flag2;
 
-extern uint32_t APP_TX_DUTYCYCLE;
-
 extern uint32_t Server_TX_DUTYCYCLE;
 
 extern uint32_t Alarm_TX_DUTYCYCLE;
 
 extern uint32_t Keep_TX_DUTYCYCLE;
-
-extern uint32_t GPS_ALARM;
 
 extern uint32_t set_sgm;
 
@@ -153,9 +149,7 @@ extern uint32_t LON;
 extern uint32_t MLON;
 extern uint32_t Threshold;
 extern uint32_t Freq;
-extern uint32_t GS;
 extern uint8_t LP;
-uint16_t dr_power = 0;
 
 #define HEX16(X)                                                               \
   X[0], X[1], X[2], X[3], X[4], X[5], X[6], X[7], X[8], X[9], X[10], X[11],    \
@@ -537,7 +531,6 @@ void restore_factory_config(void) {
   Keep_TX_DUTYCYCLE = 3600000;
   Positioning_time = 150;
   pdop_value = 3.0;
-  gps.flag = 1;
   LON = 1;
   motionDetectMode = ON_MOVE;
   set_sgm = 1;
@@ -1120,36 +1113,30 @@ void Read_Config(void) {
   mib.Param.Rx2Channel.Frequency = r_config[2];
   LoRaMacMibSetRequestConfirm(&mib);
 
+  mib.Type = MIB_RX2_CHANNEL;
   if ((rx2_flags == 0) || (lora_config.otaa == LORA_DISABLE)) {
-    mib.Type = MIB_RX2_CHANNEL;
     mib.Param.Rx2Channel.Datarate = r_config[3];
     joinrx2_dr = r_config[3];
-    LoRaMacMibSetRequestConfirm(&mib);
   } else if (rx2_flags == 1) {
-    mib.Type = MIB_RX2_CHANNEL;
     mib.Param.Rx2Channel.Datarate = rx_flags;
-    LoRaMacMibSetRequestConfirm(&mib);
   }
+  LoRaMacMibSetRequestConfirm(&mib);
 
+  mib.Type = MIB_RECEIVE_DELAY_1;
   if ((rx2_flags == 0) || (lora_config.otaa == LORA_DISABLE)) {
-    mib.Type = MIB_RECEIVE_DELAY_1;
     mib.Param.ReceiveDelay1 = r_config[4];
-    LoRaMacMibSetRequestConfirm(&mib);
   } else if (rx2_flags == 1) {
-    mib.Type = MIB_RECEIVE_DELAY_1;
     mib.Param.ReceiveDelay1 = rx1_de;
-    LoRaMacMibSetRequestConfirm(&mib);
   }
+  LoRaMacMibSetRequestConfirm(&mib);
 
+  mib.Type = MIB_RECEIVE_DELAY_2;
   if ((rx2_flags == 0) || (lora_config.otaa == LORA_DISABLE)) {
-    mib.Type = MIB_RECEIVE_DELAY_2;
     mib.Param.ReceiveDelay2 = r_config[5];
-    LoRaMacMibSetRequestConfirm(&mib);
   } else if (rx2_flags == 1) {
-    mib.Type = MIB_RECEIVE_DELAY_2;
     mib.Param.ReceiveDelay2 = rx2_de;
-    LoRaMacMibSetRequestConfirm(&mib);
   }
+  LoRaMacMibSetRequestConfirm(&mib);
 
   mib.Type = MIB_JOIN_ACCEPT_DELAY_1;
   mib.Param.JoinAcceptDelay1 = r_config[6];
