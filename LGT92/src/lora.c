@@ -155,7 +155,6 @@ extern uint32_t Threshold;
 extern uint32_t Freq;
 extern uint32_t GS;
 extern uint8_t LP;
-extern int user_key_exti_flag;
 uint16_t dr_power = 0;
 
 #define HEX16(X)                                                               \

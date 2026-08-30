@@ -24,6 +24,7 @@
 #include <led.h>
 #include <math.h>
 #include <Temporary.h>
+#include <Button.h>
 
 // Include drivers
 #include <drivers/ConfigStorage_Dummy.h>
@@ -39,6 +40,7 @@ ConfigStorage_Dummy stgDummy;
 IMU imu(imuDummy);
 ConfigManager cfgMgr(stgDummy);
 ATParser atParser;
+Button btn;
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -231,6 +233,8 @@ static LoRaParam_t LoRaParamInit = {LORAWAN_ADR_STATE,
 
 /* Private functions ---------------------------------------------------------*/
 
+void handleButtonEvent(ButtonEvent ev);
+
 /**
  * @brief  Main program
  * @param  None
@@ -365,7 +369,17 @@ int main(void) {
       TimerStart(&IWDGRefreshTimer);
       PPRINTF("Exit static mode\r\n");
     }
-    user_key_event();
+
+    ButtonEvent userPress = btn.getButtonEvent();
+
+    handleButtonEvent(userPress);
+
+
+    // TODO: Eradicate this
+    // user_key_event();
+
+
+
 
     DISABLE_IRQ();
     /*
@@ -1603,4 +1617,22 @@ int _close(int file) { return -1; }
 int _lseek(int file, int ptr, int dir) { return 0; }
 int _read(int file, char *ptr, int len) { return 0; }
 int _write(int file, char *ptr, int len) { return len; }
+}
+
+void handleButtonEvent(ButtonEvent ev) {
+  if (ev == ButtonEvent::Click_long) {
+    // Send LoRaWAN payload
+  }
+  else if (ev == ButtonEvent::Click_2times) {
+    // Enter Deep Sleep Mode
+  }
+  else if (ev == ButtonEvent::Click_3times) {
+    // System Wake / Rejoin Network
+  }
+  else if (ev == ButtonEvent::Click_4times) {
+    // GPS Test Mode (always on?)
+  }
+  else if (ev == ButtonEvent::Click_5times) {
+    // Exit Panic Mode
+  }
 }
