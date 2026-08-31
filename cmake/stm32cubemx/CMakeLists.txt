@@ -45,6 +45,7 @@ set(MX_Include_Dirs
 # STM32CubeMX generated application sources
 set(MX_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/version.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/temporary.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/drivers/ConfigStorage_Dummy.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/subsystems/ATParser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../LGT92/src/subsystems/ConfigManager.cpp

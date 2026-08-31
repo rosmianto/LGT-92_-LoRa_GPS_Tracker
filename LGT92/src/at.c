@@ -68,53 +68,6 @@
 #include <string.h>
 #include <Temporary.h>
 
-bool debug_flags = 0;
-uint8_t symbtime1_value = 0; // RX1windowtimeout
-uint8_t flag1 = 0;
-
-uint8_t symbtime2_value = 0; // RX2windowtimeout
-uint8_t flag2 = 0;
-uint8_t dwelltime;
-
-extern uint32_t Server_TX_DUTYCYCLE;
-extern uint32_t Alarm_TX_DUTYCYCLE;
-extern uint32_t Keep_TX_DUTYCYCLE;
-extern uint32_t start_time;
-GPSModel gpsModel = GPS_UBLOX_MAX7;
-GPSSearchMode searchMode = SEARCHMODE_DEFAULT;
-GPSNavMode navMode = NAVMODE_DEFAULT;
-extern uint16_t hardware_version;
-extern float pdop_value;
-
-uint8_t LP = 0;
-uint32_t Positioning_time = 150;
-uint32_t set_sgm = 0;
-uint32_t s_timer = 1;
-uint8_t md_flags = 0;
-uint32_t LON = 1;
-MotionDetectionMode motionDetectMode = ON_MOVE;
-uint32_t MLON = 0;
-uint32_t Threshold = 0;
-uint32_t Freq = 0;
-uint32_t loggps = 0;
-
-/* External variables --------------------------------------------------------*/
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/**
- * @brief Max size of the data that can be received
- */
-#define MAX_RECEIVED_DATA 255
-extern bool fdr_flags;
-extern uint16_t REJOIN_TX_DUTYCYCLE;
-extern uint8_t response_level;
-extern TimerEvent_t MacStateCheckTimer;
-extern TimerEvent_t TxDelayedTimer;
-extern TimerEvent_t AckTimeoutTimer;
-extern TimerEvent_t RxWindowTimer1;
-extern TimerEvent_t RxWindowTimer2;
-extern TimerEvent_t TxTimer;
-extern TimerEvent_t ReJoinTimer;
 /* Private macro -------------------------------------------------------------*/
 /**
  * @brief Macro to return when an error occurs

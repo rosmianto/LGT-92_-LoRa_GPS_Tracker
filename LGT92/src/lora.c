@@ -89,68 +89,6 @@
 #define Firm_FQ 0x000b
 #endif
 
-int16_t _lastKnownSNR  = 0;
-uint8_t _lastKnownRSSI = 0;
-
-uint16_t fire_version = 0;
-uint16_t fire_frequcy = 0;
-uint8_t joinrx2_dr;
-bool rx2_flags = 0;
-bool fdr_flags = 0;
-
-extern uint8_t dwelltime;
-extern uint8_t symbtime1_value;
-extern uint8_t flag1;
-
-extern uint8_t symbtime2_value;
-extern uint8_t flag2;
-extern uint8_t rx_flags;
-extern uint32_t rx1_de, rx2_de;
-
-extern uint16_t REJOIN_TX_DUTYCYCLE;
-extern uint8_t response_level;
-extern bool rejoin_status;
-
-static uint8_t config_count = 0;
-static uint8_t key_count = 0;
-
-static uint32_t s_config[32]; // store config
-static uint32_t s_key[32];    // store key
-static uint32_t s_hard[1];    // store hardware version
-
-uint8_t mpuint_flags = 0;
-uint16_t hardware_version = 167;  // TODO: This actually serves no purpose on firmware behavior
-uint8_t joinrx2_dr;
-float pdop_value;
-
-extern uint8_t symbtime1_value;
-extern uint8_t flag1;
-
-extern uint8_t symbtime2_value;
-extern uint8_t flag2;
-
-extern uint32_t Server_TX_DUTYCYCLE;
-
-extern uint32_t Alarm_TX_DUTYCYCLE;
-
-extern uint32_t Keep_TX_DUTYCYCLE;
-
-extern uint32_t set_sgm;
-
-extern uint32_t Positioning_time;
-
-extern uint32_t s_timer;
-
-extern uint8_t Alarm_times;
-
-extern uint8_t Alarm_times1;
-
-extern uint32_t LON;
-extern uint32_t MLON;
-extern uint32_t Threshold;
-extern uint32_t Freq;
-extern uint8_t LP;
-
 #define HEX16(X)                                                               \
   X[0], X[1], X[2], X[3], X[4], X[5], X[6], X[7], X[8], X[9], X[10], X[11],    \
       X[12], X[13], X[14], X[15]

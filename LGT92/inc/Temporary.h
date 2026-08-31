@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include <stdbool.h>
+
 // TODO: I prefer enum class for type-safety.
 typedef enum {
     DISABLED = 0,
