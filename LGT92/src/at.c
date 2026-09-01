@@ -84,17 +84,14 @@
 /*!
  * User application data buffer size
  */
-#define LORAWAN_APP_DATA_BUFF_SIZE 64
 
 /*!
  * User application data
  */
-static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
 
 /*!
  * User application data structure
  */
-static lora_AppData_t AppData = {AppDataBuff, 0, 0};
 /**
  * @brief Buffer that contains the last received data
  */
@@ -191,7 +188,7 @@ ATEerror_t at_reset(const char *param) {
 }
 
 ATEerror_t at_DEBUG_run(const char *param) {
-  debug_flags = 1;
+  glob.debug_flags = 1;
   PPRINTF("Enter Debug mode\r\n");
 
   return AT_OK;
@@ -301,23 +298,23 @@ ATEerror_t at_AppSKey_set(const char *param) {
 }
 
 ATEerror_t at_hardware_ic_get(const char *param) {
-  if ((hardware_version == 0) && (gpsModel == GPS_L70RL)) {
+  if ((glob.hardware_version == 0) && (glob.gpsModel == GPS_L70RL)) {
     PPRINTF("L70-RL\r\n");
-  } else if (gpsModel == GPS_L70RL) {
-    PPRINTF("v%d.%d.%d,L70-RL\r\n", hardware_version / 100,
-            (hardware_version / 10) % 10, hardware_version % 10);
-  } else if (gpsModel == GPS_L76L) {
-    PPRINTF("v%d.%d.%d,L76-L\r\n", hardware_version / 100,
-            (hardware_version / 10) % 10, hardware_version % 10);
-  } else if (gpsModel == GPS_UBLOX_MAX7) {
-    PPRINTF("v%d.%d.%d,ublox-MAX7\r\n", hardware_version / 100,
-            (hardware_version / 10) % 10, hardware_version % 10);
-  } else if (gpsModel == GPS_UBLOX_MAX8) {
-    PPRINTF("v%d.%d.%d,ublox-MAX8\r\n", hardware_version / 100,
-            (hardware_version / 10) % 10, hardware_version % 10);
-  } else if (gpsModel == GPS_L76K) {
-    PPRINTF("v%d.%d.%d,L76K\r\n", hardware_version / 100,
-            (hardware_version / 10) % 10, hardware_version % 10);
+  } else if (glob.gpsModel == GPS_L70RL) {
+    PPRINTF("v%d.%d.%d,L70-RL\r\n", glob.hardware_version / 100,
+            (glob.hardware_version / 10) % 10, glob.hardware_version % 10);
+  } else if (glob.gpsModel == GPS_L76L) {
+    PPRINTF("v%d.%d.%d,L76-L\r\n", glob.hardware_version / 100,
+            (glob.hardware_version / 10) % 10, glob.hardware_version % 10);
+  } else if (glob.gpsModel == GPS_UBLOX_MAX7) {
+    PPRINTF("v%d.%d.%d,ublox-MAX7\r\n", glob.hardware_version / 100,
+            (glob.hardware_version / 10) % 10, glob.hardware_version % 10);
+  } else if (glob.gpsModel == GPS_UBLOX_MAX8) {
+    PPRINTF("v%d.%d.%d,ublox-MAX8\r\n", glob.hardware_version / 100,
+            (glob.hardware_version / 10) % 10, glob.hardware_version % 10);
+  } else if (glob.gpsModel == GPS_L76K) {
+    PPRINTF("v%d.%d.%d,L76K\r\n", glob.hardware_version / 100,
+            (glob.hardware_version / 10) % 10, glob.hardware_version % 10);
   }
   return AT_OK;
 }
@@ -333,9 +330,9 @@ ATEerror_t at_hardware_ic_set(const char *param) {
     return AT_PARAM_ERROR;
   }
 
-  gpsModel = model;
+  glob.gpsModel = model;
   // TODO: Why would we need to monitor hardware version?
-  hardware_version = hardware;
+  glob.hardware_version = hardware;
 
   EEPROM_Store_Config();
 

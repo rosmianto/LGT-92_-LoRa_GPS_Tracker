@@ -188,10 +188,6 @@ static uint8_t LoRaMacRxPayload[LORAMAC_PHY_MAXPAYLOAD];
  */
 static uint32_t UpLinkCounter = 0;
 
-uint8_t Alarm_times = 60;
-
-uint8_t Alarm_times1 = 0;
-
 /*!
  * LoRaMAC frame counter. Each time a packet is received the counter is
  * incremented. Only the 16 LSB bits are received

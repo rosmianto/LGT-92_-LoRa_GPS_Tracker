@@ -68,8 +68,6 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "vcom.h"
 #include <stm32l0xx_hal.h>
 
-bool button_exitflag    = 0;
-bool moinint_exitflag   = 0;
 extern UART_HandleTypeDef uart1;
 
 /** @addtogroup STM32L1xx_HAL_Examples

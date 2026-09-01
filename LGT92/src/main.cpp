@@ -41,9 +41,6 @@ IMU imu(imuDummy);
 ConfigManager cfgMgr(stgDummy);
 ATParser atParser;
 Button btn;
-
-lora_AppData_t AppData = {AppDataBuff, 0, 0};
-
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
@@ -71,6 +68,11 @@ static void Send(void);
 static void lora_send(void);
 
 void send_ALARM_data(void);
+
+void send_data(void);
+void send_exti(void);
+void send_moin(void);
+void gps_Identify();
 
 #if defined(LoRa_Sensor_Node)
 /* start the tx process*/
