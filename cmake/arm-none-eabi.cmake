@@ -1,0 +1,19 @@
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+find_program(ARM_GCC arm-none-eabi-gcc REQUIRED)
+find_program(ARM_GXX arm-none-eabi-g++ REQUIRED)
+find_program(ARM_OBJCOPY arm-none-eabi-objcopy REQUIRED)
+find_program(ARM_SIZE arm-none-eabi-size REQUIRED)
+
+set(CMAKE_C_COMPILER ${ARM_GCC})
+set(CMAKE_CXX_COMPILER ${ARM_GXX})
+set(CMAKE_ASM_COMPILER ${ARM_GCC})
+
+set(ARM_FLAGS "-mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections")
+set(CMAKE_C_FLAGS_INIT "${ARM_FLAGS}")
+set(CMAKE_CXX_FLAGS_INIT "${ARM_FLAGS} -fno-exceptions -fno-rtti")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "${ARM_FLAGS} -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs")
+

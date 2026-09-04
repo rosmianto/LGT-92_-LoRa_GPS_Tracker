@@ -59,3 +59,12 @@
 
 *.axf
 *.crf
+
+# CMake & IDE Build directories
+build/
+build-*/
+cmake-build-*/
+.cache/
+.DS_Store
+compile_commands.json
+
